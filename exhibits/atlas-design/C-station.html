@@ -1,0 +1,1967 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atlas — you describe a task once, Atlas keeps doing it</title>
+<meta name="description" content="Atlas runs one English sentence on a schedule, grades the answer before it sends, and pauses tasks that keep failing. Private beta; public 27 August 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Fraunces:opsz,wght,SOFT,WONK@9..144,100..900,0..100,0..1&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/*═════════════════════════════════════════════════════════════════════════════
+  ATLAS · DIRECTION C — STATION
+  A live instrument view, not a filed record. Token system: nothing below may
+  use a value that is not derived from here. Two plates (system output / human
+  markup), three system states, one hairline ladder, one grid-ink ladder, one
+  tilt scale, and one surface — the panel's own aperture lattice.
+═════════════════════════════════════════════════════════════════════════════*/
+:root{
+
+/*── THE FIELD · calibrated display stock, one cool hue family (~262°) ──────
+  Not paper. A daylight-readable panel: the ground is self-illuminated, the
+  hue is the display's own white point sitting a little below D65, and the
+  ladder is four rungs of the same light. Measured CIE L-star and C-star on the raw hex;
+  the aperture lattice below multiplies in and costs each rung ~0.7 L* more. */
+  --disp-0:#F8FBFF;   /* panel face — the lit plane: readouts, forms, cards
+                         L* 98.5  C* 2.3  h 263                              */
+  --disp-1:#EFF4FA;   /* base field — the page ground   L* 96.0  C* 3.5  h 261 */
+  --disp-2:#E6EDF5;   /* recessed field                 L* 93.4  C* 4.7  h 260 */
+  --disp-3:#DDE5F0;   /* the data band — the live window L* 90.6 C* 6.3  h 265 */
+
+
+/*── TYPE · a cool near-black that carries the field's own hue. ────────────*/
+  --ink-1  :#141A26;   /* running text     15.6 : 13.6 : 16.6               */
+  --ink-2  :#404A5E;   /* secondary text    8.0 :  6.9 :  8.5               */
+  /* ratios above are measured on the three RENDERED grounds, in the order
+     disp-1×lattice : disp-3×lattice : disp-0 */
+  --wash-ink :rgba(20,26,38,.05);    /* tint block                          */
+
+/*── PLATE 1 · SYSTEM OUTPUT ─────────────────────────────────────────────────
+  Everything Atlas drew: grids, axes, rules, plots, glyphs, every technical
+  label. Three STATES, one plate — nominal, live, fault — which is how a real
+  monitoring view separates "this ran", "this is running" and "this broke".
+  The nominal ink is an sRGB-native blue at C* 86.9. No printing ink on
+  uncoated stock reaches that chroma; a panel does, and that is the point of
+  the translation. This page is rendered output, not an impression.          */
+  --sig      :#1A4FE0; /* NOMINAL  L* 39.9  C* 86.9   5.9 : 5.1 : 6.3       */
+  --sig-deep :#12307E; /* structure L* 22.8 C* 51.5  10.9 : 9.5 : 11.6      */
+  --sig-hi   :#3563E8; /* the button's lit top stop                          */
+  --sig-lo   :#123BAE; /* the button's shaded bottom stop                    */
+  --live     :#0085A5; /* LIVE     L* 51.3  C* 31.6   3.9 : 3.4 : 4.1
+                          GRAPHICS ONLY — cursors, rings, the running dot.
+                          Never carries text: at L* 51 nothing cyan can.
+                          Same hue as the field flood below, two stops down:
+                          cyan is "the system is working", at object scale
+                          and at page scale.                                 */
+  --alert    :#D2540A; /* FAULT    L* 51.9  C* 75.9   3.8 : 3.3 : 4.0
+                          fills, strokes, markers — the flagged-run colour   */
+  --alert-deep:#9A3B08;/* ALL fault TEXT  L* 37.9 C* 59.6  6.3 : 5.5 : 6.7  */
+  --wash-alert:rgba(210,84,10,.36); /* the hatched span the pause covers     */
+  --tint-alert:rgba(210,84,10,.10); /* the fault chip's field                */
+  --tint-live :rgba(0,133,165,.12); /* the running readout's field           */
+  --wash-sig :rgba(26,79,224,.10);   /* plot fill beneath a trace           */
+
+/*── PLATE 2 · HUMAN MARKUP ──────────────────────────────────────────────────
+  A person drawing on a live view. Magenta because it is the one hue no
+  system state owns — blue is nominal, cyan is live, amber is fault, so a
+  mark in magenta can only have been made by hand. ONLY a hand prints in this
+  ink: circles, leaders, notes, underlines. The system never prints plate 2,
+  and plate 2 never prints anything the system would have drawn.            */
+  --pen     :#D4157F;  /* STROKES and marks ONLY  L* 47.1 C* 73.7  4.5:3.9:4.8 */
+  --pen-deep:#920C5F;  /* ALL hand TEXT           L* 32.3 C* 57.5  7.8:6.8:8.3 */
+  /* --pen falls to 3.9 on the data band, which is why no hand-written word
+     anywhere on this page uses it. Every one is --pen-deep, and --pen-deep
+     is a stop darker than the chroma alone would want because a hand note
+     crosses the field lattice and has to clear 4.5 on a ruled pixel too.   */
+
+/*── GRID-INK LADDER · density ───────────────────────────────────────────────
+  Alphas of --sig-deep, not of the nominal ink: the lattice is structure and
+  the vivid blue is data, so a trace never shares a value with the rule it
+  crosses. Rescaled from the ladder it replaces so each rung composites to
+  the same L* it did — .15 lands on the 1× hairline-visibility floor.       */
+  --grid-rgb:18,48,126;
+  --grid-1:rgba(var(--grid-rgb),.10);  /* finest lattice — reads as tint     */
+  --grid-2:rgba(var(--grid-rgb),.17);  /* minor rule — at the floor          */
+  --grid-3:rgba(var(--grid-rgb),.26);  /* major rule / decade line           */
+  --grid-4:rgba(var(--grid-rgb),.42);  /* axis                               */
+
+/*── THE FIELD FLOOD · section 05, full bleed. The page's one value event,
+  and it is a BRIGHT one: a saturated cyan panel at L* 80 and C* 41 — eleven
+  times the chroma of the brightest ground and eight L* below the deepest, so
+  it separates by hue and saturation rather than by darkness. Nothing on this
+  page is allowed to go dark, and a lit instrument does not need it to: an
+  intense colour field is what a panel does that paper never could. Type is
+  PRINTED on it, not knocked out of it — you cannot knock white out of a
+  bright field — and it prints in the same ink the rest of the page uses. ──*/
+  --flood:#38D7FF;     /* L* 80.0  C* 41.1  h 229 · mean sRGB luma 184
+                          ink-1 10.2 : ink-2 5.2 : sig-deep 7.0             */
+
+/*── HAIRLINE LADDER · width. Five rungs. No other stroke width exists. ─────*/
+  --w-grid :0.5px;     /* display lattice (gradient stops only, never a border) */
+  --w-hair :1px;       /* axis, leader line, box rule, dimension line        */
+  --w-plot :1.5px;     /* the plotted trace                                  */
+  --w-mark :2px;       /* emphasis rule, hand stroke, cursor, focus ring     */
+  --w-heavy:3px;       /* masthead rule, the auto-pause strike               */
+
+/*── GRID MODULE — the coarse grid is exactly 4× the fine grid at the same
+  angle, so the two periodic patterns lock instead of beating. ─────────────*/
+  --mod  :8px;
+  --mod-2:16px;
+  --mod-4:32px;
+  --mod-8:64px;
+  --mod16:128px;
+  --decade:calc(var(--mod16) + var(--mod-8) + var(--mod));  /* 200px — one log decade */
+  --lr1:linear-gradient(90deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair));
+  --lr3:linear-gradient(90deg,var(--grid-3) 0 var(--w-hair),transparent var(--w-hair));
+
+/*── SPACE ──────────────────────────────────────────────────────────────────*/
+  --s1:4px;  --s2:8px;  --s3:12px; --s4:16px; --s5:24px;
+  --s6:32px; --s7:48px; --s8:64px; --s9:96px; --s10:128px;
+
+/*── SPINE · the one structural rule held across all nine sections ─────────*/
+  --page-max  :1180px;
+  --gutter    :clamp(16px,3.4vw,40px);
+  --margin-col:clamp(46px,6.4vw,104px);   /* the index column of the view     */
+  --colgap    :var(--s5);                 /* index → field. One token, because
+                                             the sheet subtracts it to break
+                                             out of the field column.        */
+  --measure   :62ch;
+  --sec-py    :clamp(56px,8.4vw,112px);   /* THE section rhythm. One value.  */
+
+/*── TYPE ───────────────────────────────────────────────────────────────────*/
+  --ff-display:'Fraunces',Georgia,'Times New Roman',serif;
+  --ff-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ff-hand:'Caveat','Segoe Script','Bradley Hand',cursive;
+
+  --t-micro:10px;   --t-mini :11px;  --t-tiny :12px;  --t-small:13.5px;
+  --t-body :16.5px; --t-lead :clamp(18px,1.5vw,21px);
+  --t-h4   :clamp(18px,1.7vw,22px);
+  --t-h3   :clamp(22px,2.3vw,29px);
+  --t-h2   :clamp(29px,3.9vw,44px);
+  --t-h1   :clamp(38px,6.3vw,74px);
+  --t-hand :clamp(17px,1.5vw,21px);
+
+  --lh-tight:1.04; --lh-head:1.14; --lh-body:1.58;
+  --tr-mono:.06em; --tr-caps:.15em; --tr-stamp:.22em;
+
+/*── SURFACE — the shade is a dark version of the FIELD's own hue, so a raised
+  plane darkens toward the display's blue rather than toward grey. Neutral
+  grey on a cool panel reads as dust on the screen.                         */
+  --sh:22,36,70;
+  --r-round:999px;
+  --r-panel:3px;        /* a rendered plane has a radius; a sheet of paper does not */
+  --r-chip :2px;
+  --score:0 1px 0 rgba(255,255,255,.9);         /* white companion line      */
+  --e0:0 0 0 var(--w-hair) rgba(var(--sh),.18);
+  --e1:0 0 0 1px rgba(var(--sh),.16),
+       0 1px 1px -.5px rgba(var(--sh),.08),
+       0 2px 4px -2px rgba(var(--sh),.09);
+  --e2:0 0 0 1px rgba(var(--sh),.17),
+       0 1px 1.5px -.5px rgba(var(--sh),.09),
+       0 4px 6px -3px rgba(var(--sh),.09),
+       0 10px 16px -6px rgba(var(--sh),.09),
+       0 22px 32px -12px rgba(var(--sh),.09);
+  /* the crisp lift. A rendered plane does not cast the hard zero-blur offset
+     a sheet of paper does: it sits above the field on a tight contact shadow
+     and a wide ambient one, alpha held flat across the ramp.               */
+  --e-lift:0 0 0 1px rgba(var(--sh),.16),
+           0 1px 2px -1px rgba(var(--sh),.12),
+           0 8px 18px -8px rgba(var(--sh),.20);
+
+/*── CHROMATIC FRINGE · one token pair, so the aberration is identical
+  everywhere. Above ~2px it stops reading as a fringe and starts reading as
+  a second object. ────────────────────────────────────────────────────────*/
+  --fringe-x:1.5px;
+  --fringe-y:-1.5px;
+
+/*── THE BROKEN AXIS · five discrete angles, max 2.9°, each with the off-grid
+  nudge that travels with it. Only a HAND may use these. ───────────────────*/
+  --tilt-1:-2.4deg; --tilt-2:1.1deg;  --tilt-3:-0.7deg;
+  --tilt-4:2.9deg;  --tilt-5:-1.6deg;
+  --off-1:-3px; --off-2:5px; --off-3:-2px; --off-4:4px; --off-5:-5px;
+
+/*── MOTION ─────────────────────────────────────────────────────────────────*/
+  --dur-1:110ms; --dur-2:220ms; --dur-3:420ms;
+  --dur-live:2600ms;                          /* the running indicator only  */
+  --ease:cubic-bezier(.2,.75,.25,1);
+  --ease-snap:cubic-bezier(.22,1.42,.36,1);   /* the straightening overshoot */
+
+/*── APERTURE LATTICE · the panel's own structure, and the only surface on
+  the page. A staggered 1px cell every 4×8px — a shadow mask, not a tooth:
+  regular where paper is random, and offset row to row so it never resolves
+  into columns against the 8px module. Lives INSIDE the background stack via
+  background-blend-mode, so it is never an overlay, never touches type, and
+  composites correctly below the first viewport in a fullPage capture.
+  Costs ~0.7 L* of mean and returns sigma ≈ 2.5 of real local variance. ───*/
+  --pane:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cdefs%3E%3Cpattern id='p' width='4' height='8' patternUnits='userSpaceOnUse'%3E%3Crect width='4' height='8' fill='%23ffffff'/%3E%3Crect x='0' y='0' width='1' height='1' fill='%23D5DEEF'/%3E%3Crect x='2' y='4' width='1' height='1' fill='%23D5DEEF'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='256' height='256' fill='url(%23p)'/%3E%3C/svg%3E");
+}
+
+/*═══ BASE ══════════════════════════════════════════════════════════════════*/
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink-1);
+  font:400 var(--t-body)/var(--lh-body) var(--ff-display);
+  font-variation-settings:"opsz" 14,"wght" 400,"SOFT" 0,"WONK" 0;
+  background-color:var(--disp-1);
+  background-image:var(--pane);
+  background-size:256px 256px;
+  background-blend-mode:multiply;
+}
+img,svg{max-width:100%}
+p{margin:0 0 var(--s4)}
+h1,h2,h3,h4{margin:0 0 var(--s4);font-family:var(--ff-display);line-height:var(--lh-head);
+  text-wrap:balance}
+h1{font-size:var(--t-h1);line-height:var(--lh-tight);letter-spacing:-.018em;
+  font-variation-settings:"opsz" 120,"wght" 600,"SOFT" 0,"WONK" 0}
+h2{font-size:var(--t-h2);letter-spacing:-.014em;
+  font-variation-settings:"opsz" 96,"wght" 560,"SOFT" 0,"WONK" 0}
+h3{font-size:var(--t-h3);letter-spacing:-.008em;
+  font-variation-settings:"opsz" 48,"wght" 560,"SOFT" 0,"WONK" 0}
+h4{font-size:var(--t-h4);font-variation-settings:"opsz" 30,"wght" 600,"SOFT" 0,"WONK" 0}
+strong{font-variation-settings:"opsz" 24,"wght" 700,"SOFT" 0,"WONK" 0}
+a{color:inherit}
+:focus-visible{outline:var(--w-mark) solid var(--pen);outline-offset:3px}
+.skip{position:absolute;left:var(--s4);top:calc(var(--s10) * -1);z-index:99;
+  background:var(--disp-0);color:var(--ink-1);padding:var(--s3) var(--s4);
+  border-radius:var(--r-panel);
+  font:500 var(--t-small)/1 var(--ff-mono);box-shadow:var(--e2);
+  transition:top var(--dur-2) var(--ease)}
+.skip:focus{top:var(--s4)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/*═══ TYPOGRAPHIC UTILITIES — the system's own voice ═══════════════════════*/
+.mono,.eyebrow,.stampline,.chip,.datum,.caption,.spec dt,.spec dd,.rec .rh,.rec .flg{
+  font-family:var(--ff-mono);font-variation-settings:normal}
+.eyebrow{display:flex;align-items:center;gap:var(--s3);margin:0 0 var(--s4);
+  font-size:var(--t-mini);font-weight:500;letter-spacing:var(--tr-stamp);
+  text-transform:uppercase;color:var(--sig-deep);line-height:1}
+.eyebrow::after{content:"";flex:1 1 auto;height:var(--w-hair);
+  background:linear-gradient(90deg,var(--grid-4) 0 62%,transparent);
+  box-shadow:var(--score)}
+.lede{font-size:var(--t-lead);line-height:1.5;color:var(--ink-2);max-width:var(--measure)}
+.body{max-width:var(--measure)}
+.caption{font-size:var(--t-tiny);letter-spacing:var(--tr-mono);
+  color:var(--ink-2);margin:var(--s3) 0 0;line-height:1.55;max-width:64ch}
+.datum{font-size:var(--t-tiny);letter-spacing:var(--tr-mono);color:var(--ink-2)}
+
+/*═══ THE HAND · plate 2. Tilted from the five-value scale, off-grid by its
+  matching nudge, and straightening to true on hover / focus. ═════════════*/
+.hand{display:inline-block;font-family:var(--ff-hand);font-size:var(--t-hand);
+  line-height:1.22;color:var(--pen-deep);font-weight:600;
+  transform:rotate(var(--a,var(--tilt-3))) translate(var(--o,var(--off-3)),0);
+  transform-origin:0 50%;
+  transition:transform var(--dur-3) var(--ease-snap)}
+.ann{position:relative}
+.ann:hover .hand,.ann:focus-within .hand,.hand:hover,.hand:focus-visible{
+  transform:rotate(0deg) translate(0,0)}
+.pen-rule{display:block;height:var(--w-mark);border-radius:var(--r-round);
+  background:linear-gradient(90deg,transparent,var(--pen) 8%,var(--pen) 92%,transparent)}
+.leader{position:absolute;display:block;pointer-events:none;
+  transform:rotate(var(--a,0deg));transform-origin:0 0;
+  transition:transform var(--dur-3) var(--ease-snap)}
+.ann:hover .leader,.ann:focus-within .leader{transform:rotate(0deg)}
+.leader path,.leader line{stroke:var(--pen);stroke-width:var(--w-mark);fill:none;
+  stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.circ{position:absolute;pointer-events:none;
+  transform:rotate(var(--a,var(--tilt-1)));transform-origin:50% 50%;
+  transition:transform var(--dur-3) var(--ease-snap)}
+.ann:hover .circ,.ann:focus-within .circ{transform:rotate(0deg)}
+.circ path{stroke:var(--pen);stroke-width:var(--w-mark);fill:none;stroke-linecap:round;
+  vector-effect:non-scaling-stroke}
+/* a word struck under by hand. Sits off-true and slightly long, and squares up
+   on hover like every other plate-2 mark. */
+.ul{position:relative;display:inline-block}
+.ul .scribe{position:absolute;left:-3%;right:-5%;bottom:-.14em;width:108%;height:.3em;
+  overflow:visible;transform:rotate(var(--tilt-2));transform-origin:0 50%;
+  transition:transform var(--dur-3) var(--ease-snap)}
+.ul:hover .scribe,.ul:focus-within .scribe{transform:rotate(0deg)}
+.ul .scribe path{stroke:var(--pen);stroke-width:var(--w-mark);fill:none;
+  stroke-linecap:round;vector-effect:non-scaling-stroke}
+
+/*═══ THE STATE BADGE · plate 1, and dead straight ═════════════════════════
+  A notice the system raised about itself, so it is drawn by the system: no
+  tilt, no hand, mono caps, and the run cell that caused it printed at its
+  left in the same grammar every other strip on the page uses — SOLID means
+  the grader flagged it. The second plate is offset by one fringe token and
+  multiplies into the first: on a panel that is chromatic aberration at a
+  hard edge, not a press out of register. Cyan is the fringe every time,
+  because cyan is the side a real display fringes toward. ═════════════════*/
+.stamp{--badge-ink:var(--alert-deep);--badge-line:var(--alert);
+  --fringe-ink:#A6EBFA;              /* the cool side of the aberration */
+  position:relative;isolation:isolate;display:inline-block}
+.stamp .imp{display:flex;align-items:center;gap:var(--s2);
+  padding:var(--s2) var(--s3);border-radius:var(--r-chip);
+  border:var(--w-mark) solid var(--badge-line);color:var(--badge-ink);
+  font-family:var(--ff-mono);font-size:var(--t-mini);font-weight:600;
+  letter-spacing:var(--tr-stamp);text-transform:uppercase;line-height:1.1}
+.stamp .imp::before{content:"";flex:none;width:9px;height:9px;
+  background:var(--badge-line)}
+/* the fringe plate is a light TINT, not a second full-strength ink: multiply
+   only has to bend the overlap a stop or two. A saturated second plate here
+   drives the overlap to near-black and the badge stops reading as amber at
+   all — measured, and the reason this is #A6EBFA and not the live cyan. */
+.stamp .imp2{position:absolute;inset:0;color:var(--fringe-ink);
+  border-color:var(--fringe-ink);
+  transform:translate(var(--fringe-x),var(--fringe-y));
+  mix-blend-mode:multiply;pointer-events:none}
+.stamp .imp2::before{background:var(--fringe-ink)}
+.stamp--live{--badge-ink:var(--sig-deep);--badge-line:var(--live);
+  --fringe-ink:#FFD8A6}              /* the warm side, on a cool badge */
+@supports not (mix-blend-mode:multiply){
+  .stamp .imp2{display:none}          /* the base plate alone is still correct */
+}
+
+/*═══ THE SPINE · held identically across every section ════════════════════*/
+.sec{position:relative;overflow-x:clip}
+.wrap{position:relative;max-width:var(--page-max);margin-inline:auto;
+  padding:var(--sec-py) var(--gutter);
+  display:grid;grid-template-columns:var(--margin-col) minmax(0,1fr);
+  column-gap:var(--colgap)}
+.spine{position:absolute;top:0;bottom:0;width:10px;pointer-events:none;
+  left:calc(var(--gutter) + var(--margin-col) - 9px);
+  background-image:
+    linear-gradient(var(--grid-3),var(--grid-3)),
+    repeating-linear-gradient(180deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    repeating-linear-gradient(180deg,var(--grid-3) 0 var(--w-hair),transparent var(--w-hair) var(--mod16));
+  background-size:var(--w-hair) 100%,5px 100%,10px 100%;
+  background-position:100% 0,calc(100% - 2px) 0,calc(100% - 2px) 0;
+  background-repeat:no-repeat}
+.stub{grid-column:1;padding-top:.35em;text-align:right;
+  font-family:var(--ff-mono);line-height:1.3}
+.secno{display:block;font-size:var(--t-h4);font-weight:600;color:var(--sig-deep);
+  letter-spacing:-.02em}
+.secname{display:block;font-size:var(--t-micro);letter-spacing:var(--tr-caps);
+  text-transform:uppercase;color:var(--sig-deep);margin-top:var(--s2)}
+.field{grid-column:2;min-width:0}
+
+/*═══ GROUND · the grid is the constant idea; its character is the variance.
+  Every grid layer multiplies into the stock, so ink overprints correctly. ═*/
+.g-fine{
+  background-color:var(--disp-1);
+  background-image:
+    repeating-linear-gradient(90deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    repeating-linear-gradient(180deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    repeating-linear-gradient(90deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod)),
+    repeating-linear-gradient(180deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod)),
+    var(--pane);
+  background-size:auto,auto,auto,auto,256px 256px;
+  background-blend-mode:multiply,multiply,multiply,multiply,multiply}
+.g-coarse{
+  background-color:var(--disp-1);
+  background-image:
+    repeating-linear-gradient(90deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-8)),
+    repeating-linear-gradient(180deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-8)),
+    var(--pane);
+  background-size:auto,auto,256px 256px;
+  background-blend-mode:multiply,multiply,multiply}
+/* log-ruled stock — one decade every --decade, minors at log10(2..9).
+   All nine verticals share one angle and one period, so nothing beats. */
+.g-log{
+  background-color:var(--disp-2);
+  background-image:
+    repeating-linear-gradient(180deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    var(--lr3),var(--lr1),var(--lr1),var(--lr1),var(--lr1),
+    var(--lr1),var(--lr1),var(--lr1),var(--lr1),
+    var(--pane);
+  background-size:auto,
+    var(--decade) 100%,var(--decade) 100%,var(--decade) 100%,var(--decade) 100%,
+    var(--decade) 100%,var(--decade) 100%,var(--decade) 100%,var(--decade) 100%,
+    var(--decade) 100%,
+    256px 256px;
+  background-position:0 0,
+    0 0,
+    calc(var(--decade) * .301) 0,calc(var(--decade) * .477) 0,calc(var(--decade) * .602) 0,
+    calc(var(--decade) * .699) 0,calc(var(--decade) * .778) 0,calc(var(--decade) * .845) 0,
+    calc(var(--decade) * .903) 0,calc(var(--decade) * .954) 0,
+    0 0;
+  background-blend-mode:multiply,
+    multiply,multiply,multiply,multiply,multiply,multiply,multiply,multiply,multiply,
+    multiply}
+.g-roll{
+  background-color:var(--disp-3);
+  background-image:
+    repeating-linear-gradient(180deg,var(--grid-3) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    repeating-linear-gradient(180deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod)),
+    var(--pane);
+  background-size:auto,auto,256px 256px;
+  background-blend-mode:multiply,multiply,multiply}
+/* THE COUNT FIELD — the brightest plane in the set, and the only one ruled on
+   ONE axis. Horizontal only, with a doubled period rule every --mod16. It
+   follows the flood deliberately: 80 → 98.5 L* is the largest tonal step on
+   the page, and it lands exactly where the view stops arguing and starts
+   counting. Both rules run a rung lighter than the ladder's structural stops
+   because they cross running text, and a major rule through a line of type
+   reads as a strikethrough rather than as ruling. */
+.g-ledger{
+  background-color:var(--disp-0);
+  background-image:
+    repeating-linear-gradient(180deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod16)),
+    repeating-linear-gradient(180deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod16)),
+    repeating-linear-gradient(180deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    var(--pane);
+  background-size:auto,auto,auto,256px 256px;
+  background-position:0 0,0 3px,0 0,0 0;
+  background-blend-mode:multiply,multiply,multiply,multiply}
+.g-plain{                           /* unruled margin stock, one rung down     */
+  background-color:var(--disp-2);
+  background-image:var(--pane);
+  background-size:256px 256px;background-blend-mode:multiply}
+.g-back{                            /* the back cover — deep stock, no ruling  */
+  background-color:var(--disp-3);
+  background-image:var(--pane);
+  background-size:256px 256px;background-blend-mode:multiply}
+.g-reverse{                         /* the back of the sheet: grid shows through */
+  background-color:var(--disp-3);
+  background-image:
+    repeating-linear-gradient(90deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    repeating-linear-gradient(180deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    var(--pane);
+  background-size:auto,auto,256px 256px;
+  background-blend-mode:multiply,multiply,multiply}
+/* THE END OF THE ROLL. The ruling does not stop — it runs out, on one
+   gradient, and the spine runs out on the SAME gradient, so nothing is left
+   standing alone in the blank. The fade begins below the last mark. */
+.g-tail{isolation:isolate;
+  background-color:var(--disp-1);
+  background-image:var(--pane);
+  background-size:256px 256px;background-blend-mode:multiply}
+.g-tail::before{content:"";position:absolute;inset:0;pointer-events:none;
+  mix-blend-mode:multiply;
+  background-image:
+    repeating-linear-gradient(90deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    repeating-linear-gradient(180deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    repeating-linear-gradient(90deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod)),
+    repeating-linear-gradient(180deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod));
+  -webkit-mask-image:linear-gradient(180deg,#000 0 74%,transparent 97%);
+  mask-image:linear-gradient(180deg,#000 0 74%,transparent 97%)}
+#join .spine{
+  -webkit-mask-image:linear-gradient(180deg,#000 0 74%,transparent 97%);
+  mask-image:linear-gradient(180deg,#000 0 74%,transparent 97%)}
+/* the back cover is unruled stock, so it carries no spine at all */
+.foot-sec .spine{display:none}
+
+/*═══ PLOTTED CHARTS · one class set, every stroke from the hairline ladder ═*/
+.plot{--pk:1;--pks:1;display:block;width:100%;height:auto}
+.pk-hi{--pks:1.42}   /* 540 viewBox in the hero's 380px column  */
+.pk-mid{--pks:1.32}  /* 1140 viewBox in the 860px field         */
+.pk-lo{--pks:.78}    /* 640 viewBox in the 860px field          */
+.pk-sm{--pks:.85}    /* 720 viewBox in the 860px field          */
+.plot text{font-family:var(--ff-mono);font-weight:500}
+.plot .g1{stroke:var(--grid-2);stroke-width:var(--w-grid);fill:none;vector-effect:non-scaling-stroke}
+.plot .g2{stroke:var(--grid-2);stroke-width:var(--w-hair);fill:none;vector-effect:non-scaling-stroke}
+.plot .g3{stroke:var(--grid-3);stroke-width:var(--w-hair);fill:none;vector-effect:non-scaling-stroke}
+.plot .ax{stroke:var(--grid-4);stroke-width:var(--w-hair);fill:none;vector-effect:non-scaling-stroke}
+.plot .brk{stroke:var(--grid-4);stroke-width:var(--w-mark);fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+/* THE FAULT STATE · plate 1's third colour. Everything below is the system
+   reporting on itself, so all of it is plate 1 — the amber only ever
+   says "the grader flagged this", never "a person thought this". */
+.plot .strike{stroke:var(--alert);stroke-width:var(--w-heavy);fill:none;vector-effect:non-scaling-stroke}
+.plot .flat{stroke:var(--alert);stroke-width:var(--w-plot);fill:none;stroke-dasharray:6 6;vector-effect:non-scaling-stroke}
+.plot .stop.fault{stroke:var(--alert)}
+.plot .lbs.f{fill:var(--alert-deep)}
+.plot .hxf{stroke:var(--wash-alert)}
+/* THE LIVE CURSOR · where the record is right now. One rule, one terminal,
+   one ring on the newest point — drawn, so it reads in a still frame, and
+   the only thing on the page that moves is the 7px dot in the readout. */
+.plot .cur{stroke:var(--live);stroke-width:var(--w-mark);fill:none;
+  vector-effect:non-scaling-stroke}
+.plot .curT{fill:var(--live)}
+.plot .now{fill:var(--disp-0);stroke:var(--live);stroke-width:var(--w-mark);
+  vector-effect:non-scaling-stroke}
+.plot .tr{stroke:var(--sig);stroke-width:var(--w-plot);fill:none;stroke-linejoin:round;
+  stroke-linecap:round;vector-effect:non-scaling-stroke}
+.plot .fillA{fill:var(--wash-sig);stroke:none}
+.plot .fld{fill:var(--wash-ink);stroke:var(--grid-3);stroke-width:var(--w-hair);
+  vector-effect:non-scaling-stroke}
+.plot .mk{fill:var(--sig)}
+/* the three flagged runs, ringed by the grader itself — hollow, in the fault
+   colour, and under the hand's own circle in plate 2. */
+.plot .mkO{fill:var(--disp-0);stroke:var(--alert);stroke-width:var(--w-mark);vector-effect:non-scaling-stroke}
+.plot .mkP{fill:var(--sig)}
+.plot .mkO2{fill:var(--disp-0);stroke:var(--sig);stroke-width:var(--w-mark);vector-effect:non-scaling-stroke}
+.plot .mkNone{stroke:var(--sig);stroke-width:var(--w-hair);fill:none;vector-effect:non-scaling-stroke}
+.plot .stem{stroke:var(--grid-3);stroke-width:var(--w-hair);fill:none;vector-effect:non-scaling-stroke}
+.plot .slip{fill:none;stroke:var(--grid-3);stroke-width:var(--w-hair);vector-effect:non-scaling-stroke}
+.plot .barF{fill:var(--wash-sig);stroke:var(--sig);stroke-width:var(--w-hair);vector-effect:non-scaling-stroke}
+/* an allowance span is a run of run cells drawn continuous, so it carries the
+   run cell tone: still open beside a solid bar, but no longer a faint one. */
+.plot .barA{fill:var(--grid-3)}
+.plot .barP{fill:var(--sig)}
+.plot .stop{stroke:var(--sig-deep);stroke-width:var(--w-heavy);fill:none;vector-effect:non-scaling-stroke}
+.plot .arrow{stroke:var(--sig);stroke-width:var(--w-mark);fill:none;stroke-linecap:round;
+  stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.plot .hx{stroke:var(--grid-3);stroke-width:1;fill:none}
+.plot .revrule{stroke:var(--disp-0);stroke-width:var(--w-hair);fill:none;
+  vector-effect:non-scaling-stroke}
+.plot .dash{stroke:var(--grid-3);stroke-width:var(--w-hair);fill:none;stroke-dasharray:3 5;vector-effect:non-scaling-stroke}
+.plot .lb{font-size:calc(var(--t-mini) * var(--pk) * var(--pks));fill:var(--sig);letter-spacing:var(--tr-mono)}
+.plot .lbHi{font-size:calc(var(--t-mini) * var(--pk) * var(--pks));font-weight:600;fill:var(--sig-deep);letter-spacing:var(--tr-mono)}
+.plot .lbs{font-size:calc(var(--t-mini) * var(--pk) * var(--pks));font-weight:600;fill:var(--sig-deep);letter-spacing:var(--tr-caps)}
+.plot .pro{fill:var(--sig-deep)}
+.plot .lbrev{font-size:calc(var(--t-mini) * var(--pk) * var(--pks));font-weight:600;fill:var(--disp-0);
+  letter-spacing:var(--tr-caps)}
+/* TWO FITS FOR ONE DRAWING · a plot's type is sized in USER UNITS, so the same
+   label is 1.72× wider on the sheet at phone metrics (--pk 1.34) than at desk
+   metrics (--pk × --pks = .78). Anything hand-fitted to the WIDTH OF A WORD —
+   a brace, a highlight field, a slip that has to stop on the rule — therefore
+   has two positions, not one. Both are drawn; the media query picks. A brace
+   that over-runs the words it brackets reads as a drawing error, and the fit
+   is not a thing a single number can carry across that scale change. */
+.fit-sm{display:none}
+
+/*═══ THE READOUT PANE · every plot on the page is rendered on its own pane,
+  lifted off the field. The pane is opaque, so the field lattice stops at its
+  edge: the only rules inside a pane are the plot's own. Data never shares a
+  hue and a weight with the substrate underneath it. ══════════════════════*/
+.panel{position:relative;min-width:0;margin:var(--s5) 0 0;   /* figure UA margin is 1em 40px */
+  background-color:var(--disp-0);
+  background-image:var(--pane);
+  background-size:256px 256px;background-blend-mode:multiply;
+  border-radius:var(--r-panel);
+  padding:var(--s4) var(--s5) var(--s3);
+  box-shadow:var(--e0),var(--e-lift)}
+.panel-hd{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s2) var(--s4);
+  align-items:center;margin:0 0 var(--s3);padding-bottom:var(--s2);
+  border-bottom:var(--w-hair) solid var(--grid-4);
+  font-family:var(--ff-mono);font-size:var(--t-micro);letter-spacing:var(--tr-caps);
+  text-transform:uppercase;color:var(--sig-deep);line-height:1.4}
+.panel-hd span:last-child{color:var(--sig-deep);font-weight:400}
+
+/*═══ THE RUNNING INDICATOR · the one live element on the page. It is a
+  READOUT, so it prints a value that is actually on the record beside it —
+  the newest run and its temperature, read straight off the plot's own last
+  point. The 7px dot is the only thing on eleven thousand pixels that moves,
+  and prefers-reduced-motion stops it at full opacity, where the still frame
+  already reads. Never carries the live colour as TEXT: at L* 52 it cannot. */
+.live-tag{display:inline-flex;align-items:center;gap:var(--s2);flex:none;
+  font-family:var(--ff-mono);font-size:var(--t-micro);font-weight:600;
+  letter-spacing:var(--tr-caps);text-transform:uppercase;line-height:1.4;
+  color:var(--sig-deep);white-space:nowrap;
+  padding:3px var(--s2) 3px 6px;border-radius:var(--r-chip);
+  /* a tinted field, not a keyline: a 1px rule round a 10px chip is 12% of the
+     chip's own area, and a measured ground is only honest if the pixels it
+     samples are pixels a letter can actually land on. */
+  background:var(--tint-live)}
+.panel-hd .live-tag,.sheet-head .live-tag{color:var(--sig-deep);font-weight:600}
+.live-tag i{width:7px;height:7px;flex:none;border-radius:var(--r-round);
+  background:var(--live);
+  animation:beat var(--dur-live) var(--ease) infinite}
+@keyframes beat{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.66)}}
+.panel-ft b{color:var(--sig-deep);font-weight:600}
+.panel-ft{margin:var(--s3) 0 0;padding-top:var(--s2);
+  border-top:var(--w-hair) solid var(--grid-2);
+  font-family:var(--ff-mono);font-size:var(--t-micro);letter-spacing:var(--tr-mono);
+  color:var(--sig-deep);line-height:1.5}
+
+/* a window wider than a phone is a window you scrub, not a picture you shrink:
+   the record keeps its own scale and the frame moves along it. */
+.roll{position:relative;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+  padding-bottom:var(--s2)}
+.roll::-webkit-scrollbar{height:6px}
+.roll::-webkit-scrollbar-thumb{background:var(--grid-3)}
+.roll-note{display:none}
+/* THE CUT EDGE · every window on this page parks somewhere, and the side the
+   stream still runs on under says so. One hairline where the frame cuts, and
+   the record's own shadow falling away from it. At .20 over 24px the fade was
+   below the 1x visibility floor, which is why a scrubbed window read as a
+   broken one. Painted on the wrapper, not the scroller, because anything
+   absolutely positioned INSIDE a scroll container scrolls away with the
+   content it is meant to frame. */
+.cut-wrap{position:relative}
+.cut-wrap::before,.cut-wrap::after{content:"";position:absolute;top:0;bottom:0;
+  width:var(--s6);pointer-events:none;z-index:2;opacity:0;
+  background-repeat:no-repeat;
+  transition:opacity var(--dur-2) var(--ease)}
+.cut-wrap::before{left:0;
+  background-image:
+    linear-gradient(90deg,rgba(var(--sh),.62) 0 var(--w-hair),transparent var(--w-hair)),
+    linear-gradient(90deg,rgba(var(--sh),.30),rgba(var(--sh),.10) 34%,rgba(var(--sh),0) 100%)}
+.cut-wrap::after{right:0;
+  background-image:
+    linear-gradient(270deg,rgba(var(--sh),.62) 0 var(--w-hair),transparent var(--w-hair)),
+    linear-gradient(270deg,rgba(var(--sh),.30),rgba(var(--sh),.10) 34%,rgba(var(--sh),0) 100%)}
+.cut-wrap[data-cut="left"]::before,.cut-wrap[data-cut="both"]::before{opacity:1}
+.cut-wrap[data-cut="right"]::after,.cut-wrap[data-cut="both"]::after{opacity:1}
+.sig-stage{position:relative}
+.sig-stage > .plot{min-width:0}
+@media (max-width:900px){
+  .plot,.tape{--pk:1.34;--pks:1}
+  .roll > .plot,.roll > .sig-stage{min-width:860px}
+  .roll > .plot.narrow{min-width:560px}
+  .roll > .chain{min-width:620px}
+  .roll-note{display:block}
+  .fit-lg{display:none}
+  .fit-sm{display:inline}
+  /* the sentence is set as two braced halves with a five-character gap between
+     them. At phone metrics the first half is 136 units wide instead of 79, so
+     the second half has to start further along or the two collide mid-word.
+     The whole second group travels together — words, brace, stem, slip — so
+     the drop still lands where it did; only the slip's right edge is held,
+     because it stops on the rule. */
+  .half-2{transform:translateX(72px)}
+}
+
+/*═══ THE RUN CELL · ONE SQUARE IS ONE RUN, and the square says the same
+  thing everywhere it is drawn: TONED = the run came back clean, OUTLINE =
+  not run yet, SOLID = the grader flagged it. Three states, one grammar,
+  shared by the quota strip, the auto-pause rule and the FLAG row of the
+  nine-week record. The form carried the whole grammar on its own before
+  the fault colour arrived; the amber only sharpens what the fill already
+  said, which is why a solid cell still reads with no colour at all. A
+  fourth cell exists and is not a state: --c-next is the cell the scheduler
+  is about to fill, ringed in the live colour. ══════════════════════════*/
+.tape .c-run ,.plot .c-run {fill:var(--grid-3);stroke:var(--grid-4);stroke-width:var(--w-hair);vector-effect:non-scaling-stroke}
+.tape .c-left,.plot .c-left{fill:none;stroke:var(--grid-2);stroke-width:var(--w-hair);vector-effect:non-scaling-stroke}
+.tape .c-flag,.plot .c-flag{fill:var(--alert);stroke:var(--alert);stroke-width:var(--w-hair);vector-effect:non-scaling-stroke}
+.tape .c-next,.plot .c-next{fill:none;stroke:var(--live);stroke-width:var(--w-mark);vector-effect:non-scaling-stroke}
+
+/*═══ THE RUN TAPE · the quota strip, ruled off in run cells. ════════════*/
+.tape{display:block;width:100%;height:auto}
+.tape text{font-family:var(--ff-mono);font-weight:500;letter-spacing:var(--tr-mono)}
+.tape .t-stop{stroke:var(--alert);stroke-width:var(--w-heavy);fill:none;vector-effect:non-scaling-stroke}
+.tape .t-flat{stroke:var(--alert);stroke-width:var(--w-plot);fill:none;stroke-dasharray:6 6;vector-effect:non-scaling-stroke}
+.tape .t-brk {stroke:var(--grid-4);stroke-width:var(--w-mark);fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.tape .t-arr {stroke:var(--sig);stroke-width:var(--w-mark);fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.tape{--pks:1}
+.tape .t-lab {font-size:calc(var(--t-micro) * var(--pks));fill:var(--sig);letter-spacing:var(--tr-caps)}
+.tape .t-labHi{font-size:calc(var(--t-micro) * var(--pks));font-weight:600;fill:var(--sig-deep);letter-spacing:var(--tr-caps)}
+.tape .t-brc {stroke:var(--sig-deep);stroke-width:var(--w-hair);fill:none;vector-effect:non-scaling-stroke}
+.chain{display:block;width:100%;height:auto}
+.chain text{font-family:var(--ff-mono);font-size:var(--t-mini);font-weight:500;
+  letter-spacing:var(--tr-mono)}
+
+/*═══ THE FIELD FLOOD · the one place a colour is laid down solid instead of
+  ruling with it. Full bleed, in the middle third of the page, and the page's
+  only value event. It is a BRIGHT event: a saturated cyan panel eleven times
+  the chroma of the brightest ground, dividing the page into acts by hue and
+  intensity rather than by darkness. The lattice still structures it, the ink
+  ladder is the same one the rest of the page uses at the same alphas, and
+  the type is printed on the field rather than knocked out of it — on a
+  panel this bright there is nothing lighter than the field to knock out.
+  The only remapping is the nominal ink: at C* 87 it clears only 3.9 against
+  the flood, so all NOMINAL-ink type inside runs at the deep stop. ════════*/
+.flood{position:relative;isolation:isolate;
+  background-color:var(--flood);
+  background-image:
+    repeating-linear-gradient(90deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod-8)),
+    repeating-linear-gradient(180deg,var(--grid-1) 0 var(--w-hair),transparent var(--w-hair) var(--mod-8)),
+    var(--pane);
+  background-size:auto,auto,256px 256px;
+  background-blend-mode:normal,normal,multiply;
+  box-shadow:inset 0 var(--w-heavy) 0 var(--sig),
+             inset 0 calc(var(--w-heavy) * -1) 0 var(--sig)}
+/* The nominal ink is not remapped inside the flood: every word on the page is
+   already set in the deep stop (7.0 against the field), and the nominal ink
+   stays vivid where it is a GRAPHIC — 3.9 against the field, past the 3:1
+   a drawn object needs, so the tag glyphs keep their two weights. The one
+   remap is the secondary grey: a neutral grey on a C* 41 field reads as dirt
+   on the panel, so secondary text takes the field's own hue instead. */
+.flood > .wrap{--ink-2:var(--sig-deep)}
+.flood h2{font-size:var(--t-h1);letter-spacing:-.02em;
+  font-variation-settings:"opsz" 120,"wght" 560,"SOFT" 0,"WONK" 0;
+  max-width:17ch}
+.flood .eyebrow::after{box-shadow:none}
+.flood .tagset li{box-shadow:none}
+@media (max-width:640px){.flood h2{font-size:var(--t-h2)}}
+
+/*═══ 01 · NAV ═════════════════════════════════════════════════════════════*/
+/* chrome, not field: the one band that sits above the view rather than in it,
+   so it takes the panel face and the heavy rule closes it. */
+.nav{position:sticky;top:0;z-index:20;background-color:var(--disp-0);
+  border-bottom:var(--w-heavy) solid var(--sig);
+  box-shadow:0 1px 0 rgba(var(--sh),.10),0 6px 14px -10px rgba(var(--sh),.30)}
+.nav-in{max-width:var(--page-max);margin-inline:auto;
+  padding:var(--s3) var(--gutter);display:flex;align-items:center;gap:var(--s4)}
+.mark{display:flex;align-items:baseline;gap:var(--s2);text-decoration:none;
+  font-family:var(--ff-display);font-size:26px;letter-spacing:-.02em;color:var(--sig);
+  font-variation-settings:"opsz" 96,"wght" 620,"SOFT" 0,"WONK" 0}
+.nav-stamp{margin:0;font-family:var(--ff-mono);font-size:var(--t-micro);
+  letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--sig-deep);
+  padding:var(--s1) var(--s2);border:var(--w-hair) solid var(--grid-3);
+  border-radius:var(--r-chip);line-height:1.2}
+.nav-links{margin-left:auto;display:flex;gap:var(--s5)}
+.nav-links a{font-family:var(--ff-mono);font-size:var(--t-small);color:var(--ink-2);
+  text-decoration:none;padding-bottom:2px;border-bottom:var(--w-hair) solid transparent}
+.nav-links a:hover{border-bottom-color:var(--pen);color:var(--ink-1)}
+.btn{display:inline-flex;align-items:center;gap:var(--s2);
+  font-family:var(--ff-mono);font-size:var(--t-small);font-weight:600;
+  letter-spacing:var(--tr-caps);text-transform:uppercase;text-decoration:none;
+  padding:var(--s3) var(--s4);border:none;cursor:pointer;line-height:1;
+  color:var(--disp-0);border-radius:var(--r-panel);
+  /* the light stop is pulled up out of the glyph band: type sits at 32–68% of
+     the button, so anything above --sig there would drop the reversed
+     --disp-0 under 4.5:1. Worst pixel under a cap is 6.1:1. The cast shadow
+     is a dark version of the button's OWN hue — a blue object never casts a
+     black shadow. */
+  background-image:linear-gradient(180deg,var(--sig-hi) 0,var(--sig) 18%,var(--sig-lo) 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.26),
+             inset 0 -2px 0 rgba(8,22,72,.34),
+             inset 0 0 0 1px rgba(8,22,72,.42),
+             0 1px 1px -.5px rgba(12,30,96,.34),
+             0 4px 10px -4px rgba(12,30,96,.42);
+  transition:transform var(--dur-1) var(--ease),box-shadow var(--dur-1) var(--ease)}
+.btn:hover{transform:translateY(-1px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30),
+             inset 0 -2px 0 rgba(8,22,72,.36),
+             inset 0 0 0 1px rgba(8,22,72,.48),
+             0 2px 2px -1px rgba(12,30,96,.34),
+             0 10px 20px -6px rgba(12,30,96,.46)}
+.btn:active{transform:translateY(0)}
+.btn-2{color:var(--ink-1);background:none;background-color:transparent;
+  box-shadow:inset 0 0 0 var(--w-hair) var(--grid-4)}
+.btn-2:hover{box-shadow:inset 0 0 0 var(--w-mark) var(--pen)}
+@media (max-width:820px){
+  .nav-stamp{display:none}
+  .nav-links{gap:var(--s4)}
+  .nav-links a:nth-child(2){display:none}
+}
+@media (max-width:520px){.nav-links{display:none}.mark{font-size:22px}}
+
+/*═══ 02 · HERO ════════════════════════════════════════════════════════════*/
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);
+  gap:var(--s8) var(--s7);align-items:start}
+.hero-grid > *{min-width:0}
+@media (max-width:940px){.hero-grid{grid-template-columns:1fr;gap:var(--s7)}}
+h1 em{font-style:normal;color:var(--sig);
+  font-variation-settings:"opsz" 144,"wght" 700,"SOFT" 0,"WONK" 0}
+.trust{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);margin:var(--s4) 0 0;
+  font-family:var(--ff-mono);font-size:var(--t-micro);letter-spacing:var(--tr-caps);
+  text-transform:uppercase;color:var(--sig-deep)}
+.trust span::before{content:"· ";color:var(--grid-4)}
+.trust span:first-child::before{content:""}
+.cta-row{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;margin-top:var(--s6)}
+
+/* the input field — the system's own baseline, with the parse marked on it */
+.specimen{margin:var(--s7) 0 0;position:relative}
+.specimen .rule{padding:var(--s4) 0 var(--s3);
+  border-bottom:var(--w-mark) solid var(--grid-4);box-shadow:var(--score)}
+.specimen .sent{font-size:var(--t-lead);line-height:1.45;color:var(--ink-1);margin:0}
+.parse{display:inline;padding:2px 5px;margin:0 -3px;border-radius:var(--r-chip);
+  box-shadow:inset 0 0 0 var(--w-hair) var(--sig);background:var(--wash-sig)}
+.tick-row{display:flex;justify-content:space-between;margin-top:var(--s2)}
+.tick-row span{font-family:var(--ff-mono);font-size:var(--t-micro);
+  letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--sig-deep)}
+
+/* the delivered result, as it lands */
+.slip{background-color:var(--disp-0);box-shadow:var(--e2);padding:var(--s5);
+  border-radius:var(--r-panel)}
+.slip-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;
+  gap:var(--s3) var(--s4);padding-bottom:var(--s3);
+  border-bottom:var(--w-hair) solid var(--grid-3)}
+.slip-re{margin:0;font-family:var(--ff-mono);font-size:var(--t-tiny);font-weight:600;
+  letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--ink-1);line-height:1.5;
+  flex:1 1 15ch}
+.slip-meta{display:inline-block;margin-top:var(--s1);color:var(--sig-deep);font-weight:400;
+  text-transform:none;letter-spacing:var(--tr-mono)}
+.slip-body{margin:var(--s4) 0 0;font-size:var(--t-body);line-height:1.55}
+.slip-check{margin:var(--s4) 0 0;padding-top:var(--s3);
+  border-top:var(--w-hair) solid var(--grid-3);
+  font-family:var(--ff-mono);font-size:var(--t-tiny);color:var(--sig-deep);
+  display:flex;align-items:center;gap:var(--s2)}
+.slip-check::before{content:"";width:var(--s5);height:var(--w-hair);background:var(--sig)}
+.hero-rec{margin:var(--s5) 0 0}
+
+/*═══ 03 · THE ASK · the generator ═════════════════════════════════════════*/
+.rec-field{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:var(--s6) var(--s5);margin-top:var(--s7);padding:var(--s2) var(--s2) 0}
+.rec{
+  --rec-ink:var(--sig);
+  position:relative;padding:var(--s4);border-radius:var(--r-panel);
+  background-color:var(--disp-0);box-shadow:var(--e-lift),var(--e0);
+  transform:rotate(var(--a)) translate(var(--o),0);
+  transition:transform var(--dur-3) var(--ease-snap),box-shadow var(--dur-2) var(--ease)}
+.rec:hover{z-index:2}
+.rec:hover,.rec:focus-visible{transform:rotate(0deg) translate(0,0);box-shadow:var(--e2)}
+.rec:focus-visible{z-index:3}
+.rec-hd{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s2);
+  font:500 var(--t-mini)/1 var(--ff-mono);
+  padding-bottom:var(--s2);margin-bottom:var(--s3);
+  border-bottom:var(--w-hair) solid var(--grid-3)}
+.rec-slug{color:var(--sig-deep);text-transform:uppercase;letter-spacing:var(--tr-caps)}
+.rec-unit{color:var(--sig-deep);letter-spacing:var(--tr-mono);white-space:nowrap}
+/* the plot field: the band supplies the field it is drawn on, the SVG supplies
+   the record. Six records, six different instruments — a two-trace diurnal
+   ribbon, a step against a target, an open/high/low/close bar field, a diff, a
+   ruled box score and a raster of when it fired. No two are the same picture,
+   which is the whole point: a component that produces one image six times is
+   one image. */
+.rec-plot{position:relative;
+  background-color:var(--disp-2);
+  background-repeat:no-repeat;
+  background-image:var(--band-img);
+  background-size:var(--band-size);
+  background-position:var(--band-pos)}
+.rec-plot > svg{display:block;width:100%;height:auto}
+.rec-plot .ri  {stroke:var(--rec-ink);stroke-width:var(--w-plot);fill:none;
+  stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.rec-plot .rih {stroke:var(--rec-ink);stroke-width:var(--w-hair);fill:none;
+  vector-effect:non-scaling-stroke}
+.rec-plot .rim {stroke:var(--rec-ink);stroke-width:var(--w-mark);fill:none;
+  stroke-linecap:round;vector-effect:non-scaling-stroke}
+.rec-plot .rif {fill:var(--rec-ink)}
+.rec-plot .rw  {fill:var(--wash-sig);stroke:none}
+.rec-plot .rg  {stroke:var(--grid-3);stroke-width:var(--w-hair);fill:none;
+  vector-effect:non-scaling-stroke}
+.rec-plot .rgd {stroke:var(--grid-3);stroke-width:var(--w-hair);fill:none;
+  stroke-dasharray:3 4;vector-effect:non-scaling-stroke}
+.rec-plot .rdel{fill:var(--grid-3);stroke:var(--rec-ink);stroke-width:var(--w-hair);
+  vector-effect:non-scaling-stroke}
+.rec-plot .rgg {stroke:var(--grid-2);stroke-width:var(--w-grid);fill:none;
+  vector-effect:non-scaling-stroke}
+.rec-plot .rax {stroke:var(--grid-4);stroke-width:var(--w-hair);fill:none;
+  vector-effect:non-scaling-stroke}
+.rec-plot .ro  {fill:var(--disp-0);stroke:var(--rec-ink);stroke-width:var(--w-mark);
+  vector-effect:non-scaling-stroke}
+.rec-plot text{font-family:var(--ff-mono);font-weight:500;font-size:8px;
+  fill:var(--sig);letter-spacing:var(--tr-mono)}
+.rec-ft{display:flex;justify-content:space-between;align-items:flex-start;
+  gap:var(--s3);margin-top:var(--s3)}
+.rec-t{margin:0;font-size:var(--t-small);line-height:1.35;color:var(--ink-1);max-width:24ch}
+.rec-flag{flex:none;font:600 var(--t-micro)/1 var(--ff-mono);text-transform:uppercase;
+  letter-spacing:var(--tr-stamp);color:var(--sig-deep);background:var(--disp-2);
+  border:var(--w-hair) solid var(--grid-4);border-radius:var(--r-chip);
+  padding:var(--s1) var(--s1) var(--s1) var(--s2)}
+.rec-flag::before{content:var(--flag-text)}
+/* a graded verdict that is not "ok" is the system's fault state, so it takes
+   the fault colour — the same amber the flagged run cells take. */
+.rec[data-flag]:not([data-flag="ok"]) .rec-flag{
+  border-width:var(--w-mark);border-color:var(--alert);color:var(--alert-deep);
+  background:var(--tint-alert)}
+/* THE FOUR BANDS — four different papers under one recipe. Each band tiles
+   itself, so the single background-repeat:no-repeat above is never cycled. */
+.band-fine{
+  --band-img:
+    repeating-linear-gradient(to right,var(--grid-1) 0 var(--w-grid),transparent var(--w-grid) var(--mod)),
+    repeating-linear-gradient(to top,var(--grid-2) 0 var(--w-grid),transparent var(--w-grid) var(--mod));
+  --band-size:100% 100%,100% 100%;
+  --band-pos:0 0,0 100%}
+.band-coarse{
+  --band-img:
+    repeating-linear-gradient(to right,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-2)),
+    repeating-linear-gradient(to top,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-2));
+  --band-size:100% 100%,100% 100%;
+  --band-pos:0 0,0 100%}
+.band-roll{                       /* strip chart: time lines only, no verticals */
+  --band-img:
+    repeating-linear-gradient(to top,var(--grid-3) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4)),
+    repeating-linear-gradient(to top,var(--grid-2) 0 var(--w-grid),transparent var(--w-grid) var(--mod)),
+    linear-gradient(var(--disp-2),var(--disp-2));
+  --band-size:100% 100%,100% 100%,100% 100%;
+  --band-pos:0 100%,0 100%,0 0}
+.band-log{                        /* one decade: rules at 100% × (1 − log₁₀ n) */
+  --band-img:
+    linear-gradient(var(--grid-3),var(--grid-3)),linear-gradient(var(--grid-2),var(--grid-2)),
+    linear-gradient(var(--grid-2),var(--grid-2)),linear-gradient(var(--grid-2),var(--grid-2)),
+    linear-gradient(var(--grid-2),var(--grid-2)),linear-gradient(var(--grid-3),var(--grid-3)),
+    linear-gradient(var(--grid-2),var(--grid-2)),linear-gradient(var(--grid-2),var(--grid-2)),
+    linear-gradient(var(--grid-3),var(--grid-3)),linear-gradient(var(--grid-3),var(--grid-3)),
+    repeating-linear-gradient(to right,var(--grid-2) 0 var(--w-grid),transparent var(--w-grid) var(--mod-2));
+  --band-size:
+    100% var(--w-hair),100% var(--w-grid),100% var(--w-grid),100% var(--w-grid),
+    100% var(--w-grid),100% var(--w-grid),100% var(--w-grid),100% var(--w-grid),
+    100% var(--w-grid),100% var(--w-hair),100% 100%;
+  --band-pos:
+    0 0,     0 4.6%,  0 9.7%,  0 15.5%,
+    0 22.2%, 0 30.1%, 0 39.8%, 0 52.3%,
+    0 69.9%, 0 100%,  0 0}
+
+/*═══ THREE OF THE SIX ARE NOT CARDS ═══════════════════════════════════════
+  A component that prints one container six times has drawn one object six
+  times, whatever the plot inside it does. So three of the six records are
+  built as the thing the record physically IS: a length torn off a ticker
+  tape, a punched card-stock form, and a diff sitting on the sheet it
+  replaced. Same ink, same grid, same tilt scale — different objects. ═══*/
+
+/* 1 · the tape. Die-cut at both ends on a regular 6.25% castellation —
+   sprocketed, not torn: the edge is a repeating square wave a machine cut,
+   which is the whole difference between a strip pulled off a roll and a
+   length of tape a mechanism advanced. Straight along its length, because
+   that is the width the stock was slit to. The clip takes the box shadow
+   with it, so the lift is a drop-shadow filter, which follows the cut
+   silhouette instead of a rectangle that isn't there. */
+.rec--tape{
+  align-self:start;                 /* a tape is not as deep as a form  */
+  padding:var(--s3) var(--s6);
+  background-color:transparent;box-shadow:none}
+/* the cut is drawn on a layer BEHIND the type, not by clipping the record
+   itself — a clip path would take the focus ring away with the corners. */
+.rec--tape::after{content:"";position:absolute;z-index:-1;inset:0;
+  background-color:var(--disp-0);
+  clip-path:polygon(2px 0%,calc(100% - 2px) 0%,calc(100% - 2px) 6.25%,calc(100% - 11px) 6.25%,calc(100% - 11px) 12.50%,calc(100% - 2px) 12.50%,calc(100% - 2px) 18.75%,calc(100% - 11px) 18.75%,calc(100% - 11px) 25.00%,calc(100% - 2px) 25.00%,calc(100% - 2px) 31.25%,calc(100% - 11px) 31.25%,calc(100% - 11px) 37.50%,calc(100% - 2px) 37.50%,calc(100% - 2px) 43.75%,calc(100% - 11px) 43.75%,calc(100% - 11px) 50.00%,calc(100% - 2px) 50.00%,calc(100% - 2px) 56.25%,calc(100% - 11px) 56.25%,calc(100% - 11px) 62.50%,calc(100% - 2px) 62.50%,calc(100% - 2px) 68.75%,calc(100% - 11px) 68.75%,calc(100% - 11px) 75.00%,calc(100% - 2px) 75.00%,calc(100% - 2px) 81.25%,calc(100% - 11px) 81.25%,calc(100% - 11px) 87.50%,calc(100% - 2px) 87.50%,calc(100% - 2px) 93.75%,calc(100% - 11px) 93.75%,calc(100% - 11px) 100.00%,11px 100%,11px 93.75%,2px 93.75%,2px 87.50%,11px 87.50%,11px 81.25%,2px 81.25%,2px 75.00%,11px 75.00%,11px 68.75%,2px 68.75%,2px 62.50%,11px 62.50%,11px 56.25%,2px 56.25%,2px 50.00%,11px 50.00%,11px 43.75%,2px 43.75%,2px 37.50%,11px 37.50%,11px 31.25%,2px 31.25%,2px 25.00%,11px 25.00%,11px 18.75%,2px 18.75%,2px 12.50%,11px 12.50%,11px 6.25%,2px 6.25%,2px 0.00%);
+  filter:drop-shadow(0 0 .9px rgba(var(--sh),.95)) drop-shadow(0 1px 1px rgba(var(--sh),.18))
+         drop-shadow(0 6px 10px rgba(var(--sh),.18))}
+.rec--tape .rec-hd{border-bottom-style:dashed;border-bottom-color:var(--grid-2)}
+.rec--tape .rec-ft{margin-top:var(--s2)}
+.rec:hover.rec--tape,.rec--tape:focus-visible{box-shadow:none}
+.rec--tape:hover::after,.rec--tape:focus-visible::after{
+  filter:drop-shadow(0 0 .9px rgba(var(--sh),.95)) drop-shadow(0 2px 2px rgba(var(--sh),.20))
+         drop-shadow(0 12px 20px rgba(var(--sh),.22))}
+
+/* 2 · the module. A rack card: a 2px keyline all the way round, a solid ink
+   title band with the type knocked out of it, and the two machined mounting
+   holes it is screwed in by. The only reversed plate-1 on the page outside
+   the flood — an object's own band, not a value event. */
+.rec--card{
+  padding:0 0 var(--s4);border-radius:var(--r-panel);
+  background-image:
+    radial-gradient(circle at 13px 44%,rgba(var(--sh),.40) 0 4.4px,rgba(var(--sh),.10) 4.6px,transparent 5.4px),
+    radial-gradient(circle at 13px 66%,rgba(var(--sh),.40) 0 4.4px,rgba(var(--sh),.10) 4.6px,transparent 5.4px);
+  box-shadow:0 0 0 var(--w-mark) var(--sig-deep),var(--e-lift)}
+.rec--card .rec-hd{margin:0 0 var(--s4);padding:var(--s3) var(--s4);
+  border-bottom:none;background:var(--sig)}
+.rec--card .rec-slug,.rec--card .rec-unit{color:var(--disp-0)}
+.rec--card .rec-plot{margin-inline:var(--s5) var(--s4)}
+.rec--card .rec-ft{margin:var(--s4) var(--s4) 0;padding-top:var(--s3);
+  border-top:var(--w-hair) solid var(--grid-4);box-shadow:var(--score)}
+.rec:hover.rec--card,.rec--card:focus-visible{
+  box-shadow:0 0 0 var(--w-mark) var(--sig-deep),var(--e2)}
+
+/* 3 · the diff, over the version it replaced. Two panes: the one underneath
+   is the state that is gone. Both are drawn as negative-z pseudo-elements so
+   they paint under the record's own type but over nothing else. */
+.rec--sheets{background-color:transparent;box-shadow:none}
+.rec--sheets::before,.rec--sheets::after{content:"";position:absolute}
+.rec--sheets::before{z-index:-2;inset:-15px -17px 15px 17px;
+  background-color:var(--disp-2);
+  background-image:
+    repeating-linear-gradient(180deg,var(--grid-2) 0 var(--w-hair),transparent var(--w-hair) var(--mod-2));
+  border-radius:var(--r-panel);
+  box-shadow:0 0 0 var(--w-hair) rgba(var(--sh),.20),0 4px 10px -6px rgba(var(--sh),.24);
+  transform:rotate(var(--tilt-4));transform-origin:50% 100%;
+  transition:transform var(--dur-3) var(--ease-snap)}
+/* the two panes come into register on hover, like every other tilted mark */
+.rec--sheets:hover::before,.rec--sheets:focus-visible::before{transform:rotate(0deg)}
+.rec--sheets::after{z-index:-1;inset:0;border-radius:var(--r-panel);
+  background-color:var(--disp-0);box-shadow:var(--e-lift),var(--e0)}
+.rec:hover.rec--sheets,.rec--sheets:focus-visible{box-shadow:none}
+.rec--sheets:hover::after,.rec--sheets:focus-visible::after{box-shadow:var(--e2)}
+@media (max-width:720px){        /* drop the stagger, KEEP the tilt */
+  .rec{transform:rotate(var(--a))}
+  .rec:hover,.rec:focus-visible{transform:rotate(0deg)}
+}
+
+/*═══ 04 · HOW IT WORKS ════════════════════════════════════════════════════*/
+.beats{margin-top:var(--s7);display:grid;gap:var(--s8);min-width:0}
+.beat{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s5);align-items:start;min-width:0}
+.beat>*{min-width:0}
+.verdict>*,.spec>*,.tagset>*{min-width:0}
+.beat-n{font-family:var(--ff-mono);font-size:var(--t-h4);font-weight:600;
+  color:var(--sig-deep);line-height:1;padding-top:.2em;
+  border-top:var(--w-heavy) solid var(--sig-deep);min-width:2.6em}
+.parsebox{background:none;box-shadow:inset 0 0 0 var(--w-hair) var(--grid-4);
+  border-radius:var(--r-panel);padding:var(--s5);margin-top:var(--s4)}
+.parse-line{font-size:var(--t-lead);line-height:1.7;margin:0}
+.brace{display:block;margin-top:var(--s3);font-family:var(--ff-mono);
+  font-size:var(--t-micro);letter-spacing:var(--tr-caps);text-transform:uppercase;
+  color:var(--sig-deep)}
+.card-chrome{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s4) 0 0;padding:0;list-style:none}
+.card-chrome li{font-family:var(--ff-mono);font-size:var(--t-micro);
+  letter-spacing:var(--tr-mono);text-transform:uppercase;color:var(--sig-deep);
+  padding:var(--s1) var(--s2);box-shadow:inset 0 0 0 var(--w-hair) var(--grid-3);
+  border-radius:var(--r-chip);background:var(--disp-0)}
+.card-chrome li:first-child{text-transform:none;color:var(--sig-deep);font-weight:600;
+  box-shadow:inset 0 0 0 var(--w-hair) var(--grid-4)}
+.panel .tape{margin-top:var(--s3)}
+
+/*═══ 05 · THE CHECK ═══════════════════════════════════════════════════════*/
+.pull{margin:var(--s7) 0 0;max-width:60ch;font-size:clamp(20px,2.1vw,27px);
+  line-height:1.42;color:var(--ink-1);
+  font-variation-settings:"opsz" 60,"wght" 420,"SOFT" 0,"WONK" 0;
+  padding-left:var(--s5);border-left:var(--w-heavy) solid var(--sig)}
+.tagset{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:var(--s5) var(--s6);margin:var(--s8) 0 0;padding:0;list-style:none}
+@media (min-width:900px){.tagset{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.tagset{grid-template-columns:1fr}}
+.tagset li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s3);
+  align-items:start;padding-top:var(--s3);
+  border-top:var(--w-hair) solid var(--grid-3);box-shadow:var(--score)}
+/* 56px, not 44 — the glyphs are authored on a 56-unit viewBox, so at 44 every
+   --w-grid hairline landed at 0.39 device px and the six plots washed out. */
+.tagset svg{width:56px;height:56px;flex:none}
+.tagset .tn{display:block;font-family:var(--ff-mono);font-size:var(--t-small);
+  font-weight:600;color:var(--ink-1);letter-spacing:var(--tr-mono)}
+.tagset .td{display:block;font-size:var(--t-small);line-height:1.45;color:var(--ink-2);
+  margin-top:var(--s1)}
+
+/* the signature's frame. It is the one thing on the page allowed out of the
+   field column: a nine-week window is wider than the column the rest of the
+   view is laid out in, so it runs across the index margin with its own lift
+   on top of the spine. Every other element on all nine sections still starts
+   on the spine. */
+.sheet{position:relative;margin:var(--s8) 0 0;
+  background-color:var(--disp-0);
+  background-image:var(--pane);
+  background-size:256px 256px;background-blend-mode:multiply;
+  border-radius:var(--r-panel);
+  box-shadow:var(--e2);padding:var(--s5) var(--s5) var(--s4)}
+.sheet-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);
+  align-items:center;margin-bottom:var(--s4);
+  padding-bottom:var(--s3);border-bottom:var(--w-hair) solid var(--grid-4)}
+.sheet-t{margin:0;font-family:var(--ff-mono);font-size:var(--t-small);font-weight:600;
+  letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--ink-1)}
+.roll-note{margin:var(--s2) 0 0;font-family:var(--ff-mono);font-size:var(--t-micro);
+  letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--sig-deep)}
+@media (min-width:900px){
+  .sheet{margin-inline-start:calc((var(--margin-col) + var(--colgap)) * -1)}
+}
+/* Below 900 the roll is wider than any frame the column can give it, so the
+   sheet is given the whole page: it runs off both edges of the screen the way
+   a chart roll runs off the edge of a desk. Every pixel gained here is a pixel
+   the parked window does not have to cut a word in half to find. */
+@media (max-width:900px){
+  .sheet{
+    margin-inline:calc((var(--margin-col) + var(--colgap) + var(--gutter)) * -1)
+                  calc(var(--gutter) * -1);
+    padding-inline:var(--s4)}
+}
+.sig-wrap{position:relative}
+.ann-layer{position:absolute;inset:0;pointer-events:none}
+.ann-layer > *{pointer-events:auto}
+.margin-note{position:absolute;left:var(--n-l);top:var(--n-t);max-width:var(--n-w,20ch)}
+/* the sheet's own footer. These two lines are facts about the whole record,
+   not labels on a point, so they are set once under the frame instead of
+   printed 671 units wide inside a roll that is 340 units of window on a
+   phone — where every parked position severed one of them. */
+.sheet-foot{display:flex;flex-wrap:wrap;justify-content:space-between;
+  gap:var(--s1) var(--s4);margin:var(--s3) 0 0;padding-top:var(--s2);
+  border-top:var(--w-hair) solid var(--grid-2);
+  font-family:var(--ff-mono);font-size:var(--t-micro);letter-spacing:var(--tr-mono);
+  color:var(--sig-deep);line-height:1.5}
+.sheet-foot b{color:var(--sig-deep);font-weight:600}
+@media (max-width:900px){
+  /* The parked window is one slice of the sheet, so the note that names the
+     failure is written beside the runs it is about — under the circled three,
+     clear of the trace above and the axis below — instead of out in the
+     sheet's left margin half a sheet away. Its leader has no distance left to
+     travel, so it is not drawn. */
+  .sig-wrap .margin-note[data-note="1"]{left:60%;top:43.8%;max-width:14ch}
+  .sig-wrap .leader[data-leader="1"]{display:none}
+}
+/* the fault notice. It carries the state colour on its left edge, the way a
+   monitoring view flags the row that broke. */
+.notice{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s4);
+  margin-top:var(--s7);padding:var(--s5);border-radius:var(--r-panel);
+  background-color:var(--disp-0);
+  box-shadow:var(--e1),inset var(--w-heavy) 0 0 var(--alert)}
+.notice-txt{margin:0;flex:1 1 300px;font-size:var(--t-small);line-height:1.5;
+  font-family:var(--ff-mono);color:var(--ink-2)}
+.notice-txt b{color:var(--ink-1)}
+.notice-btns{display:flex;gap:var(--s2)}
+.mini-btn{font-family:var(--ff-mono);font-size:var(--t-tiny);letter-spacing:var(--tr-mono);
+  white-space:nowrap;border-radius:var(--r-chip);
+  padding:var(--s2) var(--s3);cursor:pointer;line-height:1;color:var(--ink-1);
+  background:var(--disp-0);border:var(--w-hair) solid var(--grid-4);
+  transition:box-shadow var(--dur-1) var(--ease)}
+/* the pointer is a hand, so every hover mark on this page is plate 2 */
+.mini-btn:hover{box-shadow:inset 0 0 0 var(--w-mark) var(--pen)}
+.notice .tape{flex:0 0 216px;max-width:100%}
+
+/*═══ 06 · PROOF ═══════════════════════════════════════════════════════════*/
+.mf{margin-top:var(--s7);padding:var(--s5);border-radius:var(--r-panel);
+  background-color:var(--disp-2);
+  box-shadow:inset 0 2px 4px -1px rgba(var(--sh),.16),
+             inset 0 0 0 var(--w-hair) rgba(var(--sh),.20),
+             var(--score)}
+/* One mark per template. The radius is a FRACTION of the cell, not a fixed
+   1.6px — the cell is 11.7px wide at 1440 and 7.3px at 375, so a fixed dot was
+   6% ink at desktop (invisible as a tone at any distance) and would have gone
+   solid on a phone. At 21% of a square cell the field reads as a real density
+   from across the room and still resolves into 1,481 separate marks up close.
+   The stop is hard — 21% to 22% — because a rendered mark has an edge and a
+   halftone dot does not. Cells are square because each block's aspect-ratio
+   is cols/rows. */
+.mf-blk,.mf-rem{--cols:var(--cw);--rows:var(--rw);--n:var(--nw);
+  background-repeat:repeat;
+  background-image:radial-gradient(ellipse at 50% 50%,var(--dotink) 0 21%,transparent 22%)}
+.mf-blk{--dotink:var(--sig);
+  aspect-ratio:calc(var(--cols) / var(--rows));
+  background-size:calc(100% / var(--cols)) calc(100% / var(--rows))}
+.mf-rem{--dotink:var(--sig);
+  width:calc(var(--n) / var(--cols) * 100%);
+  aspect-ratio:calc(var(--n) / 1);
+  background-size:calc(100% / var(--n)) 100%}
+.mf-blk.alt,.mf-rem.alt{--dotink:var(--sig-deep)}
+.mf-cap{display:flex;justify-content:space-between;gap:var(--s3);
+  margin:var(--s3) 0 var(--s5);padding-top:var(--s2);
+  border-top:var(--w-hair) solid var(--grid-3);
+  font-family:var(--ff-mono);font-size:var(--t-micro);letter-spacing:var(--tr-caps);
+  text-transform:uppercase;color:var(--sig-deep)}
+.mf-cap:last-child{margin-bottom:0}
+@media (max-width:760px){.mf-blk,.mf-rem{--cols:var(--cn);--rows:var(--rn);--n:var(--nn)}}
+
+/* the dimension line — arrow terminators, label knocking out the rule */
+.dimwrap{margin-top:var(--s8);padding:var(--s7) 0 var(--s5)}
+.dimwrap .caption{margin-top:var(--s7)}
+.dimline{position:relative;height:var(--s7)}
+.dim{position:absolute;left:0;right:0;top:50%;height:var(--w-hair);background:var(--sig-deep)}
+.dim::before,.dim::after{content:"";position:absolute;top:-3.5px;width:0;height:0;
+  border-top:4px solid transparent;border-bottom:4px solid transparent}
+.dim::before{left:0;border-right:9px solid var(--sig-deep)}
+.dim::after{right:0;border-left:9px solid var(--sig-deep)}
+.dim-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:var(--disp-0);padding:0 var(--s3);   /* knocks the rule out on the count field */
+  font-family:var(--ff-mono);font-size:var(--t-small);font-weight:600;
+  letter-spacing:var(--tr-caps);color:var(--sig-deep);line-height:1.6;white-space:nowrap}
+.dim-ext{position:absolute;top:calc(var(--s5) * -1);bottom:calc(var(--s5) * -1);
+  width:var(--w-hair);background:var(--grid-4);left:var(--x)}
+.dim-lab{position:absolute;top:calc(var(--s6) * -1);left:var(--x);
+  font-family:var(--ff-mono);font-size:var(--t-micro);letter-spacing:var(--tr-caps);
+  color:var(--sig-deep);white-space:nowrap;padding-left:var(--s1)}
+.dim-lab[data-at="end"]{left:auto;right:0;padding:0 var(--s1) 0 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:0;margin:var(--s8) 0 0;padding:0;list-style:none;
+  border-top:var(--w-mark) solid var(--grid-4)}
+.stats li{padding:var(--s4) var(--s4) var(--s4) 0;
+  border-bottom:var(--w-hair) solid var(--grid-3)}
+.stats b{display:block;font-family:var(--ff-display);font-size:var(--t-h3);
+  font-variation-settings:"opsz" 72,"wght" 620,"SOFT" 0,"WONK" 0;
+  color:var(--ink-1);line-height:1;letter-spacing:-.02em}
+.stats span{display:block;margin-top:var(--s2);font-family:var(--ff-mono);
+  font-size:var(--t-micro);letter-spacing:var(--tr-caps);text-transform:uppercase;
+  color:var(--sig-deep);line-height:1.5}
+/* a hand ruling under the system's own row of counts, and what it thinks of
+   the last one. Plate 2 marks nothing the system would have drawn. */
+.ruled-note{position:relative;margin:var(--s3) 0 0}
+.ruled-note .hand{margin-top:var(--s3)}
+
+/*═══ 07 · COMPARISON ══════════════════════════════════════════════════════*/
+.chainbox{margin:0;padding:0;background:none}
+/* The sentence half of the comparison. A sentence is not a label on a point,
+   and set 604 units wide inside a roll that is 230 units of window on a phone
+   it was severed at every park position there is — no offset could clear it.
+   So it comes out from under the frame and is set as real text that wraps,
+   still on the ruled writing line it always sat on: border-top for the line,
+   the two side borders for the ticks that turned down at each end of it. */
+.writ{margin:var(--s4) 0 0;padding-top:var(--s4);
+  border-top:var(--w-hair) dashed var(--grid-3)}
+.writ p{margin:0;font-family:var(--ff-mono);font-size:var(--t-mini);font-weight:500;
+  letter-spacing:var(--tr-mono);color:var(--sig-deep);line-height:1.7}
+.writ p::after{content:"";display:block;margin-top:var(--s2);height:6px;
+  border:var(--w-hair) solid var(--sig-deep);border-bottom:0}
+.verdict{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:var(--s6);margin-top:var(--s8)}
+.verdict h3{font-size:var(--t-h4);margin-bottom:var(--s3);
+  padding-bottom:var(--s2);border-bottom:var(--w-mark) solid var(--grid-4)}
+.verdict p{font-size:var(--t-small);line-height:1.55;color:var(--ink-2);margin:0}
+
+/*═══ 08 · PRICING ═════════════════════════════════════════════════════════*/
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:var(--s6);margin:var(--s8) 0 0}
+.tier{position:relative;padding:var(--s5);border-radius:var(--r-panel);
+  background-color:var(--disp-0);box-shadow:var(--e1)}
+.tier-h{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3);
+  padding-bottom:var(--s3);border-bottom:var(--w-mark) solid var(--grid-4)}
+.tier-n{margin:0;font-family:var(--ff-mono);font-size:var(--t-small);font-weight:600;
+  letter-spacing:var(--tr-stamp);text-transform:uppercase;color:var(--ink-1)}
+.tier-p{font-family:var(--ff-display);font-size:var(--t-h3);line-height:1;
+  font-variation-settings:"opsz" 72,"wght" 620,"SOFT" 0,"WONK" 0;color:var(--sig-deep);
+  letter-spacing:-.02em}
+.tier ul{margin:var(--s4) 0 0;padding:0;list-style:none}
+.tier li{position:relative;padding:var(--s2) 0 var(--s2) var(--s5);
+  font-family:var(--ff-mono);font-size:var(--t-tiny);line-height:1.5;color:var(--ink-2);
+  border-bottom:var(--w-hair) solid var(--grid-2)}
+.tier li::before{content:"";position:absolute;left:0;top:calc(var(--s2) + .55em);
+  width:var(--s3);height:var(--w-hair);background:var(--sig)}
+.tier.soon li::before{background:var(--grid-3)}
+.tier-note{margin:var(--s4) 0 0;font-family:var(--ff-mono);font-size:var(--t-micro);
+  letter-spacing:var(--tr-mono);color:var(--sig-deep);line-height:1.5}
+.tier-stn{margin:var(--s5) 0 0;padding-top:var(--s4);
+  border-top:var(--w-hair) solid var(--grid-3);box-shadow:var(--score)}
+.tier-stn .tape{width:100%}
+.tier-stn figcaption{margin-top:var(--s2);font-family:var(--ff-mono);
+  font-size:var(--t-micro);letter-spacing:var(--tr-mono);color:var(--sig-deep);line-height:1.5}
+
+/*═══ 09 · CLOSE + FOOTER ══════════════════════════════════════════════════*/
+.endmark{margin-top:var(--s7);text-align:center;letter-spacing:var(--tr-stamp)}
+/* THE TICK RAIL · a graduated edge, not a tear-off. One rule, a minor tick
+   on every 8px module and a major on every 64px, all hanging below the rule
+   the way a scale is read. It opens the close and closes the footer, so the
+   last two bands are bounded by a measurement rather than by a perforation. */
+.perf{height:var(--s6);
+  background-image:
+    linear-gradient(var(--grid-4),var(--grid-4)),
+    repeating-linear-gradient(90deg,var(--grid-3) 0 var(--w-hair),transparent var(--w-hair) var(--mod)),
+    repeating-linear-gradient(90deg,var(--grid-4) 0 var(--w-hair),transparent var(--w-hair) var(--mod-8));
+  background-size:100% var(--w-hair),100% 4px,100% 9px;
+  background-position:
+    0 calc(var(--s6) / 2 - 1px),
+    0 calc(var(--s6) / 2),
+    0 calc(var(--s6) / 2);
+  background-repeat:no-repeat,repeat-x,repeat-x}
+.join{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:flex-end;margin-top:var(--s6)}
+.join label{display:block;font-family:var(--ff-mono);font-size:var(--t-micro);
+  letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--sig-deep);
+  margin-bottom:var(--s2)}
+.join input{width:min(340px,100%);padding:var(--s3) var(--s4);
+  font:400 var(--t-body)/1.3 var(--ff-mono);color:var(--ink-1);
+  background:var(--disp-0);border:none;border-radius:var(--r-panel);
+  box-shadow:inset 0 0 0 var(--w-hair) var(--grid-4),inset 0 2px 3px -2px rgba(var(--sh),.22)}
+.join input::placeholder{color:var(--sig-deep);opacity:1}
+.join input:focus-visible{outline:var(--w-mark) solid var(--pen);outline-offset:2px}
+.received{margin:var(--s4) 0 0;display:none}
+.received[data-on]{display:block}
+.foot-sec .wrap{padding-block:var(--s7)}
+.def{margin:0 0 var(--s5);font-size:var(--t-lead);color:var(--ink-2);
+  font-variation-settings:"opsz" 40,"wght" 400,"SOFT" 30,"WONK" 1;font-style:italic;
+  max-width:52ch}
+.foot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:var(--s5);padding-top:var(--s5);border-top:var(--w-mark) solid var(--grid-4)}
+.colophon{margin:0;font-family:var(--ff-mono);font-size:var(--t-micro);line-height:1.9;
+  letter-spacing:var(--tr-mono);color:var(--sig-deep)}
+.colophon b{color:var(--sig-deep);font-weight:600}
+.foot-links{display:flex;flex-direction:column;gap:var(--s2);margin:0;padding:0;list-style:none}
+.foot-links a{font-family:var(--ff-mono);font-size:var(--t-tiny);color:var(--ink-2);
+  text-decoration:none;border-bottom:var(--w-hair) solid transparent;align-self:flex-start}
+.foot-links a:hover{border-bottom-color:var(--pen)}
+
+/*═══ THE CLOSE'S OBJECT ═══════════════════════════════════════════════════
+  The page opened on a delivered result with an answer in it. It ends on the
+  same object with nothing in it: sheet 002, unassigned, three empty rules and
+  twelve run cells drawn as OUTLINES — which in this grammar means not run
+  yet. It is the one object on the page the reader is meant to fill in, and it
+  is why the last band is not an empty field. ════════════════════════════*/
+.close-grid{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,.96fr);
+  gap:var(--s7) var(--s8);align-items:start}
+.close-grid > *{min-width:0}
+@media (max-width:940px){.close-grid{grid-template-columns:1fr;gap:var(--s8)}}
+.taskslip{position:relative;margin:0;max-width:420px;overflow:hidden;
+  border-radius:var(--r-panel);
+  background-color:var(--disp-0);box-shadow:var(--e2),var(--e-lift);
+  transform:rotate(var(--tilt-1)) translate(var(--off-1),0);transform-origin:50% 0;
+  transition:transform var(--dur-3) var(--ease-snap)}
+.taskslip:hover,.taskslip:focus-within{transform:rotate(0deg) translate(0,0)}
+/* the band above the rail — the system's own header, plate 1 laid solid at
+   object scale with its own type knocked out of it */
+.ts-band{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s2) var(--s3);
+  margin:0;padding:var(--s3) var(--s4);background:var(--sig);color:var(--disp-0);
+  font:600 var(--t-micro)/1.2 var(--ff-mono);letter-spacing:var(--tr-caps);
+  text-transform:uppercase}
+.ts-perf{height:var(--s4);            /* the same rail, at object scale */
+  background-image:
+    linear-gradient(var(--grid-4),var(--grid-4)),
+    repeating-linear-gradient(90deg,var(--grid-3) 0 var(--w-hair),transparent var(--w-hair) var(--mod)),
+    repeating-linear-gradient(90deg,var(--grid-4) 0 var(--w-hair),transparent var(--w-hair) var(--mod-4));
+  background-size:100% var(--w-hair),100% 3px,100% 6px;
+  background-position:
+    0 calc(var(--s4) / 2 - 1px),
+    0 calc(var(--s4) / 2),
+    0 calc(var(--s4) / 2);
+  background-repeat:no-repeat,repeat-x,repeat-x}
+.ts-body{padding:var(--s1) var(--s5) var(--s5)}
+.ts-re{margin:0;font-family:var(--ff-mono);font-size:var(--t-tiny);font-weight:600;
+  letter-spacing:var(--tr-mono);color:var(--ink-1);line-height:1.5}
+.ts-re em{font-style:normal;font-weight:400;color:var(--sig-deep)}
+.ts-meta{display:inline-block;margin-top:var(--s1);font-size:var(--t-micro);font-weight:400;
+  letter-spacing:var(--tr-caps);text-transform:uppercase;color:var(--sig-deep)}
+/* three rules on the 8px module, the same module the whole view is built on */
+.ts-rules{margin:var(--s4) 0 var(--s5);height:calc(var(--mod-4) * 3 + var(--w-hair));
+  background-image:
+    linear-gradient(var(--grid-3),var(--grid-3)),
+    linear-gradient(var(--grid-3),var(--grid-3)),
+    linear-gradient(var(--grid-3),var(--grid-3));
+  background-size:100% var(--w-hair);background-repeat:no-repeat;
+  background-position:0 var(--mod-4),0 var(--mod-8),0 calc(var(--mod-8) + var(--mod-4))}
+/* the strip draws at the same scale as every other run tape on the page */
+.taskslip .tape{width:100%;max-width:246px}
+.ts-ft{margin:var(--s3) 0 0;padding-top:var(--s2);
+  border-top:var(--w-hair) solid var(--grid-2);
+  font-family:var(--ff-mono);font-size:var(--t-micro);letter-spacing:var(--tr-mono);
+  color:var(--sig-deep);line-height:1.5}
+
+/*═══ ACCESS ═══════════════════════════════════════════════════════════════*/
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:1ms!important;animation-duration:1ms!important;
+    animation-iteration-count:1!important}
+  /* the running dot stops at full opacity and full size — the state it reads
+     in a still frame — because the keyframe's 0% IS its resting value. */
+  .live-tag i{animation:none;opacity:1;transform:none}
+  /* the tilt itself stays — it is the design, not motion */
+}
+@media (forced-colors:active){
+  .rec,.slip,.tier,.mf,.notice,.panel,.sheet,.taskslip,.live-tag{
+    box-shadow:none;background:Canvas;border:1px solid CanvasText}
+  .sec,body,.nav,.g-tail::before{background-image:none}
+  .flood{background:Canvas;color:CanvasText}
+  .flood > .wrap{color:CanvasText}
+  .btn{background:ButtonFace;color:ButtonText;border:1px solid ButtonText;box-shadow:none}
+  .stamp .imp2{display:none}          /* a fringe is not a legibility feature */
+  .live-tag i{background:CanvasText}
+}
+@media print{
+  .nav{position:static}
+  .sec{break-inside:avoid}
+}
+@media (max-width:640px){
+  /* the index column loses its name here, so it only has to hold two digits. Narrowing
+     the token — not abandoning it — gives every plot on the page 10% more
+     width at 375, which is the difference between a chart and a sliver. The
+     spine is derived from the same token, so it follows. */
+  :root{--margin-col:26px;--colgap:var(--s3)}
+  /* the two dated ends are the fact; the month names collide with them below
+     ~500px of dimension line. The extension lines stay, so the divisions do. */
+  .dim-lab[data-at="mid"]{display:none}
+  .secname{display:none}
+  .secno{font-size:var(--t-small)}
+  .beat{grid-template-columns:1fr;gap:var(--s3)}
+  .beat-n{min-width:0;justify-self:start;padding-right:var(--s5)}
+  .cta-row{gap:var(--s2)}
+  .cta-row .btn,.join .btn{width:100%;justify-content:center}
+  .join input{width:100%}
+  .join .btn{width:100%}
+}
+</style>
+</head>
+<body id="top">
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- 01 — NAV ═════════════════════════════════════════════════════════════ -->
+<header class="nav">
+  <div class="nav-in">
+    <a class="mark" href="#top">Atlas</a>
+    <p class="nav-stamp">Private beta · public 2026-08-27</p>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#check">The check</a>
+      <a href="#proof">Proof</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <a class="btn" href="#join">Join waitlist</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- 02 — HERO ════════════════════════════════════════════════════════════ -->
+<section class="sec g-fine" aria-labelledby="h-hero">
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub"><span class="secno">02</span><span class="secname">Hero</span></div>
+    <div class="field">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Station log</p>
+          <h1 id="h-hero">You describe a task once. <em>Atlas keeps doing it.</em></h1>
+          <p class="lede">It runs on your schedule, checks the answer before it sends, and
+            emails you the results — a daily digest, or every run as it lands on Pro.</p>
+          <div class="cta-row">
+            <a class="btn" href="#join">Join waitlist</a>
+            <a class="btn btn-2" href="#check">See the check</a>
+          </div>
+          <p class="trust"><span>Free</span><span>No signup to try</span><span>No credit card</span></p>
+        </div>
+        <div>
+          <div class="slip">
+            <div class="slip-head">
+              <p class="slip-re">RE: Boston morning forecast — run 001<br>
+                <span class="slip-meta">Wed 07:00 · gemini 3.1 flash-lite</span></p>
+              </div>
+            <p class="slip-body">High 68°F, low 54°F. Rain likely 2pm–6pm, 70% chance — take
+              the coat. Wind 12mph NE. Sunrise 05:31.</p>
+            <p class="slip-check">checked: has a source, nothing missing</p>
+          </div>
+          <figure class="panel hero-rec">
+            <figcaption class="panel-hd"><span>Sheet 001 · boston-morning-forecast</span><span>runs 001–021 · daily 07:00</span><span class="live-tag"><i aria-hidden="true"></i>Live · run 021 · 73°F</span></figcaption>
+            <div class="cut-wrap">
+            <div class="roll" data-park="end" tabindex="0" role="group" aria-label="The record so far: runs 001 to 021. Scrollable.">
+              <!--@HEROPLOT--><svg class="plot pk-hi" viewBox="0 0 540 206" role="img" aria-label="The first three weeks of the boston-morning-forecast task, runs 001 to 021, plotted as daily high temperature in Fahrenheit against run number on a linear axis from 55 to 80. The trace climbs from 58 to 77. The newest run, 021, is marked with a live cursor at 73 degrees."><path class="g1" d="M44 22V172"/><path class="g1" d="M68.2 22V172"/><path class="g1" d="M92.4 22V172"/><path class="g1" d="M116.6 22V172"/><path class="g1" d="M140.8 22V172"/><path class="g1" d="M165 22V172"/><path class="g1" d="M189.2 22V172"/><path class="g1" d="M213.4 22V172"/><path class="g1" d="M237.6 22V172"/><path class="g1" d="M261.8 22V172"/><path class="g1" d="M286 22V172"/><path class="g1" d="M310.2 22V172"/><path class="g1" d="M334.4 22V172"/><path class="g1" d="M358.6 22V172"/><path class="g1" d="M382.8 22V172"/><path class="g1" d="M407 22V172"/><path class="g1" d="M431.2 22V172"/><path class="g1" d="M455.4 22V172"/><path class="g1" d="M479.6 22V172"/><path class="g1" d="M503.8 22V172"/><path class="g1" d="M528 22V172"/><path class="g2" d="M44 22V172"/><path class="g2" d="M140.8 22V172"/><path class="g2" d="M261.8 22V172"/><path class="g2" d="M382.8 22V172"/><path class="g2" d="M503.8 22V172"/><path class="g1" d="M44 172H528"/><text class="lb" x="35" y="175.6" text-anchor="end">55</text><path class="g3" d="M44 142H528"/><text class="lb" x="35" y="145.6" text-anchor="end">60</text><path class="g1" d="M44 112H528"/><text class="lb" x="35" y="115.6" text-anchor="end">65</text><path class="g3" d="M44 82H528"/><text class="lb" x="35" y="85.6" text-anchor="end">70</text><path class="g1" d="M44 52H528"/><text class="lb" x="35" y="55.6" text-anchor="end">75</text><path class="g3" d="M44 22H528"/><text class="lb" x="35" y="25.6" text-anchor="end">80</text><path class="fillA" d="M44,172 L44,154 L68.2,124 L92.4,88 L116.6,76 L140.8,118 L165,106 L189.2,136 L213.4,148 L237.6,112 L261.8,82 L286,70 L310.2,94 L334.4,124 L358.6,100 L382.8,76 L407,58 L431.2,82 L455.4,70 L479.6,40 L503.8,52 L528,64 L528,172Z"/><polyline class="tr" points="44,154 68.2,124 92.4,88 116.6,76 140.8,118 165,106 189.2,136 213.4,148 237.6,112 261.8,82 286,70 310.2,94 334.4,124 358.6,100 382.8,76 407,58 431.2,82 455.4,70 479.6,40 503.8,52 528,64"/><rect class="mk" x="42" y="152" width="4" height="4"/><rect class="mk" x="66.2" y="122" width="4" height="4"/><rect class="mk" x="90.4" y="86" width="4" height="4"/><rect class="mk" x="114.6" y="74" width="4" height="4"/><rect class="mk" x="138.8" y="116" width="4" height="4"/><rect class="mk" x="163" y="104" width="4" height="4"/><rect class="mk" x="187.2" y="134" width="4" height="4"/><rect class="mk" x="211.4" y="146" width="4" height="4"/><rect class="mk" x="235.6" y="110" width="4" height="4"/><rect class="mk" x="259.8" y="80" width="4" height="4"/><rect class="mk" x="284" y="68" width="4" height="4"/><rect class="mk" x="308.2" y="92" width="4" height="4"/><rect class="mk" x="332.4" y="122" width="4" height="4"/><rect class="mk" x="356.6" y="98" width="4" height="4"/><rect class="mk" x="380.8" y="74" width="4" height="4"/><rect class="mk" x="405" y="56" width="4" height="4"/><rect class="mk" x="429.2" y="80" width="4" height="4"/><rect class="mk" x="453.4" y="68" width="4" height="4"/><rect class="mk" x="477.6" y="38" width="4" height="4"/><rect class="mk" x="501.8" y="50" width="4" height="4"/><rect class="mk" x="526" y="62" width="4" height="4"/><path class="ax" d="M44 172H528"/><path class="ax" d="M44 172v6"/><text class="lb" x="44" y="196" text-anchor="middle">001</text><path class="ax" d="M140.8 172v6"/><text class="lb" x="140.8" y="196" text-anchor="middle">005</text><path class="ax" d="M261.8 172v6"/><text class="lb" x="261.8" y="196" text-anchor="middle">010</text><path class="ax" d="M382.8 172v6"/><text class="lb" x="382.8" y="196" text-anchor="middle">015</text><path class="ax" d="M503.8 172v6"/><text class="lb" x="503.8" y="196" text-anchor="middle">020</text><text class="lbs" x="44" y="14">DAILY HIGH °F</text><path class="cur" d="M528 16V178"/><path class="curT" d="M523 8h10l-5 7z"/><circle class="now" cx="528" cy="64" r="5"/><rect class="mk" x="526" y="62" width="4" height="4"/></svg><!--/@HEROPLOT-->
+            </div>
+            </div>
+            <!--@HEROTAPE--><svg class="tape pk-hi" viewBox="0 0 540 50" role="img" aria-label="A strip of forty run cells, twenty-one of them toned as completed runs and none flagged. The twenty-second is ringed as the next one due, and nineteen are left this month."><rect class="c-run" x="2" y="4" width="11.6" height="22"/><rect class="c-run" x="15.4" y="4" width="11.6" height="22"/><rect class="c-run" x="28.8" y="4" width="11.6" height="22"/><rect class="c-run" x="42.2" y="4" width="11.6" height="22"/><rect class="c-run" x="55.6" y="4" width="11.6" height="22"/><rect class="c-run" x="69" y="4" width="11.6" height="22"/><rect class="c-run" x="82.4" y="4" width="11.6" height="22"/><rect class="c-run" x="95.8" y="4" width="11.6" height="22"/><rect class="c-run" x="109.2" y="4" width="11.6" height="22"/><rect class="c-run" x="122.6" y="4" width="11.6" height="22"/><rect class="c-run" x="136" y="4" width="11.6" height="22"/><rect class="c-run" x="149.4" y="4" width="11.6" height="22"/><rect class="c-run" x="162.8" y="4" width="11.6" height="22"/><rect class="c-run" x="176.2" y="4" width="11.6" height="22"/><rect class="c-run" x="189.6" y="4" width="11.6" height="22"/><rect class="c-run" x="203" y="4" width="11.6" height="22"/><rect class="c-run" x="216.4" y="4" width="11.6" height="22"/><rect class="c-run" x="229.8" y="4" width="11.6" height="22"/><rect class="c-run" x="243.2" y="4" width="11.6" height="22"/><rect class="c-run" x="256.6" y="4" width="11.6" height="22"/><rect class="c-run" x="270" y="4" width="11.6" height="22"/><rect class="c-left c-next" x="283.4" y="4" width="11.6" height="22"/><rect class="c-left" x="296.8" y="4" width="11.6" height="22"/><rect class="c-left" x="310.2" y="4" width="11.6" height="22"/><rect class="c-left" x="323.6" y="4" width="11.6" height="22"/><rect class="c-left" x="337" y="4" width="11.6" height="22"/><rect class="c-left" x="350.4" y="4" width="11.6" height="22"/><rect class="c-left" x="363.8" y="4" width="11.6" height="22"/><rect class="c-left" x="377.2" y="4" width="11.6" height="22"/><rect class="c-left" x="390.6" y="4" width="11.6" height="22"/><rect class="c-left" x="404" y="4" width="11.6" height="22"/><rect class="c-left" x="417.4" y="4" width="11.6" height="22"/><rect class="c-left" x="430.8" y="4" width="11.6" height="22"/><rect class="c-left" x="444.2" y="4" width="11.6" height="22"/><rect class="c-left" x="457.6" y="4" width="11.6" height="22"/><rect class="c-left" x="471" y="4" width="11.6" height="22"/><rect class="c-left" x="484.4" y="4" width="11.6" height="22"/><rect class="c-left" x="497.8" y="4" width="11.6" height="22"/><rect class="c-left" x="511.2" y="4" width="11.6" height="22"/><rect class="c-left" x="524.6" y="4" width="11.6" height="22"/><text class="t-labHi" x="2" y="44">RUNS 001–021</text><text class="t-lab" x="538" y="44" text-anchor="end">21 / 40 THIS MONTH · 0 FLAGGED</text></svg><!--/@HEROTAPE-->
+          </figure>
+        </div>
+      </div>
+
+      <div class="specimen ann">
+        <div class="rule">
+          <p class="sent"><span class="parse">Every morning</span>, tell me the forecast for
+            Boston — rain, temperature, and whether I need a coat.</p>
+        </div>
+        <div class="tick-row">
+          <span>Sentence in</span>
+          <span>Schedule parsed → daily 07:00</span>
+        </div>
+        <p style="margin:var(--s4) 0 0"><span class="hand" style="--a:var(--tilt-1);--o:var(--off-1)"
+          >nothing else to fill in — the sentence <i>is</i> the task</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 — THE ASK ═════════════════════════════════════════════════════════ -->
+<section class="sec g-coarse" id="ask" aria-labelledby="h-ask">
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub"><span class="secno">03</span><span class="secname">The ask</span></div>
+    <div class="field">
+      <p class="eyebrow">What it watches</p>
+      <h2 id="h-ask">If you can say it in a sentence, Atlas can watch it.</h2>
+      <p class="lede">Its territory is the things outside your accounts — a forecast, a price,
+        a page, a score. It cannot read your inbox or your connected apps, and it is not
+        pretending to.</p>
+      <div class="rec-field"><!--@REC--><article class="rec band-fine" tabindex="0" role="group" data-flag="ok" style="--a:var(--tilt-1);--o:var(--off-1);--rec-ink:var(--sig-deep);--flag-text:'ok'"><div class="rec-hd"><span class="rec-slug">weather</span><span class="rec-unit">°F</span></div><div class="rec-plot"><svg class="rec-svg" viewBox="0 0 260 96" role="img" aria-label="Fourteen days of highs and lows traced together as a band, highs climbing from 68 to 79 degrees Fahrenheit."><path class="rgg" d="M14 88H246"/><path class="rgg" d="M14 68.5H246"/><path class="rgg" d="M14 49H246"/><path class="rgg" d="M14 29.5H246"/><path class="rgg" d="M14 10H246"/><path class="rw" d="M14,44.13 L31.85,36.81 L49.69,41.69 L67.54,29.5 L85.38,34.38 L103.23,39.25 L121.08,31.94 L138.92,22.19 L156.77,27.06 L174.62,34.38 L192.46,29.5 L210.31,17.31 L228.15,24.63 L246,31.94 L246,68.5 L228.15,61.19 L210.31,56.31 L192.46,66.06 L174.62,70.94 L156.77,63.63 L138.92,61.19 L121.08,68.5 L103.23,75.81 L85.38,68.5 L67.54,66.06 L49.69,75.81 L31.85,70.94 L14,78.25Z"/><polyline class="ri" points="14,44.13 31.85,36.81 49.69,41.69 67.54,29.5 85.38,34.38 103.23,39.25 121.08,31.94 138.92,22.19 156.77,27.06 174.62,34.38 192.46,29.5 210.31,17.31 228.15,24.63 246,31.94"/><polyline class="rih" points="14,78.25 31.85,70.94 49.69,75.81 67.54,66.06 85.38,68.5 103.23,75.81 121.08,68.5 138.92,61.19 156.77,63.63 174.62,70.94 192.46,66.06 210.31,56.31 228.15,61.19 246,68.5"/><rect class="rif" x="12.5" y="42.63" width="3" height="3"/><rect class="rif" x="30.35" y="35.31" width="3" height="3"/><rect class="rif" x="48.19" y="40.19" width="3" height="3"/><rect class="rif" x="66.04" y="28" width="3" height="3"/><rect class="rif" x="83.88" y="32.88" width="3" height="3"/><rect class="rif" x="101.73" y="37.75" width="3" height="3"/><rect class="rif" x="119.58" y="30.44" width="3" height="3"/><rect class="rif" x="137.42" y="20.69" width="3" height="3"/><rect class="rif" x="155.27" y="25.56" width="3" height="3"/><rect class="rif" x="173.12" y="32.88" width="3" height="3"/><rect class="rif" x="190.96" y="28" width="3" height="3"/><rect class="rif" x="208.81" y="15.81" width="3" height="3"/><rect class="rif" x="226.65" y="23.13" width="3" height="3"/><rect class="rif" x="244.5" y="30.44" width="3" height="3"/><path class="rax" d="M14 88H246"/><text x="14" y="8">HIGH</text><text x="246" y="8" text-anchor="end">LOW · 14 DAYS</text></svg></div><div class="rec-ft"><p class="rec-t">The weather where you live, before you head out</p><span class="rec-flag"></span></div></article><article class="rec band-coarse" tabindex="0" role="group" data-flag="ok" style="--a:var(--tilt-4);--o:var(--off-4);--rec-ink:var(--sig);--flag-text:'ok'"><div class="rec-hd"><span class="rec-slug">price-drop</span><span class="rec-unit">USD</span></div><div class="rec-plot"><svg class="rec-svg" viewBox="0 0 260 96" role="img" aria-label="A price stepping down from 249 to 179 dollars, crossing a dashed target line at 189 on the eleventh check."><path class="rgg" d="M14 62H246M14 30H246"/><path class="rgd" d="M14 70.8H246"/><text x="246" y="66.8" text-anchor="end">TARGET 189</text><path class="ri" d="M14,22.8 H31.85 V22.8 H49.69 V30.8 H67.54 V30.8 H85.38 V30.8 H103.23 V46.8 H121.08 V46.8 H138.92 V46.8 H156.77 V62.8 H174.62 V62.8 H192.46 V70.8 H210.31 V70.8 H228.15 V78.8 H246 V78.8"/><circle class="ro" cx="192.46" cy="70.8" r="4"/><path class="rax" d="M14 88H246"/><text x="14" y="8">249 → 179</text></svg></div><div class="rec-ft"><p class="rec-t">A price you’re waiting to see drop</p><span class="rec-flag"></span></div></article><article class="rec rec--tape band-roll" tabindex="0" role="group" data-flag="ok" style="--a:var(--tilt-2);--o:var(--off-2);--rec-ink:var(--sig-deep);--flag-text:'ok'"><div class="rec-hd"><span class="rec-slug">ticker</span><span class="rec-unit">%CHG</span></div><div class="rec-plot"><svg class="rec-svg" viewBox="0 0 260 96" role="img" aria-label="Sixteen open-high-low-close bars trending up from 40 to 68 percent."><path class="rgg" d="M14 72.55H246"/><path class="rgg" d="M14 45.64H246"/><path class="rgg" d="M14 18.73H246"/><path class="ri" d="M16 64.14V77.59"/><path class="rih" d="M11.6 72.55H16M16 69.18H20.4"/><path class="ri" d="M31.2 57.41V75.91"/><path class="rih" d="M26.8 69.18H31.2M31.2 64.14H35.6"/><path class="ri" d="M46.4 59.09V75.91"/><path class="rih" d="M42 64.14H46.4M46.4 70.86H50.8"/><path class="ri" d="M61.6 52.36V79.27"/><path class="rih" d="M57.2 70.86H61.6M61.6 60.77H66"/><path class="ri" d="M76.8 45.64V67.5"/><path class="rih" d="M72.4 60.77H76.8M76.8 52.36H81.2"/><path class="ri" d="M92 47.32V62.45"/><path class="rih" d="M87.6 52.36H92M92 57.41H96.4"/><path class="ri" d="M107.2 38.91V65.82"/><path class="rih" d="M102.8 57.41H107.2M107.2 47.32H111.6"/><path class="ri" d="M122.4 40.59V60.77"/><path class="rih" d="M118 47.32H122.4M122.4 54.05H126.8"/><path class="ri" d="M137.6 37.23V59.09"/><path class="rih" d="M133.2 54.05H137.6M137.6 42.27H142"/><path class="ri" d="M152.8 35.55V55.73"/><path class="rih" d="M148.4 42.27H152.8M152.8 49H157.2"/><path class="ri" d="M168 28.82V57.41"/><path class="rih" d="M163.6 49H168M168 37.23H172.4"/><path class="ri" d="M183.2 32.18V49"/><path class="rih" d="M178.8 37.23H183.2M183.2 43.95H187.6"/><path class="ri" d="M198.4 27.14V50.68"/><path class="rih" d="M194 43.95H198.4M198.4 33.86H202.8"/><path class="ri" d="M213.6 20.41V42.27"/><path class="rih" d="M209.2 33.86H213.6M213.6 28.82H218"/><path class="ri" d="M228.8 23.77V40.59"/><path class="rih" d="M224.4 28.82H228.8M228.8 35.55H233.2"/><path class="ri" d="M244 18.73V42.27"/><path class="rih" d="M239.6 35.55H244M244 25.45H248.4"/><path class="rax" d="M14 88H246"/><text x="14" y="8">OPEN · HIGH · LOW · CLOSE</text></svg></div><div class="rec-ft"><p class="rec-t">A stock or a coin you’re watching</p><span class="rec-flag"></span></div></article><article class="rec rec--sheets band-log" tabindex="0" role="group" data-flag="unsourced" style="--a:var(--tilt-5);--o:var(--off-5);--rec-ink:var(--sig);--flag-text:'unsourced'"><div class="rec-hd"><span class="rec-slug">page-diff</span><span class="rec-unit">LINES</span></div><div class="rec-plot"><svg class="rec-svg" viewBox="0 0 260 96" role="img" aria-label="A diff of nine lines: two removed and struck through, three added and inked solid, four unchanged."><path class="rax" d="M27 8V90"/><path class="rg" d="M34 14.2H164.2"/><path class="rg" d="M34 23H134.8"/><path class="rim" d="M14 31.8H22"/><rect class="rdel" x="34" y="29.6" width="147" height="4.4"/><path class="rim" d="M34 31.8H181"/><path class="rim" d="M14 40.6H22"/><rect class="rdel" x="34" y="38.4" width="71.4" height="4.4"/><path class="rim" d="M34 40.6H105.4"/><path class="rim" d="M14 49.4H22M18 45.4V53.4"/><rect class="rif" x="34" y="47.2" width="138.6" height="4.4"/><path class="rim" d="M14 58.2H22M18 54.2V62.2"/><rect class="rif" x="34" y="56" width="109.2" height="4.4"/><path class="rg" d="M34 67H155.8"/><path class="rg" d="M34 75.8H118"/><path class="rim" d="M14 84.6H22M18 80.6V88.6"/><rect class="rif" x="34" y="82.4" width="151.2" height="4.4"/><text x="14" y="8">−2</text><text x="246" y="8" text-anchor="end">+3 LINES</text></svg></div><div class="rec-ft"><p class="rec-t">A website, the moment anything on it changes</p><span class="rec-flag"></span></div></article><article class="rec rec--card band-coarse" tabindex="0" role="group" data-flag="ok" style="--a:var(--tilt-3);--o:var(--off-3);--rec-ink:var(--sig-deep);--flag-text:'ok'"><div class="rec-hd"><span class="rec-slug">box-score</span><span class="rec-unit">PTS</span></div><div class="rec-plot"><svg class="rec-svg" viewBox="0 0 260 96" role="img" aria-label="A box score table: four quarters and a total for two teams, 96 to 99, with an injury row."><rect class="rax" x="14" y="14" width="232" height="74" fill="none"/><path class="rax" d="M52.67 14V88"/><path class="rg" d="M91.33 14V88"/><path class="rg" d="M130 14V88"/><path class="rg" d="M168.67 14V88"/><path class="rax" d="M207.33 14V88"/><path class="rax" d="M14 32.5H246"/><path class="rg" d="M14 51H246"/><path class="rax" d="M14 69.5H246"/><rect class="rw" x="207.33" y="32.5" width="38.67" height="37"/><text x="72" y="26.25" text-anchor="middle">Q1</text><text x="110.67" y="26.25" text-anchor="middle">Q2</text><text x="149.33" y="26.25" text-anchor="middle">Q3</text><text x="188" y="26.25" text-anchor="middle">Q4</text><text x="226.67" y="26.25" text-anchor="middle">T</text><text x="33.33" y="44.75" text-anchor="middle">HOM</text><text x="33.33" y="63.25" text-anchor="middle">AWY</text><text x="33.33" y="81.75" text-anchor="middle">INJ</text><text x="72" y="44.75" text-anchor="middle">24</text><text x="110.67" y="44.75" text-anchor="middle">19</text><text x="149.33" y="44.75" text-anchor="middle">31</text><text x="188" y="44.75" text-anchor="middle">22</text><text x="226.67" y="44.75" text-anchor="middle">96</text><text x="72" y="63.25" text-anchor="middle">27</text><text x="110.67" y="63.25" text-anchor="middle">25</text><text x="149.33" y="63.25" text-anchor="middle">18</text><text x="188" y="63.25" text-anchor="middle">29</text><text x="226.67" y="63.25" text-anchor="middle">99</text><text x="72" y="81.75" text-anchor="middle">2</text><text x="110.67" y="81.75" text-anchor="middle">—</text><text x="149.33" y="81.75" text-anchor="middle">1</text><text x="188" y="81.75" text-anchor="middle">—</text><text x="226.67" y="81.75" text-anchor="middle">3</text><text x="14" y="8">FINAL</text></svg></div><div class="rec-ft"><p class="rec-t">Your team’s score and injury list</p><span class="rec-flag"></span></div></article><article class="rec band-fine" tabindex="0" role="group" data-flag="empty" style="--a:var(--tilt-1);--o:var(--off-1);--rec-ink:var(--sig);--flag-text:'empty'"><div class="rec-hd"><span class="rec-slug">lookup</span><span class="rec-unit">RUNS</span></div><div class="rec-plot"><svg class="rec-svg" viewBox="0 0 260 96" role="img" aria-label="A raster of seven days by twenty-four hours with one mark in the seven a.m. column each day, except one day where the run came back empty and is crossed."><path class="rgg" d="M14 10V80"/><path class="rgg" d="M23.67 10V80"/><path class="rgg" d="M33.33 10V80"/><path class="rgg" d="M43 10V80"/><path class="rgg" d="M52.67 10V80"/><path class="rgg" d="M62.33 10V80"/><path class="rgg" d="M72 10V80"/><path class="rgg" d="M81.67 10V80"/><path class="rgg" d="M91.33 10V80"/><path class="rgg" d="M101 10V80"/><path class="rgg" d="M110.67 10V80"/><path class="rgg" d="M120.33 10V80"/><path class="rgg" d="M130 10V80"/><path class="rgg" d="M139.67 10V80"/><path class="rgg" d="M149.33 10V80"/><path class="rgg" d="M159 10V80"/><path class="rgg" d="M168.67 10V80"/><path class="rgg" d="M178.33 10V80"/><path class="rgg" d="M188 10V80"/><path class="rgg" d="M197.67 10V80"/><path class="rgg" d="M207.33 10V80"/><path class="rgg" d="M217 10V80"/><path class="rgg" d="M226.67 10V80"/><path class="rgg" d="M236.33 10V80"/><path class="rgg" d="M246 10V80"/><path class="rgg" d="M14 10H246"/><path class="rgg" d="M14 20H246"/><path class="rgg" d="M14 30H246"/><path class="rgg" d="M14 40H246"/><path class="rgg" d="M14 50H246"/><path class="rgg" d="M14 60H246"/><path class="rgg" d="M14 70H246"/><path class="rgg" d="M14 80H246"/><circle class="rif" cx="86.5" cy="15" r="2.4"/><circle class="rif" cx="86.5" cy="25" r="2.4"/><circle class="rif" cx="86.5" cy="35" r="2.4"/><circle class="rif" cx="86.5" cy="45" r="2.4"/><path class="rim" d="M83.5 52l6 6m0 -6l-6 6"/><circle class="rif" cx="86.5" cy="65" r="2.4"/><circle class="rif" cx="86.5" cy="75" r="2.4"/><path class="rax" d="M14 80H246"/><text x="14" y="90">00</text><text x="86.5" y="90" text-anchor="middle">07</text><text x="246" y="90" text-anchor="end">23</text><text x="14" y="7">7 DAYS × 24 H</text></svg></div><div class="rec-ft"><p class="rec-t">A question you keep looking up</p><span class="rec-flag"></span></div></article><!--/@REC--></div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 — HOW IT WORKS ════════════════════════════════════════════════════ -->
+<section class="sec g-log" id="how" aria-labelledby="h-how">
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub"><span class="secno">04</span><span class="secname">How it works</span></div>
+    <div class="field">
+      <p class="eyebrow">Three beats</p>
+      <h2 id="h-how">One sentence in. A schedule out of it. A graded answer back.</h2>
+      <div class="beats">
+
+        <div class="beat">
+          <p class="beat-n">01</p>
+          <div>
+            <h3>The sentence is the task.</h3>
+            <p class="body">You write what you want and when you want it in the same breath.
+              Atlas splits the sentence itself — one half becomes the schedule, the other half
+              becomes the prompt. There is no second screen.</p>
+            <figure class="panel">
+              <figcaption class="panel-hd"><span>Parse</span><span>one field in · two objects out</span></figcaption>
+              <div class="cut-wrap">
+              <div class="roll" tabindex="0" role="group" aria-label="The sentence split into a schedule and a prompt. Scrollable.">
+                <!--@PARSE--><svg class="plot narrow pk-lo" viewBox="0 0 640 194" role="img" aria-label="The sentence on a ruled line. A brace under the words Every morning drops to a slip reading schedule, daily 07:00. A brace under the rest of the sentence drops to a slip reading prompt, the rest, verbatim."><rect class="fld fit-lg" x="20" y="24" width="87.3" height="22"/><rect class="fld fit-sm" x="20" y="24" width="144.2" height="22"/><path class="ax" d="M16 50H624M16 50v-6M624 50v-6"/><text class="lbHi" x="24" y="41">EVERY MORNING,</text><path class="ax fit-lg" d="M20 56V64H107.3V56"/><path class="ax fit-sm" d="M20 56V64H164.2V56"/><path class="ax" d="M63.6 64V82"/><rect class="slip" x="20" y="82" width="180" height="46"/><text class="lb" x="32" y="100">SCHEDULE</text><text class="lbs" x="32" y="118">DAILY 07:00</text><g class="half-2"><text class="lb" x="132" y="41">BOSTON’S FORECAST.</text><path class="ax fit-lg" d="M132 56V64H238V56"/><path class="ax fit-sm" d="M132 56V64H311V56"/><path class="ax" d="M224.6 64V140"/><rect class="slip fit-lg" x="132" y="140" width="492" height="46"/><rect class="slip fit-sm" x="132" y="140" width="420" height="46"/><text class="lb" x="144" y="158">PROMPT</text><text class="lbs" x="144" y="176">REST, VERBATIM</text></g></svg><!--/@PARSE-->
+              </div>
+              </div>
+              <p class="panel-ft">One field in. Two objects out. No second screen.</p>
+            </figure>
+          </div>
+        </div>
+
+        <div class="beat">
+          <p class="beat-n">02</p>
+          <div>
+            <h3>The schedule is a real position on a real axis.</h3>
+            <p class="body">Ten frequencies exist. Four of them are free. Pro adds the six
+              sub-daily ones. Plotted honestly, on log time, that looks like this — and it
+              shows the thing worth admitting: <strong>the free floor is daily</strong>, which
+              is slower than the free tiers you are comparing this to.</p>
+            <figure class="panel">
+              <figcaption class="panel-hd"><span>Schedule frequencies</span><span>10 total · 4 free</span></figcaption>
+              <div class="cut-wrap">
+              <div class="roll" tabindex="0" role="group" aria-label="Schedule frequency chart, scrollable">
+                <!--@SCHED--><svg class="plot pk-mid" viewBox="0 0 1140 220" role="img" aria-label="The ten schedule frequencies plotted on a logarithmic axis of period between runs, from thirty minutes to weekly, with once placed past an axis break because it has no period. The Pro lane carries a filled marker at every frequency. The Free lane is marked at daily, weekdays, weekly and once, and crossed at the six sub-daily frequencies. A key on the chart reads: filled marker runs on this tier, cross does not."><rect class="fld" x="120" y="46" width="846" height="106"/><rect class="fld" x="1000" y="46" width="100" height="106"/><path class="g1" d="M217.71 46V152"/><path class="g1" d="M274.86 46V152"/><path class="g1" d="M315.42 46V152"/><path class="g1" d="M346.87 46V152"/><path class="g1" d="M372.57 46V152"/><path class="g1" d="M394.3 46V152"/><path class="g1" d="M413.12 46V152"/><path class="g1" d="M429.73 46V152"/><path class="g3" d="M444.58 46V152"/><path class="g1" d="M542.29 46V152"/><path class="g1" d="M599.44 46V152"/><path class="g1" d="M640 46V152"/><path class="g1" d="M671.45 46V152"/><path class="g1" d="M697.15 46V152"/><path class="g1" d="M718.88 46V152"/><path class="g1" d="M737.7 46V152"/><path class="g1" d="M754.31 46V152"/><path class="g3" d="M769.16 46V152"/><path class="g1" d="M866.87 46V152"/><path class="g1" d="M924.02 46V152"/><path class="g2" d="M120 76H966M1000 76H1100"/><path class="g2" d="M120 126H966M1000 126H1100"/><text class="lbs pro" x="108" y="80" text-anchor="end">PRO</text><text class="lbs" x="108" y="130" text-anchor="end">FREE</text><path class="ax" d="M120 176H966M1000 176H1100"/><path class="brk" d="M977 186l8 -20M985 186l8 -20"/><path class="ax" d="M120 176v6"/><text class="lb" x="120" y="196" text-anchor="middle">30m</text><path class="stem" d="M120 76V176"/><circle class="mkP" cx="120" cy="76" r="5"/><path class="mkNone" d="M115.4 121.4l9.2 9.2m0 -9.2l-9.2 9.2"/><path class="ax" d="M217.71 176v6"/><text class="lb" x="217.71" y="196" text-anchor="middle">1h</text><path class="stem" d="M217.71 76V176"/><circle class="mkP" cx="217.71" cy="76" r="5"/><path class="mkNone" d="M213.11 121.4l9.2 9.2m0 -9.2l-9.2 9.2"/><path class="ax" d="M315.42 176v6"/><text class="lb" x="315.42" y="196" text-anchor="middle">2h</text><path class="stem" d="M315.42 76V176"/><circle class="mkP" cx="315.42" cy="76" r="5"/><path class="mkNone" d="M310.82 121.4l9.2 9.2m0 -9.2l-9.2 9.2"/><path class="ax" d="M413.12 176v6"/><text class="lb" x="413.12" y="196" text-anchor="middle">4h</text><path class="stem" d="M413.12 76V176"/><circle class="mkP" cx="413.12" cy="76" r="5"/><path class="mkNone" d="M408.52 121.4l9.2 9.2m0 -9.2l-9.2 9.2"/><path class="ax" d="M470.28 176v6"/><text class="lb" x="470.28" y="196" text-anchor="middle">6h</text><path class="stem" d="M470.28 76V176"/><circle class="mkP" cx="470.28" cy="76" r="5"/><path class="mkNone" d="M465.68 121.4l9.2 9.2m0 -9.2l-9.2 9.2"/><path class="ax" d="M567.99 176v6"/><text class="lb" x="567.99" y="196" text-anchor="middle">12h</text><path class="stem" d="M567.99 76V176"/><circle class="mkP" cx="567.99" cy="76" r="5"/><path class="mkNone" d="M563.39 121.4l9.2 9.2m0 -9.2l-9.2 9.2"/><path class="ax" d="M665.7 176v6"/><text class="lb" x="665.7" y="196" text-anchor="middle">daily</text><path class="stem" d="M665.7 76V176"/><circle class="mkP" cx="665.7" cy="76" r="5"/><circle class="mkP" cx="665.7" cy="126" r="5"/><path class="ax" d="M713.13 176v20"/><text class="lb" x="713.13" y="210" text-anchor="middle">weekdays</text><path class="stem" d="M713.13 76V176"/><circle class="mkP" cx="713.13" cy="76" r="5"/><circle class="mkP" cx="713.13" cy="126" r="5"/><path class="ax" d="M940 176v6"/><text class="lb" x="940" y="196" text-anchor="middle">weekly</text><path class="stem" d="M940 76V176"/><circle class="mkP" cx="940" cy="76" r="5"/><circle class="mkP" cx="940" cy="126" r="5"/><path class="ax" d="M1050 176v6"/><text class="lb" x="1050" y="196" text-anchor="middle">once</text><path class="stem" d="M1050 76V176"/><circle class="mkP" cx="1050" cy="76" r="5"/><circle class="mkP" cx="1050" cy="126" r="5"/><text class="lbs" x="120" y="28">PERIOD BETWEEN RUNS — LOGARITHMIC</text><circle class="mkP" cx="686" cy="24" r="5"/><text class="lb" x="700" y="28">RUNS ON THIS TIER</text><path class="mkNone" d="M878 19.4l9.2 9.2m0 -9.2l-9.2 9.2"/><text class="lb" x="900" y="28">DOES NOT</text></svg><!--/@SCHED-->
+              </div>
+              </div>
+              <p class="roll-note">◂ scrub the window ▸</p>
+              <p class="panel-ft"><b>10 frequencies · 4 free · 6 more on Pro · the free floor is daily.</b> weekdays sits at its mean period, 1.4 days. once has no period at all, so it sits past the break.</p>
+            </figure>
+          </div>
+        </div>
+
+        <div class="beat">
+          <p class="beat-n">03</p>
+          <div>
+            <h3>The result arrives already graded.</h3>
+            <p class="body">Every run is checked before it is sent, and the verdict is kept
+              with the run. Free gets one digest a day at an hour you pick. Pro gets each run
+              as it lands, and you can reply to refine it.</p>
+            <figure class="panel">
+              <figcaption class="panel-hd"><span>Run timeline</span><span>23 runs · flagged 0</span></figcaption>
+            <div class="cut-wrap">
+            <div class="roll" data-park="end" tabindex="0" role="group" aria-label="Twenty-three run timeline, scrollable">
+              <!--@STRIP--><svg class="plot narrow pk-sm" viewBox="0 0 720 82" role="img" aria-label="A time axis of twenty-three completed runs at daily seven a.m., each drawn as one tick, none flagged."><path class="ax" d="M34 52H690"/><path class="g3" d="M34 52v8"/><rect class="mk" x="32.2" y="38" width="3.6" height="12"/><text class="lb" x="34" y="74" text-anchor="middle">001</text><path class="g1" d="M63.82 52v5"/><rect class="mk" x="62.02" y="38" width="3.6" height="12"/><path class="g1" d="M93.64 52v5"/><rect class="mk" x="91.84" y="38" width="3.6" height="12"/><path class="g1" d="M123.45 52v5"/><rect class="mk" x="121.65" y="38" width="3.6" height="12"/><path class="g3" d="M153.27 52v8"/><rect class="mk" x="151.47" y="38" width="3.6" height="12"/><text class="lb" x="153.27" y="74" text-anchor="middle">005</text><path class="g1" d="M183.09 52v5"/><rect class="mk" x="181.29" y="38" width="3.6" height="12"/><path class="g1" d="M212.91 52v5"/><rect class="mk" x="211.11" y="38" width="3.6" height="12"/><path class="g1" d="M242.73 52v5"/><rect class="mk" x="240.93" y="38" width="3.6" height="12"/><path class="g1" d="M272.55 52v5"/><rect class="mk" x="270.75" y="38" width="3.6" height="12"/><path class="g3" d="M302.36 52v8"/><rect class="mk" x="300.56" y="38" width="3.6" height="12"/><text class="lb" x="302.36" y="74" text-anchor="middle">010</text><path class="g1" d="M332.18 52v5"/><rect class="mk" x="330.38" y="38" width="3.6" height="12"/><path class="g1" d="M362 52v5"/><rect class="mk" x="360.2" y="38" width="3.6" height="12"/><path class="g1" d="M391.82 52v5"/><rect class="mk" x="390.02" y="38" width="3.6" height="12"/><path class="g1" d="M421.64 52v5"/><rect class="mk" x="419.84" y="38" width="3.6" height="12"/><path class="g3" d="M451.45 52v8"/><rect class="mk" x="449.65" y="38" width="3.6" height="12"/><text class="lb" x="451.45" y="74" text-anchor="middle">015</text><path class="g1" d="M481.27 52v5"/><rect class="mk" x="479.47" y="38" width="3.6" height="12"/><path class="g1" d="M511.09 52v5"/><rect class="mk" x="509.29" y="38" width="3.6" height="12"/><path class="g1" d="M540.91 52v5"/><rect class="mk" x="539.11" y="38" width="3.6" height="12"/><path class="g1" d="M570.73 52v5"/><rect class="mk" x="568.93" y="38" width="3.6" height="12"/><path class="g3" d="M600.55 52v8"/><rect class="mk" x="598.75" y="38" width="3.6" height="12"/><text class="lb" x="600.55" y="74" text-anchor="middle">020</text><path class="g1" d="M630.36 52v5"/><rect class="mk" x="628.56" y="38" width="3.6" height="12"/><path class="g1" d="M660.18 52v5"/><rect class="mk" x="658.38" y="38" width="3.6" height="12"/><path class="g1" d="M690 52v5"/><rect class="mk" x="688.2" y="38" width="3.6" height="12"/></svg><!--/@STRIP-->
+            </div>
+            </div>
+            <!--@STRIPTAPE--><svg class="tape pk-sm" viewBox="0 0 720 50" role="img" aria-label="Forty run cells, twenty-three toned as completed runs, none flagged."><rect class="c-run" x="2" y="4" width="16.1" height="22"/><rect class="c-run" x="19.9" y="4" width="16.1" height="22"/><rect class="c-run" x="37.8" y="4" width="16.1" height="22"/><rect class="c-run" x="55.7" y="4" width="16.1" height="22"/><rect class="c-run" x="73.6" y="4" width="16.1" height="22"/><rect class="c-run" x="91.5" y="4" width="16.1" height="22"/><rect class="c-run" x="109.4" y="4" width="16.1" height="22"/><rect class="c-run" x="127.3" y="4" width="16.1" height="22"/><rect class="c-run" x="145.2" y="4" width="16.1" height="22"/><rect class="c-run" x="163.1" y="4" width="16.1" height="22"/><rect class="c-run" x="181" y="4" width="16.1" height="22"/><rect class="c-run" x="198.9" y="4" width="16.1" height="22"/><rect class="c-run" x="216.8" y="4" width="16.1" height="22"/><rect class="c-run" x="234.7" y="4" width="16.1" height="22"/><rect class="c-run" x="252.6" y="4" width="16.1" height="22"/><rect class="c-run" x="270.5" y="4" width="16.1" height="22"/><rect class="c-run" x="288.4" y="4" width="16.1" height="22"/><rect class="c-run" x="306.3" y="4" width="16.1" height="22"/><rect class="c-run" x="324.2" y="4" width="16.1" height="22"/><rect class="c-run" x="342.1" y="4" width="16.1" height="22"/><rect class="c-run" x="360" y="4" width="16.1" height="22"/><rect class="c-run" x="377.9" y="4" width="16.1" height="22"/><rect class="c-run" x="395.8" y="4" width="16.1" height="22"/><rect class="c-left" x="413.7" y="4" width="16.1" height="22"/><rect class="c-left" x="431.6" y="4" width="16.1" height="22"/><rect class="c-left" x="449.5" y="4" width="16.1" height="22"/><rect class="c-left" x="467.4" y="4" width="16.1" height="22"/><rect class="c-left" x="485.3" y="4" width="16.1" height="22"/><rect class="c-left" x="503.2" y="4" width="16.1" height="22"/><rect class="c-left" x="521.1" y="4" width="16.1" height="22"/><rect class="c-left" x="539" y="4" width="16.1" height="22"/><rect class="c-left" x="556.9" y="4" width="16.1" height="22"/><rect class="c-left" x="574.8" y="4" width="16.1" height="22"/><rect class="c-left" x="592.7" y="4" width="16.1" height="22"/><rect class="c-left" x="610.6" y="4" width="16.1" height="22"/><rect class="c-left" x="628.5" y="4" width="16.1" height="22"/><rect class="c-left" x="646.4" y="4" width="16.1" height="22"/><rect class="c-left" x="664.3" y="4" width="16.1" height="22"/><rect class="c-left" x="682.2" y="4" width="16.1" height="22"/><rect class="c-left" x="700.1" y="4" width="16.1" height="22"/><text class="t-labHi" x="2" y="44">23 / 40 RUNS THIS MONTH</text><text class="t-lab" x="718" y="44" text-anchor="end">17 LEFT · 0 FLAGGED</text></svg><!--/@STRIPTAPE-->
+            </figure>
+            <ul class="card-chrome">
+              <li>boston-morning-forecast</li><li>schedule daily 07:00</li><li>runs 23</li>
+              <li>flagged 0</li><li>model gemini</li><li>free tier 23 / 40 mo</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 — THE CHECK ═══════════════════════════════════════════════════════ -->
+<section class="sec g-roll" id="check" aria-labelledby="h-check">
+
+  <!-- the one place a colour is laid down solid. Full bleed, middle third,
+       bright and saturated, the same ink ladder printed on it. -->
+  <div class="flood">
+    <div class="wrap">
+      <div class="spine" aria-hidden="true"></div>
+      <div class="stub"><span class="secno">05</span><span class="secname">The check</span></div>
+      <div class="field">
+        <p class="eyebrow">The argument</p>
+        <h2 id="h-check">Atlas grades every run before it reaches you.</h2>
+        <p class="pull">This is how these tools fail quietly: a confident number arrives in the
+          same email, at the same time, looking exactly like a good one. So Atlas grades every
+          run before it reaches you — blank replies, refusals, answers cut off mid-sentence,
+          claims with no source. Each gets its own tag in your run history.</p>
+        <ul class="tagset"><!--@TAGS--><li><svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true" focusable="false"><path d="M8 20H48M8 32H48" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M8 12V44H48" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><path d="M8 38 15 29 22 32 30 21 40 20" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-plot)"/><circle cx="40" cy="20" r="2.2" fill="var(--sig-deep)"/><path d="M40 23V34" stroke="var(--sig)" stroke-width="var(--w-hair)"/><rect x="34" y="35" width="12" height="9" fill="var(--sig-deep)"/></svg><div><span class="tn">ok</span><span class="td">Complete, and it carries a source.</span></div></li><li><svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true" focusable="false"><path d="M8 20H48M8 32H48" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M8 12V44H48" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><path d="M8 38H44" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-plot)"/><circle cx="44" cy="38" r="2.2" fill="var(--sig-deep)"/></svg><div><span class="tn">empty</span><span class="td">The model returned nothing at all.</span></div></li><li><svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true" focusable="false"><path d="M8 20H48M8 32H48" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M8 12V44H48" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><path d="M8 41 16 30" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-plot)"/><path d="M23 13V44" stroke="var(--sig-deep)" stroke-width="var(--w-heavy)"/></svg><div><span class="tn">refusal</span><span class="td">The model declined to answer.</span></div></li><li><svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true" focusable="false"><path d="M8 20H48M8 32H48" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M8 12V44H48" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><path d="M8 38 16 28 24 32 31 21" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-plot)"/><path d="M35 23 46 18" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)" stroke-dasharray="2 2.5"/></svg><div><span class="tn">truncated</span><span class="td">Cut off mid-sentence.</span></div></li><li><svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true" focusable="false"><path d="M8 20H48M8 32H48" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M8 12V44H48" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><path d="M11 36 17 20 23 36M27 36 33 20 39 36" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-plot)"/><path d="M39 36v4H17" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><path d="M11 40 17.5 37.2v5.6Z" fill="var(--sig)"/></svg><div><span class="tn">loop</span><span class="td">It repeated itself instead of finishing.</span></div></li><li><svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true" focusable="false"><path d="M8 20H48M8 32H48" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M8 12V44H48" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><path d="M8 38 15 29 22 32 30 21 40 20" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-plot)"/><circle cx="40" cy="20" r="2.2" fill="var(--sig-deep)"/><path d="M40 23V34" stroke="var(--grid-3)" stroke-width="var(--w-hair)" stroke-dasharray="2 2"/><rect x="34" y="35" width="12" height="9" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/></svg><div><span class="tn">unsourced</span><span class="td">A claim arrived with nothing behind it.</span></div></li><!--/@TAGS--></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub" aria-hidden="true"><span class="secno">05</span><span class="secname">cont.</span></div>
+    <div class="field">
+
+      <figure class="panel">
+        <figcaption class="panel-hd"><span>Auto-pause rule</span><span>3 consecutive flags · then nothing</span></figcaption>
+        <div class="cut-wrap">
+        <div class="roll" tabindex="0" role="group" aria-label="The auto-pause rule, drawn. Scrollable.">
+          <!--@PAUSE--><svg class="plot narrow" viewBox="0 0 900 178" role="img" aria-label="Eight run cells in a row, runs 029 to 036. The first five are toned as runs that came back clean; the last three are inked solid and bracketed, labelled three in a row. A heavy stop bar follows them, and after it the record goes flat: paused, nothing sent."><rect class="c-run" x="16" y="40" width="48" height="48"/><rect class="c-run" x="72" y="40" width="48" height="48"/><rect class="c-run" x="128" y="40" width="48" height="48"/><rect class="c-run" x="184" y="40" width="48" height="48"/><rect class="c-run" x="240" y="40" width="48" height="48"/><rect class="c-flag" x="296" y="40" width="48" height="48"/><rect class="c-flag" x="352" y="40" width="48" height="48"/><rect class="c-flag" x="408" y="40" width="48" height="48"/><text class="lb" x="40" y="106" text-anchor="middle">029</text><text class="lb" x="432" y="106" text-anchor="middle">036</text><path class="ax" d="M296 118V126H456V118"/><path class="ax" d="M376 126V138"/><text class="lbs" x="376" y="156" text-anchor="middle">3 IN A ROW</text><path class="stop fault" d="M492 26V162"/><text class="lbs f" x="518" y="56">PAUSED · NOTHING SENT</text><path class="flat" d="M518 84H884"/><text class="lb" x="518" y="112">037 038 039 040 …</text></svg><!--/@PAUSE-->
+        </div>
+        </div>
+      </figure>
+      <p class="body" style="margin:var(--s4) 0 0">It is not a warning email and it is not a
+        retry loop. The task stops, and the next thing you hear about it is a notice you can
+        clear in one click.</p>
+
+      <figure class="sheet ann" style="margin-top:var(--s8)">
+        <div class="sheet-head">
+          <p class="sheet-t">Sheet 001 — boston-morning-forecast — runs 001–045</p>
+          <p class="sheet-t" style="color:var(--sig-deep);font-weight:500">Daily high, °F · nine weeks</p>
+          <span class="live-tag"><i aria-hidden="true"></i>Live · run 045 · 81°F</span>
+        </div>
+        <div class="sig-wrap cut-wrap">
+          <div class="roll" id="sigroll" data-park="end" tabindex="0" role="group"
+            aria-label="Nine-week plotted record of the boston-morning-forecast task. Scrollable.">
+            <!--@SIG--><div class="sig-stage"><svg class="plot sig" viewBox="0 0 1140 322" role="img" aria-label="Nine weeks of the boston-morning-forecast task, runs 001 to 045, plotted as daily high temperature in Fahrenheit against run number. The trace climbs from 58 to the high seventies. Runs 034, 035 and 036 are flagged unsourced and marked with hollow circles. The task auto-pauses before run 037; the record is flat across the paused span and the axis is broken there. Runs 037 to 045 resume in the high seventies and low eighties, and the newest run, 045, is marked with a live cursor at 81 degrees."><defs><pattern id="hatch" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><path class="hx hxf" d="M0 0V8"/></pattern></defs><path class="g1" d="M62 20V260"/><path class="g1" d="M83.75 20V260"/><path class="g1" d="M105.5 20V260"/><path class="g1" d="M127.25 20V260"/><path class="g1" d="M149 20V260"/><path class="g1" d="M170.75 20V260"/><path class="g1" d="M192.5 20V260"/><path class="g1" d="M214.25 20V260"/><path class="g1" d="M236 20V260"/><path class="g1" d="M257.75 20V260"/><path class="g1" d="M279.5 20V260"/><path class="g1" d="M301.25 20V260"/><path class="g1" d="M323 20V260"/><path class="g1" d="M344.75 20V260"/><path class="g1" d="M366.5 20V260"/><path class="g1" d="M388.25 20V260"/><path class="g1" d="M410 20V260"/><path class="g1" d="M431.75 20V260"/><path class="g1" d="M453.5 20V260"/><path class="g1" d="M475.25 20V260"/><path class="g1" d="M497 20V260"/><path class="g1" d="M518.75 20V260"/><path class="g1" d="M540.5 20V260"/><path class="g1" d="M562.25 20V260"/><path class="g1" d="M584 20V260"/><path class="g1" d="M605.75 20V260"/><path class="g1" d="M627.5 20V260"/><path class="g1" d="M649.25 20V260"/><path class="g1" d="M671 20V260"/><path class="g1" d="M692.75 20V260"/><path class="g1" d="M714.5 20V260"/><path class="g1" d="M736.25 20V260"/><path class="g1" d="M758 20V260"/><path class="g1" d="M779.75 20V260"/><path class="g1" d="M801.5 20V260"/><path class="g1" d="M823.25 20V260"/><path class="g1" d="M845 20V260"/><path class="g1" d="M866.75 20V260"/><path class="g1" d="M888.5 20V260"/><path class="g1" d="M910.25 20V260"/><path class="g1" d="M932 20V260"/><path class="g1" d="M953.75 20V260"/><path class="g1" d="M975.5 20V260"/><path class="g1" d="M997.25 20V260"/><path class="g1" d="M1019 20V260"/><path class="g1" d="M1040.75 20V260"/><path class="g1" d="M1062.5 20V260"/><path class="g1" d="M1084.25 20V260"/><path class="g1" d="M1106 20V260"/><path class="g2" d="M149 20V260"/><path class="g2" d="M257.75 20V260"/><path class="g2" d="M366.5 20V260"/><path class="g2" d="M475.25 20V260"/><path class="g2" d="M584 20V260"/><path class="g2" d="M692.75 20V260"/><path class="g2" d="M801.5 20V260"/><path class="g2" d="M997.25 20V260"/><path class="g2" d="M1106 20V260"/><path class="g1" d="M62 260H1106"/><text class="lb" x="53" y="263.4" text-anchor="end">55</text><path class="g3" d="M62 225.71H1106"/><text class="lb" x="53" y="229.11" text-anchor="end">60</text><path class="g1" d="M62 191.43H1106"/><text class="lb" x="53" y="194.83" text-anchor="end">65</text><path class="g3" d="M62 157.14H1106"/><text class="lb" x="53" y="160.54" text-anchor="end">70</text><path class="g1" d="M62 122.86H1106"/><text class="lb" x="53" y="126.26" text-anchor="end">75</text><path class="g3" d="M62 88.57H1106"/><text class="lb" x="53" y="91.97" text-anchor="end">80</text><path class="g1" d="M62 54.29H1106"/><text class="lb" x="53" y="57.69" text-anchor="end">85</text><path class="g3" d="M62 20H1106"/><text class="lb" x="53" y="23.4" text-anchor="end">90</text><rect x="834.13" y="20" width="87" height="240" fill="url(#hatch)"/><path class="g3" d="M834.13 20V260M921.13 20V260"/><path class="flat" d="M834.13 260H921.13"/><text class="lbs f" x="877.63" y="38" text-anchor="middle">PAUSED</text><path class="fillA" d="M62,260 L62,239.43 L83.75,205.14 L105.5,164 L127.25,150.29 L149,198.29 L170.75,184.57 L192.5,218.86 L214.25,232.57 L236,191.43 L257.75,157.14 L279.5,143.43 L301.25,170.86 L323,205.14 L344.75,177.71 L366.5,150.29 L388.25,129.71 L410,157.14 L431.75,143.43 L453.5,109.14 L475.25,122.86 L497,136.57 L518.75,129.71 L540.5,95.43 L562.25,116 L584,143.43 L605.75,157.14 L627.5,129.71 L649.25,102.29 L671,81.71 L692.75,95.43 L714.5,122.86 L736.25,136.57 L758,109.14 L779.75,88.57 L801.5,74.86 L823.25,102.29 L823.25,260Z"/><path class="fillA" d="M932,260 L932,116 L953.75,95.43 L975.5,68 L997.25,54.29 L1019,74.86 L1040.75,102.29 L1062.5,88.57 L1084.25,61.14 L1106,81.71 L1106,260Z"/><polyline class="tr" points="62,239.43 83.75,205.14 105.5,164 127.25,150.29 149,198.29 170.75,184.57 192.5,218.86 214.25,232.57 236,191.43 257.75,157.14 279.5,143.43 301.25,170.86 323,205.14 344.75,177.71 366.5,150.29 388.25,129.71 410,157.14 431.75,143.43 453.5,109.14 475.25,122.86 497,136.57 518.75,129.71 540.5,95.43 562.25,116 584,143.43 605.75,157.14 627.5,129.71 649.25,102.29 671,81.71 692.75,95.43 714.5,122.86 736.25,136.57 758,109.14 779.75,88.57 801.5,74.86 823.25,102.29"/><polyline class="tr" points="932,116 953.75,95.43 975.5,68 997.25,54.29 1019,74.86 1040.75,102.29 1062.5,88.57 1084.25,61.14 1106,81.71"/><rect class="mk" x="60.4" y="237.83" width="3.2" height="3.2"/><rect class="mk" x="82.15" y="203.54" width="3.2" height="3.2"/><rect class="mk" x="103.9" y="162.4" width="3.2" height="3.2"/><rect class="mk" x="125.65" y="148.69" width="3.2" height="3.2"/><rect class="mk" x="147.4" y="196.69" width="3.2" height="3.2"/><rect class="mk" x="169.15" y="182.97" width="3.2" height="3.2"/><rect class="mk" x="190.9" y="217.26" width="3.2" height="3.2"/><rect class="mk" x="212.65" y="230.97" width="3.2" height="3.2"/><rect class="mk" x="234.4" y="189.83" width="3.2" height="3.2"/><rect class="mk" x="256.15" y="155.54" width="3.2" height="3.2"/><rect class="mk" x="277.9" y="141.83" width="3.2" height="3.2"/><rect class="mk" x="299.65" y="169.26" width="3.2" height="3.2"/><rect class="mk" x="321.4" y="203.54" width="3.2" height="3.2"/><rect class="mk" x="343.15" y="176.11" width="3.2" height="3.2"/><rect class="mk" x="364.9" y="148.69" width="3.2" height="3.2"/><rect class="mk" x="386.65" y="128.11" width="3.2" height="3.2"/><rect class="mk" x="408.4" y="155.54" width="3.2" height="3.2"/><rect class="mk" x="430.15" y="141.83" width="3.2" height="3.2"/><rect class="mk" x="451.9" y="107.54" width="3.2" height="3.2"/><rect class="mk" x="473.65" y="121.26" width="3.2" height="3.2"/><rect class="mk" x="495.4" y="134.97" width="3.2" height="3.2"/><rect class="mk" x="517.15" y="128.11" width="3.2" height="3.2"/><rect class="mk" x="538.9" y="93.83" width="3.2" height="3.2"/><rect class="mk" x="560.65" y="114.4" width="3.2" height="3.2"/><rect class="mk" x="582.4" y="141.83" width="3.2" height="3.2"/><rect class="mk" x="604.15" y="155.54" width="3.2" height="3.2"/><rect class="mk" x="625.9" y="128.11" width="3.2" height="3.2"/><rect class="mk" x="647.65" y="100.69" width="3.2" height="3.2"/><rect class="mk" x="669.4" y="80.11" width="3.2" height="3.2"/><rect class="mk" x="691.15" y="93.83" width="3.2" height="3.2"/><rect class="mk" x="712.9" y="121.26" width="3.2" height="3.2"/><rect class="mk" x="734.65" y="134.97" width="3.2" height="3.2"/><rect class="mk" x="756.4" y="107.54" width="3.2" height="3.2"/><circle class="mkO" cx="779.75" cy="88.57" r="4.4"/><circle class="mkO" cx="801.5" cy="74.86" r="4.4"/><circle class="mkO" cx="823.25" cy="102.29" r="4.4"/><rect class="mk" x="930.4" y="114.4" width="3.2" height="3.2"/><rect class="mk" x="952.15" y="93.83" width="3.2" height="3.2"/><rect class="mk" x="973.9" y="66.4" width="3.2" height="3.2"/><rect class="mk" x="995.65" y="52.69" width="3.2" height="3.2"/><rect class="mk" x="1017.4" y="73.26" width="3.2" height="3.2"/><rect class="mk" x="1039.15" y="100.69" width="3.2" height="3.2"/><rect class="mk" x="1060.9" y="86.97" width="3.2" height="3.2"/><rect class="mk" x="1082.65" y="59.54" width="3.2" height="3.2"/><rect class="mk" x="1104.4" y="80.11" width="3.2" height="3.2"/><path class="ax" d="M62 260H834.13M921.13 260H1106"/><path class="brk" d="M868.63 266l7 -12M875.63 266l7 -12"/><path class="strike" d="M834.13 14V270"/><path class="ax" d="M149 260v5"/><text class="lb" x="149" y="278" text-anchor="middle">005</text><path class="ax" d="M257.75 260v5"/><text class="lb" x="257.75" y="278" text-anchor="middle">010</text><path class="ax" d="M366.5 260v5"/><text class="lb" x="366.5" y="278" text-anchor="middle">015</text><path class="ax" d="M475.25 260v5"/><text class="lb" x="475.25" y="278" text-anchor="middle">020</text><path class="ax" d="M584 260v5"/><text class="lb" x="584" y="278" text-anchor="middle">025</text><path class="ax" d="M692.75 260v5"/><text class="lb" x="692.75" y="278" text-anchor="middle">030</text><path class="ax" d="M801.5 260v5"/><text class="lb" x="801.5" y="278" text-anchor="middle">035</text><path class="ax" d="M997.25 260v5"/><text class="lb" x="997.25" y="278" text-anchor="middle">040</text><path class="ax" d="M1106 260v5"/><text class="lb" x="1106" y="278" text-anchor="middle">045</text><text class="lbs" x="53" y="278" text-anchor="end">RUN</text><text class="lbs" x="53" y="299" text-anchor="end">FLAG</text><rect class="c-run" x="55.7" y="288" width="12.61" height="15"/><rect class="c-run" x="77.44" y="288" width="12.61" height="15"/><rect class="c-run" x="99.2" y="288" width="12.61" height="15"/><rect class="c-run" x="120.95" y="288" width="12.61" height="15"/><rect class="c-run" x="142.7" y="288" width="12.61" height="15"/><rect class="c-run" x="164.45" y="288" width="12.61" height="15"/><rect class="c-run" x="186.2" y="288" width="12.61" height="15"/><rect class="c-run" x="207.95" y="288" width="12.61" height="15"/><rect class="c-run" x="229.7" y="288" width="12.61" height="15"/><rect class="c-run" x="251.45" y="288" width="12.61" height="15"/><rect class="c-run" x="273.2" y="288" width="12.61" height="15"/><rect class="c-run" x="294.95" y="288" width="12.61" height="15"/><rect class="c-run" x="316.7" y="288" width="12.61" height="15"/><rect class="c-run" x="338.45" y="288" width="12.61" height="15"/><rect class="c-run" x="360.2" y="288" width="12.61" height="15"/><rect class="c-run" x="381.95" y="288" width="12.61" height="15"/><rect class="c-run" x="403.7" y="288" width="12.61" height="15"/><rect class="c-run" x="425.45" y="288" width="12.61" height="15"/><rect class="c-run" x="447.2" y="288" width="12.61" height="15"/><rect class="c-run" x="468.95" y="288" width="12.61" height="15"/><rect class="c-run" x="490.7" y="288" width="12.61" height="15"/><rect class="c-run" x="512.45" y="288" width="12.61" height="15"/><rect class="c-run" x="534.2" y="288" width="12.61" height="15"/><rect class="c-run" x="555.95" y="288" width="12.61" height="15"/><rect class="c-run" x="577.7" y="288" width="12.61" height="15"/><rect class="c-run" x="599.45" y="288" width="12.61" height="15"/><rect class="c-run" x="621.2" y="288" width="12.61" height="15"/><rect class="c-run" x="642.95" y="288" width="12.61" height="15"/><rect class="c-run" x="664.7" y="288" width="12.61" height="15"/><rect class="c-run" x="686.45" y="288" width="12.61" height="15"/><rect class="c-run" x="708.2" y="288" width="12.61" height="15"/><rect class="c-run" x="729.95" y="288" width="12.61" height="15"/><rect class="c-run" x="751.7" y="288" width="12.61" height="15"/><rect class="c-flag" x="773.45" y="288" width="12.61" height="15"/><rect class="c-flag" x="795.2" y="288" width="12.61" height="15"/><rect class="c-flag" x="816.95" y="288" width="12.61" height="15"/><rect class="c-run" x="925.7" y="288" width="12.61" height="15"/><rect class="c-run" x="947.45" y="288" width="12.61" height="15"/><rect class="c-run" x="969.2" y="288" width="12.61" height="15"/><rect class="c-run" x="990.95" y="288" width="12.61" height="15"/><rect class="c-run" x="1012.7" y="288" width="12.61" height="15"/><rect class="c-run" x="1034.45" y="288" width="12.61" height="15"/><rect class="c-run" x="1056.2" y="288" width="12.61" height="15"/><rect class="c-run" x="1077.95" y="288" width="12.61" height="15"/><rect class="c-run" x="1099.7" y="288" width="12.61" height="15"/><rect x="834.13" y="288" width="87" height="15" fill="url(#hatch)"/><path class="cur" d="M1106 10V266"/><path class="curT" d="M1101 2h10l-5 7z"/><circle class="now" cx="1106" cy="81.71" r="5.4"/><rect class="mk" x="1104.4" y="80.11" width="3.2" height="3.2"/></svg><div class="ann-layer" aria-hidden="true"><!--@SIGANN--><svg class="circ" aria-hidden="true" focusable="false" style="--a:var(--tilt-1);left:65.4%;top:11.75%;width:10.2%;height:29.91%" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50 5C75 4 97 21 96 50c-1 30-25 46-48 45C25 94 4 78 4 49 4 23 25 6 46 5c6 0 13 1 19 3"/></svg><svg class="leader" data-leader="1" aria-hidden="true" focusable="false" style="left:38%;top:6.41%;width:28%;height:16.02%" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M2 8H68l30 84"/></svg><span class="hand margin-note" data-note="1" style="--a:var(--tilt-2);--o:var(--off-2);--n-l:14%;--n-t:1.6%;--n-w:23ch">three in a row with no source behind the number</span><svg class="leader" aria-hidden="true" focusable="false" style="--a:var(--tilt-5);left:73.5%;top:36.32%;width:6%;height:12.82%" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M96 96 4 8m0 0 28 6m-28-6-2 28"/></svg><span class="hand margin-note" data-note="2" style="--a:var(--tilt-4);--o:var(--off-4);--n-l:78.5%;--n-t:49.14%;--n-w:18ch">so it stopped itself, rather than send a fourth</span><!--/@SIGANN--></div></div><!--/@SIG-->
+          </div>
+          <div class="ann-layer" aria-hidden="true"></div>
+        </div>
+        <p class="roll-note">◂ scrub back for the earlier runs</p>
+        <p class="sheet-foot"><span>specimen record · task boston-morning-forecast ·
+          schedule daily 07:00</span><b>flagged 3 / 45 · tag unsourced</b></p>
+      </figure>
+
+      <div class="notice ann">
+        <!--@NOTICETAPE--><svg class="tape " viewBox="0 0 260 50" role="img" aria-label="A strip of twelve run cells; the last three are inked solid and a heavy stop bar follows them."><rect class="c-run" x="2" y="4" width="17.2" height="22"/><rect class="c-run" x="21" y="4" width="17.2" height="22"/><rect class="c-run" x="40" y="4" width="17.2" height="22"/><rect class="c-run" x="59" y="4" width="17.2" height="22"/><rect class="c-run" x="78" y="4" width="17.2" height="22"/><rect class="c-run" x="97" y="4" width="17.2" height="22"/><rect class="c-run" x="116" y="4" width="17.2" height="22"/><rect class="c-run" x="135" y="4" width="17.2" height="22"/><rect class="c-run" x="154" y="4" width="17.2" height="22"/><rect class="c-flag" x="173" y="4" width="17.2" height="22"/><rect class="c-flag" x="192" y="4" width="17.2" height="22"/><rect class="c-flag" x="211" y="4" width="17.2" height="22"/><path class="t-stop" d="M235 0V30"/><text class="t-labHi" x="2" y="44">RUNS 025–036</text><text class="t-lab" x="258" y="44" text-anchor="end">3 FLAGGED</text></svg><!--/@NOTICETAPE-->
+        <span class="stamp">
+          <span class="imp">Auto-pause notice</span>
+          <span class="imp imp2" aria-hidden="true">Auto-pause notice</span>
+        </span>
+        <p class="notice-txt"><b>boston-morning-forecast</b> — paused after 3 consecutive
+          flagged runs.</p>
+        <div class="notice-btns">
+          <button class="mini-btn" type="button">[ resume ]</button>
+          <button class="mini-btn" type="button">[ snooze 30d ]</button>
+        </div>
+      </div>
+      <p class="body" style="margin-top:var(--s5)">You hear about it once a week at most — one
+        click snoozes it for thirty days, and the first good run clears the flag on its own.
+        <strong>Nothing here nags.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- 06 — PROOF ═══════════════════════════════════════════════════════════ -->
+<section class="sec g-ledger" id="proof" aria-labelledby="h-proof">
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub"><span class="secno">06</span><span class="secname">Proof</span></div>
+    <div class="field">
+      <p class="eyebrow">What there is to count</p>
+      <h2 id="h-proof">The numbers that actually exist.</h2>
+      <p class="lede">No user counts, no logos, no testimonials, no press. There is not enough
+        of any of that yet for it to mean anything, and a row of borrowed badges would be the
+        first dishonest thing on this page. Here is what can be counted.</p>
+
+      <div class="mf">
+        <div class="mf-blk" style="--cw:84;--rw:17;--cn:42;--rn:35" role="img"
+          aria-label="A field of 1,481 marks, one per task template"></div>
+        <div class="mf-rem" style="--cw:84;--nw:53;--cn:42;--nn:11" aria-hidden="true"></div>
+        <p class="mf-cap"><span>1,481 task templates</span><span>20 categories</span></p>
+        <div class="mf-blk alt" style="--cw:84;--rw:2;--cn:42;--rn:5" role="img"
+          aria-label="A field of 238 marks, one per workflow template"></div>
+        <div class="mf-rem alt" style="--cw:84;--nw:70;--cn:42;--nn:28" aria-hidden="true"></div>
+        <p class="mf-cap"><span>238 workflow templates</span><span>1,719 marks on this sheet</span></p>
+      </div>
+
+      <div class="dimwrap">
+        <div class="dimline">
+          <span class="dim-ext" style="--x:0"></span><span class="dim-lab" style="--x:0">2026-04-01</span>
+          <span class="dim-ext" style="--x:21.28%"></span><span class="dim-lab" data-at="mid" style="--x:21.28%">May</span>
+          <span class="dim-ext" style="--x:43.26%"></span><span class="dim-lab" data-at="mid" style="--x:43.26%">Jun</span>
+          <span class="dim-ext" style="--x:64.54%"></span><span class="dim-lab" data-at="mid" style="--x:64.54%">Jul</span>
+          <span class="dim-ext" style="--x:86.52%"></span><span class="dim-lab" data-at="mid" style="--x:86.52%">Aug</span>
+          <span class="dim-ext" style="--x:100%"></span><span class="dim-lab" data-at="end" style="--x:100%">2026-08-20</span>
+          <span class="dim" aria-hidden="true"></span>
+          <span class="dim-label">335 releases · 142 days</span>
+        </div>
+        <p class="caption">A rate, not a shape — the per-day distribution is not published,
+          so it is not drawn.</p>
+      </div>
+
+      <ul class="stats">
+        <li><b>6</b><span>quality tags</span></li>
+        <li><b>10</b><span>schedule frequencies</span></li>
+        <li><b>3</b><span>flags before a pause</span></li>
+        <li><b>40</b><span>free runs a month</span></li>
+        <li><b>1</b><span>person building it</span></li>
+      </ul>
+      <p class="ruled-note ann">
+        <span class="pen-rule" aria-hidden="true"></span>
+        <span class="hand" style="--a:var(--tilt-5);--o:var(--off-5)">the last one is also
+          the risk</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 — COMPARISON ══════════════════════════════════════════════════════ -->
+<section class="sec g-plain" id="versus" aria-labelledby="h-vs">
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub"><span class="secno">07</span><span class="secname">Versus</span></div>
+    <div class="field">
+      <p class="eyebrow">Against the incumbents</p>
+      <h2 id="h-vs">Zapier, Make and n8n are better at <span class="ul ann">most<svg
+        class="scribe" viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true"
+        focusable="false"><path d="M2 6c14-3 30-3 47-1 16 2 33 3 49 0"/></svg></span> of this.</h2>
+      <p class="lede">They are visual editors with very large connector libraries, and both of
+        the big two now ship AI assistance as well. Atlas starts from the other end: describe
+        the outcome, and the model works out how — which means less setup for open-ended,
+        judgement-heavy work, and, honestly, far fewer integrations than they have.</p>
+
+      <figure class="panel">
+        <figcaption class="panel-hd"><span>A fixed chain, and a sentence</span><span>same task, both ways</span></figcaption>
+      <div class="cut-wrap">
+      <div class="chainbox roll" tabindex="0" role="group"
+        aria-label="Diagram: a fixed chain of five stages against one written sentence. Scrollable.">
+        <!--@CHAIN--><svg class="chain" viewBox="0 0 640 120" role="img" aria-label="Above: a fixed chain of five stages — trigger, filter, format, sheet, message — joined by links. A bracket spans the whole chain and drops to an empty terminal reading, is this worth sending? The chain has no box for that step."><path d="M20,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M60,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M100,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M140,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M180,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M220,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M260,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M300,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M340,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M380,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M420,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M460,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M500,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M540,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M580,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M620,8V64" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M18,18H622" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><path d="M18,42H622" stroke="var(--grid-2)" stroke-width="var(--w-grid)"/><g><rect x="18" y="26" width="86" height="32" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="22" y="30" width="3" height="3" fill="var(--sig-deep)"/><path d="M40,26V22.5 M61,26V22.5 M82,26V22.5 M40,58V61.5 M61,58V61.5 M82,58V61.5" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><text x="61" y="46" text-anchor="middle" fill="var(--sig)">TRIGGER</text></g><g><path d="M104,42H111 M135,42H142" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="111" y="36.5" width="24" height="11" rx="5.5" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-mark)"/></g><g><rect x="142" y="26" width="86" height="32" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="146" y="30" width="3" height="3" fill="var(--sig-deep)"/><path d="M164,26V22.5 M185,26V22.5 M206,26V22.5 M164,58V61.5 M185,58V61.5 M206,58V61.5" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><text x="185" y="46" text-anchor="middle" fill="var(--sig)">FILTER</text></g><g><path d="M228,42H235 M259,42H266" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="235" y="36.5" width="24" height="11" rx="5.5" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-mark)"/></g><g><rect x="266" y="26" width="86" height="32" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="270" y="30" width="3" height="3" fill="var(--sig-deep)"/><path d="M288,26V22.5 M309,26V22.5 M330,26V22.5 M288,58V61.5 M309,58V61.5 M330,58V61.5" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><text x="309" y="46" text-anchor="middle" fill="var(--sig)">FORMAT</text></g><g><path d="M352,42H359 M383,42H390" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="359" y="36.5" width="24" height="11" rx="5.5" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-mark)"/></g><g><rect x="390" y="26" width="86" height="32" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="394" y="30" width="3" height="3" fill="var(--sig-deep)"/><path d="M412,26V22.5 M433,26V22.5 M454,26V22.5 M412,58V61.5 M433,58V61.5 M454,58V61.5" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><text x="433" y="46" text-anchor="middle" fill="var(--sig)">SHEET</text></g><g><path d="M476,42H483 M507,42H514" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="483" y="36.5" width="24" height="11" rx="5.5" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-mark)"/></g><g><rect x="514" y="26" width="86" height="32" fill="none" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><rect x="518" y="30" width="3" height="3" fill="var(--sig-deep)"/><path d="M536,26V22.5 M557,26V22.5 M578,26V22.5 M536,58V61.5 M557,58V61.5 M578,58V61.5" stroke="var(--sig-deep)" stroke-width="var(--w-hair)"/><text x="557" y="46" text-anchor="middle" fill="var(--sig)">MESSAGE</text></g><path d="M18,70V78H600V70" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><path d="M309,78V92" fill="none" stroke="var(--sig)" stroke-width="var(--w-hair)"/><circle cx="309" cy="99" r="6.5" fill="none" stroke="var(--sig)" stroke-width="var(--w-mark)"/><text x="326" y="96" fill="var(--sig-deep)">&#8220;IS THIS WORTH SENDING?&#8221;</text><text x="326" y="110" fill="var(--sig)">THE CHAIN HAS NO BOX FOR THIS STEP</text></svg><!--/@CHAIN-->
+      </div>
+      </div>
+      <p class="roll-note">◂ scrub the window ▸</p>
+      <div class="writ"><p>Every morning, tell me the forecast for Boston and whether I need a coat.</p></div>
+      <p class="panel-ft">One sentence. No second screen. The grade is part of the run.</p>
+      </figure>
+
+      <figure class="panel" style="margin-top:var(--s8)">
+        <figcaption class="panel-hd"><span>Where each one wins</span><span>one axis, two spans</span></figcaption>
+        <div class="cut-wrap">
+        <div class="roll" tabindex="0" role="group" aria-label="Where each tool wins, plotted on one axis. Scrollable.">
+          <!--@FIT--><svg class="plot narrow pk-lo" viewBox="0 0 640 160" role="img" aria-label="One axis labelled what the work is, running from fields from app to app on the left to reading and judging on the right. A span for Zapier, Make and n8n covers the left two thirds. A span for Atlas covers the right half. They overlap in a hatched middle marked either."><defs><pattern id="hatch2" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><path class="hx" d="M0 0V8"/></pattern></defs><text class="lbs" x="16" y="18">WHAT THE WORK IS</text><path class="ax" d="M16 46H624M16 46v-6M624 46v-6"/><text class="lb" x="16" y="38">FIELDS FROM APP TO APP</text><text class="lb" x="624" y="38" text-anchor="end">READING AND JUDGING</text><rect class="barF" x="16" y="60" width="384" height="26"/><rect x="280" y="60" width="120" height="26" fill="url(#hatch2)"/><text class="lbs" x="28" y="77">ZAPIER · MAKE · N8N</text><rect class="barP" x="280" y="98" width="344" height="26"/><text class="lbrev" x="612" y="115" text-anchor="end">ATLAS</text><path class="g3" d="M280 54V90M400 54V90"/><path class="revrule" d="M280 94V128M400 94V128"/><path class="ax" d="M340 128V142"/><text class="lbs" x="352" y="146">EITHER</text></svg><!--/@FIT-->
+        </div>
+        </div>
+        <p class="panel-ft">If it is a fixed chain between named apps, they are the better fit and it is
+          not close. If it is “watch this and tell me what matters,” that is Atlas.</p>
+      </figure>
+
+      <div class="verdict">
+        <div>
+          <h3>Use them</h3>
+          <p>If the automation is a fixed chain between specific apps — this record, into that
+            sheet, then that message — a visual editor is the right tool and it is not close.
+            Their free tiers also run every 15 minutes. Atlas's free floor is daily.</p>
+        </div>
+        <div>
+          <h3>Use Atlas</h3>
+          <p>If the automation is "watch this and tell me what matters," where the work is
+            reading and judging rather than moving fields between two apps. One sentence,
+            a schedule, and a grader that will stop the task rather than keep sending.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 — PRICING ═════════════════════════════════════════════════════════ -->
+<section class="sec g-reverse" id="pricing" aria-labelledby="h-price">
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub"><span class="secno">08</span><span class="secname">Pricing</span></div>
+    <div class="field">
+      <p class="eyebrow">Two tiers, plotted</p>
+      <h2 id="h-price">Free is genuinely free.</h2>
+      <p class="lede">No card, no trial clock, no feature held hostage. The grading, the
+        templates and the digest are all on the free tier. What Pro buys is volume, speed and
+        the places the results can go.</p>
+
+      <figure class="panel">
+        <figcaption class="panel-hd"><span>Two tiers, plotted</span><span>runs per month · price per month</span></figcaption>
+      <div class="cut-wrap">
+      <div class="roll" tabindex="0" role="group"
+        aria-label="Pricing plotted on two axes: runs per month, and price per month. Scrollable.">
+        <!--@PRICE--><svg class="plot" viewBox="0 0 1140 344" role="img" aria-label="Two plotted axes. On a logarithmic runs-per-month axis the Free bar stops dead at forty runs and Pro's bar runs off the sheet through an axis break to unlimited. On a linear price-per-month axis, Free sits at zero dollars, Pro at nine dollars monthly, and a hollow marker at seven dollars fifty shows the annual rate of ninety dollars a year. Teams is drawn as a dashed lane with no marker: not priced."><text class="lbs" x="116" y="28">RUNS PER MONTH — LOGARITHMIC</text><path class="g3" d="M116 40V150"/><path class="g1" d="M200.89 40V150"/><path class="g1" d="M250.55 40V150"/><path class="g1" d="M285.78 40V150"/><path class="g1" d="M313.11 40V150"/><path class="g1" d="M335.44 40V150"/><path class="g1" d="M354.32 40V150"/><path class="g1" d="M370.67 40V150"/><path class="g1" d="M385.1 40V150"/><path class="g3" d="M398 40V150"/><path class="g1" d="M482.89 40V150"/><path class="g1" d="M532.55 40V150"/><path class="g1" d="M567.78 40V150"/><path class="g1" d="M595.11 40V150"/><path class="g1" d="M617.44 40V150"/><path class="g1" d="M636.32 40V150"/><path class="g1" d="M652.67 40V150"/><path class="g1" d="M667.1 40V150"/><path class="g3" d="M680 40V150"/><path class="g1" d="M764.89 40V150"/><path class="g1" d="M814.55 40V150"/><path class="g1" d="M849.78 40V150"/><path class="g1" d="M877.11 40V150"/><path class="g1" d="M899.44 40V150"/><path class="g1" d="M918.32 40V150"/><path class="g1" d="M934.67 40V150"/><path class="g1" d="M949.1 40V150"/><path class="g3" d="M962 40V150"/><path class="ax" d="M116 150H988"/><path class="brk" d="M994 160l7 -20M1002 160l7 -20"/><path class="ax" d="M1012 150H1088"/><path class="ax" d="M116 150v6"/><text class="lb" x="116" y="170" text-anchor="middle">1</text><path class="ax" d="M398 150v6"/><text class="lb" x="398" y="170" text-anchor="middle">10</text><path class="ax" d="M680 150v6"/><text class="lb" x="680" y="170" text-anchor="middle">100</text><path class="ax" d="M962 150v6"/><text class="lb" x="962" y="170" text-anchor="middle">1000</text><rect class="barF barA" x="116" y="71" width="451.78" height="26"/><path class="stop" d="M567.78 67v34"/><path class="ax" d="M567.78 150v6"/><text class="lbHi" x="567.78" y="170" text-anchor="middle">40</text><text class="lbs" x="104" y="88" text-anchor="end">FREE</text><rect class="barP" x="116" y="105" width="846" height="26"/><rect class="barP" x="1012" y="105" width="52" height="26"/><path class="arrow" d="M1070 118h16m-7 -7l7 7l-7 7"/><text class="lbs pro" x="104" y="122" text-anchor="end">PRO</text><text class="lb" x="1088" y="90" text-anchor="end">unlimited</text><text class="lbs" x="116" y="206">PRICE PER MONTH — LINEAR, US DOLLARS</text><path class="ax" d="M116 268H640.52"/><path class="g3" d="M116 238V268"/><path class="ax" d="M116 268v7"/><text class="lb" x="116" y="289" text-anchor="middle">$0</text><path class="g1" d="M168.45 238V268"/><path class="ax" d="M168.45 268v4"/><path class="g1" d="M220.9 238V268"/><path class="ax" d="M220.9 268v4"/><path class="g1" d="M273.36 238V268"/><path class="ax" d="M273.36 268v4"/><path class="g1" d="M325.81 238V268"/><path class="ax" d="M325.81 268v4"/><path class="g3" d="M378.26 238V268"/><path class="ax" d="M378.26 268v7"/><text class="lb" x="378.26" y="289" text-anchor="middle">$5</text><path class="g1" d="M430.71 238V268"/><path class="ax" d="M430.71 268v4"/><path class="g1" d="M483.16 238V268"/><path class="ax" d="M483.16 268v4"/><path class="g1" d="M535.62 238V268"/><path class="ax" d="M535.62 268v4"/><path class="g1" d="M588.07 238V268"/><path class="ax" d="M588.07 268v4"/><path class="g3" d="M640.52 238V268"/><path class="ax" d="M640.52 268v7"/><text class="lb" x="640.52" y="289" text-anchor="middle">$10</text><circle class="mkP" cx="116" cy="253" r="5.4"/><text class="lb" x="127" y="257">$0 free</text><circle class="mkP" cx="588.07" cy="253" r="5.4"/><text class="lb" x="599.07" y="257">$9 pro, monthly</text><circle class="mkO2" cx="509.39" cy="253" r="5.4"/><path class="stem" d="M509.39 253V242h74"/><text class="lb" x="515.39" y="221">$7.50 · $90 a year</text><text class="lb" x="515.39" y="237">two months free</text><text class="lbs" x="104" y="322" text-anchor="end">TEAMS</text><path class="dash" d="M116 317H416"/><text class="lb" x="428" y="321">not priced · coming soon</text></svg><!--/@PRICE-->
+      </div>
+      </div>
+      <p class="roll-note">◂ scrub the window ▸</p>
+      </figure>
+
+      <div class="ann" style="margin-top:var(--s5)">
+        <span class="hand" style="--a:var(--tilt-5);--o:var(--off-5)"
+          >40 runs a month is the smallest free allowance in this category. It is still free.</span>
+      </div>
+
+      <div class="spec">
+        <div class="tier">
+          <div class="tier-h"><p class="tier-n">Free</p><span class="tier-p">$0<span
+            style="font-size:var(--t-tiny);font-family:var(--ff-mono);color:var(--sig-deep)">/mo</span></span></div>
+          <ul>
+            <li>40 AI runs a month</li>
+            <li>Up to 40 saved tasks</li>
+            <li>7-day run history</li>
+            <li>Daily email digest at an hour you pick</li>
+            <li>Browser push · anomaly alerts</li>
+            <li>Grading on every run</li>
+            <li>1,481 task templates</li>
+            <li>Bring your own API key</li>
+          </ul>
+          <p class="tier-note">Gemini 3.1 Flash Lite included, no key required.</p>
+          <figure class="tier-stn"><!--@FREETAPE--><svg class="tape " viewBox="0 0 300 50" role="img" aria-label="Forty run cells, twenty-three of them toned as completed and none flagged."><rect class="c-run" x="2" y="4" width="5.92" height="22"/><rect class="c-run" x="9.4" y="4" width="5.92" height="22"/><rect class="c-run" x="16.8" y="4" width="5.92" height="22"/><rect class="c-run" x="24.2" y="4" width="5.92" height="22"/><rect class="c-run" x="31.6" y="4" width="5.92" height="22"/><rect class="c-run" x="39" y="4" width="5.92" height="22"/><rect class="c-run" x="46.4" y="4" width="5.92" height="22"/><rect class="c-run" x="53.8" y="4" width="5.92" height="22"/><rect class="c-run" x="61.2" y="4" width="5.92" height="22"/><rect class="c-run" x="68.6" y="4" width="5.92" height="22"/><rect class="c-run" x="76" y="4" width="5.92" height="22"/><rect class="c-run" x="83.4" y="4" width="5.92" height="22"/><rect class="c-run" x="90.8" y="4" width="5.92" height="22"/><rect class="c-run" x="98.2" y="4" width="5.92" height="22"/><rect class="c-run" x="105.6" y="4" width="5.92" height="22"/><rect class="c-run" x="113" y="4" width="5.92" height="22"/><rect class="c-run" x="120.4" y="4" width="5.92" height="22"/><rect class="c-run" x="127.8" y="4" width="5.92" height="22"/><rect class="c-run" x="135.2" y="4" width="5.92" height="22"/><rect class="c-run" x="142.6" y="4" width="5.92" height="22"/><rect class="c-run" x="150" y="4" width="5.92" height="22"/><rect class="c-run" x="157.4" y="4" width="5.92" height="22"/><rect class="c-run" x="164.8" y="4" width="5.92" height="22"/><rect class="c-left" x="172.2" y="4" width="5.92" height="22"/><rect class="c-left" x="179.6" y="4" width="5.92" height="22"/><rect class="c-left" x="187" y="4" width="5.92" height="22"/><rect class="c-left" x="194.4" y="4" width="5.92" height="22"/><rect class="c-left" x="201.8" y="4" width="5.92" height="22"/><rect class="c-left" x="209.2" y="4" width="5.92" height="22"/><rect class="c-left" x="216.6" y="4" width="5.92" height="22"/><rect class="c-left" x="224" y="4" width="5.92" height="22"/><rect class="c-left" x="231.4" y="4" width="5.92" height="22"/><rect class="c-left" x="238.8" y="4" width="5.92" height="22"/><rect class="c-left" x="246.2" y="4" width="5.92" height="22"/><rect class="c-left" x="253.6" y="4" width="5.92" height="22"/><rect class="c-left" x="261" y="4" width="5.92" height="22"/><rect class="c-left" x="268.4" y="4" width="5.92" height="22"/><rect class="c-left" x="275.8" y="4" width="5.92" height="22"/><rect class="c-left" x="283.2" y="4" width="5.92" height="22"/><rect class="c-left" x="290.6" y="4" width="5.92" height="22"/><text class="t-labHi" x="2" y="44">23 / 40 RUNS</text><text class="t-lab" x="298" y="44" text-anchor="end">17 LEFT THIS MONTH</text></svg><!--/@FREETAPE-->
+            <figcaption>The same task, on Free</figcaption></figure>
+        </div>
+        <div class="tier">
+          <div class="tier-h"><p class="tier-n">Pro</p><span class="tier-p">$9<span
+            style="font-size:var(--t-tiny);font-family:var(--ff-mono);color:var(--sig-deep)">/mo</span></span></div>
+          <ul>
+            <li>Unlimited tasks and runs</li>
+            <li>Sub-daily schedules from 30 minutes</li>
+            <li>Multi-step workflows</li>
+            <li>Webhooks — Discord, Slack, Telegram, JSON</li>
+            <li>Google Sheets</li>
+            <li>Full run history</li>
+            <li>Analytics with CSV / PDF export</li>
+            <li>Per-run emails with reply-to-refine</li>
+            <li>Personal analyst briefings</li>
+          </ul>
+          <p class="tier-note">$90 a year — two months free. 14-day money-back guarantee on
+            the first payment.</p>
+          <figure class="tier-stn"><!--@PROTAPE--><svg class="tape " viewBox="0 0 300 50" role="img" aria-label="Run cells filling the whole strip and running past a break under an arrow: unlimited runs."><rect class="c-run" x="2" y="4" width="5.85" height="22"/><rect class="c-run" x="9.31" y="4" width="5.85" height="22"/><rect class="c-run" x="16.62" y="4" width="5.85" height="22"/><rect class="c-run" x="23.92" y="4" width="5.85" height="22"/><rect class="c-run" x="31.23" y="4" width="5.85" height="22"/><rect class="c-run" x="38.54" y="4" width="5.85" height="22"/><rect class="c-run" x="45.85" y="4" width="5.85" height="22"/><rect class="c-run" x="53.15" y="4" width="5.85" height="22"/><rect class="c-run" x="60.46" y="4" width="5.85" height="22"/><rect class="c-run" x="67.77" y="4" width="5.85" height="22"/><rect class="c-run" x="75.08" y="4" width="5.85" height="22"/><rect class="c-run" x="82.38" y="4" width="5.85" height="22"/><rect class="c-run" x="89.69" y="4" width="5.85" height="22"/><rect class="c-run" x="97" y="4" width="5.85" height="22"/><rect class="c-run" x="104.31" y="4" width="5.85" height="22"/><rect class="c-run" x="111.62" y="4" width="5.85" height="22"/><rect class="c-run" x="118.92" y="4" width="5.85" height="22"/><rect class="c-run" x="126.23" y="4" width="5.85" height="22"/><rect class="c-run" x="133.54" y="4" width="5.85" height="22"/><rect class="c-run" x="140.85" y="4" width="5.85" height="22"/><rect class="c-run" x="148.15" y="4" width="5.85" height="22"/><rect class="c-run" x="155.46" y="4" width="5.85" height="22"/><rect class="c-run" x="162.77" y="4" width="5.85" height="22"/><rect class="c-run" x="170.08" y="4" width="5.85" height="22"/><rect class="c-run" x="177.38" y="4" width="5.85" height="22"/><rect class="c-run" x="184.69" y="4" width="5.85" height="22"/><path class="t-brk" d="M204 29l7 -28M213 29l7 -28"/><path class="t-arr" d="M238 15h52m-8 -7l8 7l-8 7"/><text class="t-labHi" x="2" y="44">NO QUOTA</text><text class="t-lab" x="298" y="44" text-anchor="end">A RUN EVERY 30 MIN</text></svg><!--/@PROTAPE-->
+            <figcaption>The same task, on Pro</figcaption></figure>
+        </div>
+        <div class="tier soon">
+          <div class="tier-h"><p class="tier-n">Teams</p><span class="tier-p"
+            style="color:var(--sig-deep)">— —</span></div>
+          <ul>
+            <li>Not priced yet</li>
+            <li>Coming soon</li>
+          </ul>
+          <p class="tier-note">There is no number here because there is no number yet. There is
+            also no API, no mobile app and no SSO.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 — CLOSE + FOOTER ══════════════════════════════════════════════════ -->
+<section class="sec g-tail" id="join" aria-labelledby="h-join">
+  <div class="perf" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub"><span class="secno">09</span><span class="secname">Close</span></div>
+    <div class="field">
+     <div class="close-grid">
+      <div>
+      <p class="eyebrow">End of sheet</p>
+      <h2 id="h-join">That was one task. <em style="font-style:normal;color:var(--sig)">Start yours.</em></h2>
+      <p class="lede">Atlas opens to the public on 27 August 2026. Leave an address and it will
+        tell you once, on the day.</p>
+
+      <form class="join" id="waitlist" novalidate>
+        <div>
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email"
+            placeholder="you@example.com" required>
+        </div>
+        <button class="btn" type="submit">Join waitlist</button>
+      </form>
+      <p class="trust"><span>Free</span><span>No signup to try</span><span>No credit card</span></p>
+      <div class="received ann" id="received">
+        <span class="stamp stamp--live">
+          <span class="imp">Received · queued for 2026-08-27</span>
+          <span class="imp imp2" aria-hidden="true">Received · queued for 2026-08-27</span>
+        </span>
+      </div>
+      <p class="vh" role="status" aria-live="polite" id="live"></p>
+      </div>
+
+      <div>
+        <figure class="taskslip">
+          <p class="ts-band"><span>Sheet 002</span><span>Unassigned</span></p>
+          <div class="ts-perf" aria-hidden="true"></div>
+          <div class="ts-body">
+            <p class="ts-re">RE: <em>your one sentence</em><br>
+              <span class="ts-meta">run 001 · no schedule set</span></p>
+            <div class="ts-rules" aria-hidden="true"></div>
+            <svg class="tape" viewBox="0 0 260 46" role="img" aria-label="A strip of twelve run cells, every one of them drawn as an outline: nothing has run on this sheet yet."><rect class="c-left" x="2" y="4" width="17.2" height="22"/><rect class="c-left" x="21" y="4" width="17.2" height="22"/><rect class="c-left" x="40" y="4" width="17.2" height="22"/><rect class="c-left" x="59" y="4" width="17.2" height="22"/><rect class="c-left" x="78" y="4" width="17.2" height="22"/><rect class="c-left" x="97" y="4" width="17.2" height="22"/><rect class="c-left" x="116" y="4" width="17.2" height="22"/><rect class="c-left" x="135" y="4" width="17.2" height="22"/><rect class="c-left" x="154" y="4" width="17.2" height="22"/><rect class="c-left" x="173" y="4" width="17.2" height="22"/><rect class="c-left" x="192" y="4" width="17.2" height="22"/><rect class="c-left" x="211" y="4" width="17.2" height="22"/><text class="t-labHi" x="2" y="42">RUNS 001–012</text><text class="t-lab" x="258" y="42" text-anchor="end">NONE YET</text></svg>
+            <figcaption class="ts-ft">Nothing on it yet. One sentence and a time is
+              the whole of it.</figcaption>
+          </div>
+        </figure>
+        <p class="ruled-note ann">
+          <span class="hand" style="--a:var(--tilt-5);--o:var(--off-5)">this sheet is
+            yours</span>
+        </p>
+      </div>
+     </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="sec g-back foot-sec">
+  <div class="wrap">
+    <div class="spine" aria-hidden="true"></div>
+    <div class="stub" aria-hidden="true"></div>
+    <div class="field">
+        <p class="def">at·las /ˈat·ləs/ n. — one who carries the weight so others don't have
+          to.</p>
+        <div class="foot-grid">
+          <p class="colophon">
+            <b>Field</b> nine planes · one 8px module<br>
+            <b>Surface</b> aperture lattice · 1px cell every 4×8<br>
+            <b>Plate 1</b> system · nominal 1A4FE0 · live 0085A5 · fault D2540A<br>
+            <b>Plate 2</b> human markup · D4157F, and nothing else<br>
+            <b>Fringe</b> 1.5px · plate 2 of the badge, cyan side<br>
+            <b>Flood</b> 38D7FF · one bright band, section 05<br>
+            <b>View</b> sheet 001 · rendered 2026-08-21
+          </p>
+          <p class="colophon">
+            <b>Status</b> private beta<br>
+            <b>Public</b> 2026-08-27<br>
+            <b>Models</b> Gemini 3.1 Flash Lite, or your own key for OpenAI,
+            Anthropic, Groq, or any OpenAI-compatible endpoint<br>
+            <b>Built by</b> one person
+          </p>
+          <ul class="foot-links">
+            <li><a href="#ask">What it watches</a></li>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#check">The check</a></li>
+            <li><a href="#proof">Proof</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+          </ul>
+        </div>
+        <p class="colophon endmark">— end of sheet 001 —</p>
+    </div>
+  </div>
+  <div class="perf" aria-hidden="true"></div>
+</footer>
+
+<script>
+/* THE PARKED WINDOW · a record wider than its frame is a stream you scrub,
+   and a parked window has to read as SCRUBBED, not as broken text. Three
+   things make that true, and they are true of every window on the page, not
+   just the big one:
+
+   1 · it parks on a boundary the CONTENT has — the record's end, newest run
+       against the right rule (data-park="end"), or the first rule of a
+       drawing (the default) — never at a magic pixel offset;
+   2 · every word in the window, system label and hand-written note alike, is
+       measured in the record's own coordinates, and the park steps off that
+       boundary by the least it must so that no word straddles either frame
+       edge — but only as far as the drawing goes. A roll that would have to
+       leave the drawing to find a clean offset stays on the boundary instead
+       and lets the cut edge do the talking;
+   3 · whichever side still runs on under the frame gets the cut edge painted
+       on it, so the boundary reads as deliberate.
+
+   Set with scrollLeft, not scrollIntoView, so nothing else on the page moves. */
+(function(){
+  var PAD = 3;                       /* a word must CLEAR the edge, not just miss it */
+  var rolls = [].slice.call(document.querySelectorAll('.roll'));
+  if (!rolls.length) return;
+
+  /* Every word on the sheet, in the sheet's own coordinates. A bounding rect
+     is ALREADY offset by the scroll, so scrollLeft is added back exactly once
+     — add it to a rect measured against the scrolled stage and every box
+     shifts by one scroll position. */
+  var words = function(r){
+    var x0 = r.getBoundingClientRect().left + r.clientLeft - r.scrollLeft;
+    var all = r.querySelectorAll('text, .margin-note'), out = [];
+    for (var i = 0; i < all.length; i++){
+      var b = all[i].getBoundingClientRect();
+      if (b.width < 1) continue;
+      out.push([b.left - x0, b.right - x0]);
+    }
+    return out;
+  };
+  var severs = function(o, list, W){
+    for (var i = 0; i < list.length; i++){
+      var a = list[i][0], b = list[i][1];
+      if (b > o - PAD && a < o + PAD) return true;              /* left edge  */
+      if (b > o + W - PAD && a < o + W + PAD) return true;      /* right edge */
+    }
+    return false;
+  };
+  /* Does this window still show any of the sheet's words? Because we only ask
+     of offsets that already sever nothing, a word is either wholly inside the
+     window or wholly outside it, so one overlap is enough to answer. */
+  var blank = function(o, list, W){
+    for (var i = 0; i < list.length; i++)
+      if (list[i][1] > o && list[i][0] < o + W) return false;
+    return true;
+  };
+  var mark = function(r){
+    var w = r.parentNode;
+    if (!w || !w.classList || !w.classList.contains('cut-wrap')) return;
+    var over = r.scrollWidth - r.clientWidth;
+    if (over <= 24) { w.removeAttribute('data-cut'); return; }
+    w.setAttribute('data-cut', r.scrollLeft > 24
+      ? (r.scrollLeft < over - 24 ? 'both' : 'left') : 'right');
+  };
+  var park = function(r){
+    var W = r.clientWidth, over = r.scrollWidth - W;
+    if (over > 2) {
+      var list = words(r), end = r.getAttribute('data-park') === 'end';
+      var home = end ? over : 0, at = home;
+      var homeBlank = blank(home, list, W);
+      if (severs(home, list, W) || homeBlank) {
+        /* Walk away from the boundary looking for an offset that is both
+           clean AND still on the drawing. Past the last word there is always
+           a clean offset — blank sheet severs nothing — and taking it is the
+           worst of the three outcomes: the reader meets a ruled line and an
+           empty slip, having lost the drawing altogether. So a blank window
+           is never a park, at any distance, and not at the boundary either.
+           Nor is a least-bad offset halfway along the sheet, which is the
+           magic pixel number this whole routine exists to avoid. Ranked:
+             1 · clean and on the drawing — take it;
+             2 · else the boundary, and whichever word runs on runs off under
+                 the painted cut edge. A sheet slid sideways is the truth,
+                 and it is the truth the cut edge is built to tell;
+             3 · and if the BOUNDARY is the blank one — a sheet with a wide
+                 unmarked margin — the nearest offset that shows anything,
+                 cut edges and all. Marked cut over blank rest, always. */
+        var best = -1, first = -1;
+        for (var d = 1; d <= over; d++){
+          var o = end ? home - d : home + d;
+          if (blank(o, list, W)) continue;
+          if (first < 0) first = o;
+          if (!severs(o, list, W)) { best = o; break; }
+        }
+        at = best >= 0 ? best : (homeBlank && first >= 0 ? first : home);
+      }
+      r.scrollLeft = at;
+    }
+    mark(r);
+  };
+  var parkAll = function(){ for (var i = 0; i < rolls.length; i++) park(rolls[i]); };
+  parkAll();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(parkAll);
+  var t; addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(parkAll, 200); });
+  for (var i = 0; i < rolls.length; i++)
+    (function(r){ r.addEventListener('scroll', function(){ mark(r); }, { passive: true }); })(rolls[i]);
+})();
+(function(){
+  var f = document.getElementById('waitlist');
+  if (!f) return;
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var i = document.getElementById('email');
+    var ok = i && i.value && i.value.indexOf('@') > 0 && i.value.indexOf('.') > 1;
+    var live = document.getElementById('live');
+    var got = document.getElementById('received');
+    if (!ok) { if (live) live.textContent = 'That does not look like an email address.'; if (i) i.focus(); return; }
+    got.setAttribute('data-on','');
+    if (live) live.textContent = 'Received. Queued for 27 August 2026.';
+  });
+})();
+</script>
+</body>
+</html>

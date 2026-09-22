@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas — Owen Silva</title>
+<meta name="description" content="Atlas: AI task automation, live at try-atlas.app since 27 August 2026. Its release history and a public-safe map of the 50 parts it runs on.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0F14'/><circle cx='23.5' cy='7' r='1.4' fill='%23ECE5D7'/><circle cx='8' cy='10' r='1' fill='%23ECE5D7'/><rect x='2' y='19.2' width='28' height='1.2' fill='%23F0603A'/><path d='M2 20.4 L9 12 L14 17.4 L21 8.6 L30 20.4 Z' fill='%23ECE5D7'/></svg>">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('ink-theme');
+      if (t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+    } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400..700&display=swap">
+<link rel="stylesheet" href="css/ink.css">
+<style>
+/* ============================================================
+   atlas.html — page-only layout. Everything here is scoped under
+   .p-atlas so no other page can be reached from this file.
+   The vocabulary (tokens, .measure, .scrim, .hair, .t-*) is
+   ink.css section 16; only the two compositions this page needs
+   are written out below.
+   ============================================================ */
+
+/* ---- 1. the hero: the name is bigger than the window ----
+   "Atlas" is five letters, so at any size that fits the screen it reads
+   as a heading, not as an opening. The frame runs from the left gutter
+   to the right edge of the screen and the name is set past it: what the
+   window holds is "Atla" and the start of the s, and the rest of the
+   word is off in the dark. Real text on one line — the tab title, the
+   outline and the copied text all still say Atlas.
+   Why one flat vw and no rem cap: the word is 1.767 em wide at this
+   tracking, and the frame is 96vw, so the screen edge falls inside the
+   last letter for every font-size above ~54.5vw and at the same place
+   in the word at every width (measured: 1.65 em at 1280, 393 and 320).
+   A rem cap, or a height term, would let the whole word back into the
+   frame on a wide or a short window and the crop would stop meaning
+   anything. The hero may run a little past the fold instead. */
+.p-atlas .at-hero {
+  position: relative;
+  display: grid; grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);   /* the name must not set the column */
+  height: auto; min-height: calc(100svh - 56px); max-height: none;
+  padding: clamp(16px, 4vh, 40px) var(--gutter) clamp(18px, 3.6vh, 38px);
+  margin-bottom: 0;
+  overflow: clip;
+}
+.p-atlas .at-hero__text { position: static; max-width: none; grid-row: 1; }
+/* the opening sentence is the caption to the name, not a second voice:
+   it is set small and wide against it, the way the index's sub-line is */
+.p-atlas .at-hero .lede {
+  max-width: 48ch;
+  font-size: clamp(1.04rem, 1.05vw, 1.3rem); line-height: 1.5;
+  margin: 0;
+}
+.p-atlas .at-hero__link { margin: var(--s-5) 0 0; }
+
+/* the clipped frame: from the left gutter to the edge of the screen.
+   The clip and the max-content width are what .crop gives it; they are
+   written out again here so the hero cannot be undone by a change to
+   the primitive. */
+.p-atlas .at-hero__crop {
+  grid-row: 3; position: relative;
+  margin-right: calc(-1 * var(--gutter));
+  overflow: clip;
+  pointer-events: none;
+}
+.p-atlas .at-hero__name {
+  width: max-content; max-width: none; white-space: nowrap;
+  margin: 0;
+  font-family: var(--display); font-weight: 700;
+  font-size: 58vw;
+  font-variation-settings: "opsz" 144, "SOFT" 3, "WONK" 1;
+  letter-spacing: -.05em; line-height: .84;
+  color: var(--ink-hi);
+}
+
+/* ---- 2. the journey: the run as a place, pinned to the screen ----
+   The band is two screens tall; the stage is pinned for one of them,
+   and that screen of scroll is the whole seven-stage run. No frame,
+   no card: the scene IS the band and the prose sits on it. */
+.p-atlas .at-journey { position: relative; height: 210svh; }
+.p-atlas .at-journey__stage {
+  position: sticky; top: 0; height: 100svh; overflow: clip;
+}
+.p-atlas .at-journey__cv,
+.p-atlas .at-journey__svg {
+  position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+}
+.p-atlas .at-journey__cv { z-index: 2; }
+.p-atlas .at-journey__svg { z-index: 3; }
+/* the gradient scrim: ink gathering under the far ground so the words hold */
+.p-atlas .at-journey__scrim {
+  position: absolute; z-index: 1; inset: auto 0 0 0; height: 62%;
+  pointer-events: none;
+  background-image: linear-gradient(to top,
+    color-mix(in srgb, var(--ground) 88%, transparent) 0%,
+    color-mix(in srgb, var(--ground) 40%, transparent) 46%,
+    transparent 100%);
+}
+.p-atlas .at-journey__head {
+  position: absolute; z-index: 4;
+  left: var(--gutter); top: clamp(44px, 13vh, 132px);
+  max-width: min(880px, 62%);
+}
+.p-atlas .at-journey__head h2 {
+  font-size: clamp(2.1rem, 6vw, 5.8rem);
+  letter-spacing: var(--track-title); line-height: .98; margin: 0;
+  font-variation-settings: "opsz" 120, "SOFT" 3, "WONK" 1;
+}
+.p-atlas .at-journey__read {
+  position: absolute; z-index: 4;
+  right: var(--gutter); bottom: clamp(44px, 7.2vh, 76px);
+  width: min(50ch, 42%);
+  padding-top: 13px; border-top: 1px solid var(--rule-strong);
+}
+.p-atlas .at-journey__read .k {
+  font-family: var(--mono); font-size: var(--t-micro); letter-spacing: .13em;
+  text-transform: uppercase; color: var(--ink-low);
+}
+.p-atlas .at-journey__read b {
+  display: block; font-family: var(--display); font-weight: 600;
+  font-size: clamp(1.35rem, 1.9vw, 1.8rem); line-height: 1.08;
+  letter-spacing: var(--track-head); margin: 6px 0 7px; color: var(--ink-hi);
+}
+.p-atlas .at-journey__read p { margin: 0; color: var(--ink-mid); font-size: var(--t-small); line-height: 1.58; }
+/* the band's state line sits under the prose, on the same right-hand
+   edge: the near end of the trail and its largest label own the bottom
+   left corner, and a status line laid across them reads as a collision. */
+.p-atlas .at-journey .scene-note {
+  position: absolute; z-index: 4; left: auto; right: var(--gutter); bottom: 14px;
+  margin: 0; text-align: right; max-width: min(104ch, 66%);
+}
+
+/* the landmarks: real text in the SVG, sized by how far away they are */
+.p-atlas .lf__n { fill: var(--ink-mid); font-family: var(--body); letter-spacing: -.005em; }
+.p-atlas .lf__i { fill: var(--ink-faint); font-family: var(--mono); letter-spacing: .15em; }
+.p-atlas .lf__stem { stroke: var(--ink-faint); }
+.p-atlas .lf[data-on="true"] .lf__stem { stroke: var(--horizon); opacity: .72; }
+.p-atlas .lf[data-on="true"] .lf__n { fill: var(--ink-hi); }
+.p-atlas .lf[data-on="true"] .lf__i { fill: var(--horizon); }
+.p-atlas .lf:hover .lf__n { fill: var(--ink-hi); }
+.p-atlas .lf__n, .p-atlas .lf__i { transition: fill var(--dur-fast) var(--ease-ink); }
+
+/* air between the journey and the page that follows it */
+.p-atlas main > .wrap { padding-top: var(--s-7); }
+
+/* ---- the specification: one measure of running text, not a strip ----
+   The same six labels and the same figures QA-1 first met as a table and
+   QA-3 met again as a five-column strip parted by vertical hairlines.
+   Nothing here is a cell and nothing is a column: the labels are mono
+   marks set into a single running line, the figures are the reading
+   voice, and the only rule on the block is the one the note already
+   carries. No accent either — the one warm thing on this page is the
+   horizon. The <dl> is kept, so a screen reader still hears six
+   term-and-definition pairs; only the rendering is prose. */
+.p-atlas .at-spec {
+  margin: var(--s-6) 0 0; max-width: var(--measure-wide);
+  font-size: var(--t-small); line-height: 1.85;
+  color: var(--ink-hi); text-wrap: pretty;
+}
+.p-atlas .at-spec > div { display: inline; }
+.p-atlas .at-spec dt {
+  display: inline; font-family: var(--mono); font-size: var(--t-micro);
+  letter-spacing: .13em; text-transform: uppercase; color: var(--ink-faint);
+  margin: 0; white-space: nowrap;
+}
+.p-atlas .at-spec dd { display: inline; margin: 0; }
+/* the space between a label and its figure, and the wider one between one
+   fact and the next: written as boxes so no punctuation is invented and
+   nothing is read out that is not in the text. */
+.p-atlas .at-spec dt::after,
+.p-atlas .at-spec dd::after {
+  content: ""; display: inline-block; height: 1px;
+}
+.p-atlas .at-spec dt::after { width: .62em; }
+.p-atlas .at-spec dd::after { width: 2.1em; }
+.p-atlas .at-spec > div:last-child dd::after { width: 0; }
+
+/* the seven stages, written out — the text path when nothing renders */
+.p-atlas .life-text { list-style: none; margin: var(--s-5) 0 0; padding: 0; max-width: var(--measure-wide); }
+.p-atlas .life-text li { padding: 14px 0; border-top: 1px solid var(--rule); display: grid; gap: 2px 26px; grid-template-columns: 112px minmax(0, 1fr); }
+.p-atlas .life-text .k { font-family: var(--mono); font-size: var(--t-micro); letter-spacing: .1em; color: var(--ink-faint); padding-top: .35em; white-space: nowrap; }
+.p-atlas .life-text b { font-weight: 600; color: var(--ink-hi); }
+.p-atlas .life-text p { margin: 3px 0 0; color: var(--ink-mid); font-size: var(--t-small); line-height: var(--lh-body); }
+
+/* the two disclosures: a control in the page's language. The native
+   triangle is the browser's mark, not the site's, so it goes; in its
+   place a cross drawn from two hairlines, which loses its upright when
+   the block is open. It is painted, not written, so nothing new is
+   announced — the state a screen reader hears is the details element's
+   own. The label keeps ink.css's micro caps and its 44 px thumb target. */
+.p-atlas details.plain > summary {
+  display: flex; align-items: center; gap: 13px;
+  width: max-content; max-width: 100%;
+  list-style: none;
+}
+.p-atlas details.plain > summary::-webkit-details-marker { display: none; }
+.p-atlas details.plain > summary::before {
+  content: ""; flex: none; width: 11px; height: 11px;
+  background-image:
+    linear-gradient(var(--ink-low), var(--ink-low)),
+    linear-gradient(var(--ink-low), var(--ink-low));
+  background-size: 11px 1px, 1px 11px;
+  background-position: center center, center center;
+  background-repeat: no-repeat;
+  transition: background-size var(--dur-fast) var(--ease-ink);
+}
+.p-atlas details.plain[open] > summary::before { background-size: 11px 1px, 1px 0; }
+.p-atlas details.plain > summary:hover::before,
+.p-atlas details.plain > summary:focus-visible::before {
+  background-image:
+    linear-gradient(var(--ink-hi), var(--ink-hi)),
+    linear-gradient(var(--ink-hi), var(--ink-hi));
+}
+
+/* ---- 3. the release scene: the names get a rail of their own ----
+   Nine of the ten releases land in one week at the far right of a
+   five-month axis, so the names sit on a rail across the whole band
+   and a lens joins that rail to the week it magnifies. Pointing at a
+   name ties it to its own mark; at rest nothing crosses. */
+.p-atlas .rel-scene { height: clamp(360px, 34vw, 460px); }
+.p-atlas .rel-lens__fill, .p-atlas .rel-lens { pointer-events: none; }
+.p-atlas .rel-mark__v {
+  fill: var(--scene-ink); letter-spacing: .02em;
+  transition: fill var(--dur-fast) var(--ease-ink);
+}
+.p-atlas .rel-mark[data-kind="Major Release"] .rel-mark__v { fill: var(--ink-mid); }
+.p-atlas .rel-mark:hover .rel-mark__v,
+.p-atlas .rel-mark:focus .rel-mark__v { fill: var(--ink-hi); }
+.p-atlas .rel-mark__tie {
+  stroke: var(--ink-hi); stroke-width: 1; opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-ink);
+}
+.p-atlas .rel-mark:hover .rel-mark__tie,
+.p-atlas .rel-mark:focus .rel-mark__tie { opacity: .5; }
+
+/* ---- 4. the releases: rows on a hairline rhythm, not a table ---- */
+.p-atlas .rel-row summary { grid-template-columns: 104px 124px minmax(0, 1fr) auto; padding: 16px 0; }
+.p-atlas .rel-row .d { white-space: nowrap; }
+.p-atlas .rel-row summary:hover,
+.p-atlas .rel-row[open] summary { background: none; }
+.p-atlas .rel-row summary:hover .t,
+.p-atlas .rel-row summary:focus-visible .t { color: var(--horizon); }
+.p-atlas .rel-row[open] .v { color: var(--horizon); }
+.p-atlas .rel-row .body { padding-bottom: 22px; }
+
+/* ---- 5. the plates: the screenshots join the night -----------
+   The treatment itself is ink.css §16 (.plate.plate--duo, the same
+   rule portal uses); this page only supplies the two filter defs the
+   primitive asks for and the composition — a pair at the end of the
+   page, each one running off its own side of the viewport. Before
+   this the two were the only hues on the site outside ink, cream and
+   vermilion. */
+.p-atlas .at-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+/* The inline plate inside "How it's built" is the one screenshot QA read as
+   still carrying colour. The duotone filter does take on it — the computed
+   filter is url(#ink-duo-ink) and the picture is grey. What the scan picked
+   up is the page's own warm ground read THROUGH the plate: .plate--duo
+   dissolves the left 15 % and the bottom 26 % of the image to nothing, and
+   a clip inset four pixels from the image box is mostly world at those
+   edges, so the measurement moved with wherever the horizon happened to be
+   standing. The bleed treatment belongs to a plate that runs off the side
+   of the screen; this one sits in a column. So: the left edge is whole, the
+   dissolve is the bottom edge only, and the ink gathers behind the plate so
+   what the picture fades into is ink rather than whatever the sky is doing.
+   The two bleed plates below are untouched. */
+.p-atlas .at-inline { isolation: isolate; }
+.p-atlas .at-inline::before {
+  content: ""; position: absolute; z-index: 0;
+  left: -16%; right: -16%; top: 44%; bottom: -14%;
+  pointer-events: none;
+  /* ink gathering under the plate, the way the journey's scrim gathers
+     under the far ground — a pool, never a panel: it is solid only under
+     the dissolving edge and it is out of sight before it reaches a side */
+  background: linear-gradient(to top, var(--ground) 0 38%, rgb(0 0 0 / 0) 100%);
+  -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 0) 0, #000 11%, #000 89%, rgb(0 0 0 / 0) 100%);
+  mask-image: linear-gradient(to right, rgb(0 0 0 / 0) 0, #000 11%, #000 89%, rgb(0 0 0 / 0) 100%);
+}
+.p-atlas .at-inline img, .p-atlas .at-inline figcaption { position: relative; z-index: 1; }
+.p-atlas .at-inline img {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 78%, rgb(0 0 0 / 0) 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 78%, rgb(0 0 0 / 0) 100%);
+  -webkit-mask-composite: source-over; mask-composite: add;
+}
+.p-atlas .at-plates {
+  margin-top: var(--s-7);
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-8);
+  align-items: end;
+}
+@media (min-width: 900px) {
+  .p-atlas .at-plates { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(36px, 5vw, 86px); }
+}
+.p-atlas .at-plate { margin: 0; position: relative; }
+.p-atlas .at-plate img { width: calc(100% + 7vw); max-width: none; opacity: .92; }
+.p-atlas .at-plate--l img { margin-left: -7vw; }
+/* the primitive dissolves the LEFT edge, for a plate that bleeds off
+   the right. This one bleeds off the left, so its dissolved edge is
+   the right one — the mask is mirrored, the duotone is not touched. */
+.p-atlas .at-plate--l img {
+  -webkit-mask-image:
+    linear-gradient(to left, rgb(0 0 0 / 0) 0, #000 15%),
+    linear-gradient(to bottom, rgb(0 0 0 / 0) 0, #000 9%, #000 74%, rgb(0 0 0 / 0) 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to left, rgb(0 0 0 / 0) 0, #000 15%),
+    linear-gradient(to bottom, rgb(0 0 0 / 0) 0, #000 9%, #000 74%, rgb(0 0 0 / 0) 100%);
+  mask-composite: intersect;
+}
+.p-atlas .at-plate figcaption { margin-top: 14px; }
+.p-atlas .at-plate--l figcaption { padding-right: var(--s-5); }
+
+/* ---- 5b. the system map: a map of the night ------------------
+   Six ground levels, one per tier, each a hairline horizon that
+   fades out at both ends; the fifty parts are marks of light above
+   their own ground with their names beside them. Nothing is boxed:
+   the dark plate that used to sit behind every name is gone and the
+   names are cased in ground the way a place name is cased on a map,
+   so the links can pass under them. The six tier names have left the
+   drawing for the map's left margin, where they are real text at the
+   page's own size (10.5 px, not the 9 px the sheet gave them) and
+   each is sticky inside its own level, pinned a measured nav-height
+   clear of the masthead instead of sliding under it. */
+.p-atlas .map-scene { position: relative; }
+.p-atlas .map-margin { position: absolute; left: 0; top: 0; bottom: 0; pointer-events: none; }
+.p-atlas .map-tier { position: absolute; left: 0; width: 100%; }
+.p-atlas .map-tier-name {
+  position: sticky; top: var(--map-stick, 72px); display: block;
+  font-family: var(--mono); font-size: 10.5px; line-height: 1.34;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.p-atlas .map-tier.off .map-tier-name { display: none; }
+.p-atlas .map-tier-name b { display: block; font-weight: 400; color: var(--ink-mid); }
+.p-atlas .map-tier-name i { display: block; font-style: normal; color: var(--ink-faint); }
+.p-atlas .map-svg .horizon { fill: none; stroke: url(#map-horizon); stroke-width: 1; }
+.p-atlas .map-svg #map-horizon stop { stop-color: var(--rule-strong); }
+.p-atlas .map-svg .edge { stroke: var(--rule-strong); stroke-width: .85; opacity: .4; }
+.p-atlas .map-svg .edge.hot { stroke: var(--accent); stroke-width: 1.6; opacity: 1; }
+/* a hit area, never a plate: no fill, no stroke, and it still takes a pointer */
+.p-atlas .map-svg .node__hit { fill: none; stroke: none; pointer-events: all; }
+.p-atlas .map-svg .node__ring { fill: none; stroke: none; }
+.p-atlas .map-svg .node:hover .node__ring,
+.p-atlas .map-svg .node:focus-visible .node__ring { stroke: var(--accent); stroke-width: 1; opacity: .42; }
+.p-atlas .map-svg .node__label {
+  font-size: 10.6px; letter-spacing: .015em;
+  paint-order: stroke; stroke: var(--ground); stroke-width: 2.4px;
+  stroke-linejoin: round; stroke-opacity: .92;
+}
+
+/* ---- 6. phone and tablet: the same journey, a lighter scene ----
+   Only the active landmark is named on a narrow screen, so no two
+   labels can ever meet; the words live in the prose block instead. */
+@media (max-width: 900px) {
+  .p-atlas .at-hero {
+    height: auto; min-height: calc(100svh - 56px); max-height: none;
+    padding: clamp(18px, 3.5vh, 44px) var(--gutter) clamp(18px, 3vh, 40px);
+  }
+  .p-atlas .at-hero .lede { max-width: 26ch; }
+
+  .p-atlas .at-journey { height: 190svh; }
+  .p-atlas .at-journey__head { max-width: none; right: var(--gutter); top: clamp(92px, 12vh, 132px); }
+  .p-atlas .at-journey__read {
+    left: var(--gutter); right: var(--gutter); width: auto;
+    top: clamp(214px, 29vh, 290px); bottom: auto; min-height: 160px;
+  }
+  /* still on the right, and never as wide as the near label's corner */
+  .p-atlas .at-journey .scene-note { max-width: calc(100% - 128px); bottom: 12px; }
+  .p-atlas .at-journey__scrim {
+    inset: 0 0 auto 0; height: 66%;
+    background-image: linear-gradient(to bottom,
+      color-mix(in srgb, var(--ground) 90%, transparent) 0%,
+      color-mix(in srgb, var(--ground) 52%, transparent) 58%,
+      transparent 100%);
+  }
+  .p-atlas .life-text li { grid-template-columns: minmax(0, 1fr); }
+  .p-atlas .life-text .k { padding-top: 0; }
+}
+
+@media (max-width: 560px) {
+  .p-atlas .at-hero .lede { max-width: 26ch; font-size: 1.14rem; }
+  .p-atlas .at-journey { height: 180svh; }
+  .p-atlas .at-journey__read p { font-size: var(--t-small); line-height: 1.52; }
+
+  /* one column: version, date, title, note down the same hairline
+     rhythm — no 110 px title column with 200 px of empty row beside it.
+     ink.css now carries this rule too, byte-identical, but the page copy
+     CANNOT go: section 4 above sets .p-atlas .rel-row summary, which
+     outranks a bare .rel-row summary in the stylesheet at any width.
+     Measured with this block deleted: 104px 124px 64px 0px at 320 and
+     104px 124px 133px 0px at 393 — four columns, the phone layout gone. */
+  .p-atlas .rel-row summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px 0; padding: 15px 0 17px;
+  }
+  .p-atlas .rel-row .v,
+  .p-atlas .rel-row .d,
+  .p-atlas .rel-row .t,
+  .p-atlas .rel-row .n { grid-column: 1; }
+  .p-atlas .rel-row .t { font-size: 1.04rem; line-height: 1.32; margin-top: 2px; }
+  .p-atlas .rel-row .n { white-space: normal; margin-top: 1px; }
+}
+
+/* The 10 px map labels under 480 px used to live here as a page-scoped
+   copy as well. That one is in ink.css now and nothing on this page
+   outranks it, so it has gone: measured at 320 and 393 after the
+   deletion, the tier and node labels still render at 10.0 px. */
+
+/* reduced motion: the run is already over, the whole trail is drawn */
+@media (prefers-reduced-motion: reduce) {
+  .p-atlas .at-journey { height: auto; }
+  .p-atlas .at-journey__stage { position: static; height: 100svh; }
+}
+</style>
+<script defer src="js/site.js"></script>
+<script defer src="js/scene.js"></script>
+<script defer src="js/palette.js"></script>
+<script defer src="js/wash.js"></script>
+<script defer src="js/atlas.js"></script>
+</head>
+<body class="ink-ground p-atlas">
+
+<canvas class="page-wash" id="page-wash" aria-hidden="true"></canvas>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav" aria-label="Pages">
+  <a class="nav__mark" href="index.html">Owen Silva</a>
+  <button class="pal-btn" id="pal-btn" type="button" aria-label="Open the go-to palette. Keyboard shortcut Control or Command K.">Go to <kbd>⌘K</kbd></button>
+  <button class="theme-btn" id="theme-btn" type="button">Ink</button>
+  <div class="nav__links">
+    <a href="index.html">Index</a>
+    <a href="atlas.html" aria-current="page">Atlas</a>
+    <a href="browser.html">Browser</a>
+    <a href="portal.html">Portal</a>
+    <a href="projects.html">Projects</a>
+    <a href="lab.html">Lab</a>
+    <a href="about.html">About</a>
+  </div>
+</nav>
+
+<main id="main">
+
+  <!-- ============ the hero: one word in the night ============ -->
+  <section class="band-hero at-hero" aria-labelledby="h-title">
+    <div class="at-hero__text">
+      <p class="eyebrow">Project &middot; live on the public web</p>
+      <p class="lede">Type &ldquo;every weekday at 8am, send me the top tech news&rdquo; and Atlas runs it on
+        that schedule, checks the answer, and sends you the result.</p>
+      <p class="at-hero__link" data-enter="rise" data-delay="420"><a class="more" href="https://try-atlas.app" rel="noopener">try-atlas.app</a></p>
+    </div>
+
+    <!-- the frame is clipped at the right edge of the screen and the name is
+         set larger than the screen can hold, so what reads is the first four
+         letters and the start of the last one. Still one line of real text;
+         the tab title and the page outline carry the whole name. It is not on
+         a script's timer either: it paints in the first frame. -->
+    <div class="crop at-hero__crop">
+      <h1 class="at-hero__name" id="h-title">Atlas</h1>
+    </div>
+  </section>
+
+  <!-- ============ the journey: seven stages to the horizon ============ -->
+  <section class="at-journey" id="journey" aria-labelledby="h-life">
+    <div class="at-journey__stage" id="life-stage">
+      <div class="at-journey__scrim" aria-hidden="true"></div>
+      <canvas class="at-journey__cv" id="life-cv" aria-hidden="true"></canvas>
+      <svg class="at-journey__svg ink-svg" id="life-svg" role="group"
+           aria-label="The life of one scheduled task in seven stages: the sentence, the leader, pre-fetch, the model, the grader, delivery, task health. Each stage is a button, and every stage is written out under the diagram."></svg>
+      <div class="at-journey__head" data-enter="rise">
+        <p class="eyebrow">01 &mdash; The life of one scheduled task</p>
+        <h2 id="h-life">One scheduled task, end to end</h2>
+      </div>
+      <div class="at-journey__read" id="life-read" role="status" aria-live="polite" data-enter="fade" data-delay="260"></div>
+      <p class="scene-note" id="life-state" role="status"></p>
+    </div>
+  </section>
+
+  <div class="wrap">
+
+    <details class="plain">
+      <summary>The seven stages as text</summary>
+      <ol class="life-text" id="life-text"></ol>
+    </details>
+
+    <div class="page-head page-head--tight">
+      <dl class="at-spec">
+        <div><dt>Built</dt><dd>1 Apr &ndash; 9 Sep 2026, with commits on 109 days</dd></div>
+        <div><dt>Public launch</dt><dd>27 Aug 2026</dd></div>
+        <div><dt>Commits</dt><dd>2,636 to production</dd></div>
+        <div><dt>Releases</dt><dd>337 internal before 1.0, then 10 public</dd></div>
+        <div><dt>Code</dt><dd>~140k lines of app code, ~212k lines of tests</dd></div>
+        <div><dt>Built with</dt><dd>Node and Express, PostgreSQL, Clerk, Railway, Cloudflare, Brevo,
+          LemonSqueezy. Gemini by default, or your own OpenAI or Anthropic key. Playwright and axe-core.</dd></div>
+      </dl>
+      <p class="note">The two code figures above were counted with <code>wc</code>-style rules on 13 September
+        and were not remeasured on 16 September; the 408,364-line census on the front page counts code lines
+        under a different rule. The two do not reconcile, so they are never placed side by side.</p>
+    </div>
+
+    <section class="band" aria-labelledby="h-does">
+      <div class="band__head">
+        <p class="eyebrow">02 — The product</p>
+        <h2 class="ink-in" id="h-does">What it does, and how it holds</h2>
+      </div>
+      <div class="feature__top">
+        <div class="cols" style="margin-top:0">
+          <div>
+            <h3>What it does</h3>
+            <ul class="ticks">
+              <li>Reads the schedule straight out of the sentence. Nobody fills in a cron field.</li>
+              <li>Sends results by email or daily digest, Discord, Slack, Telegram or signed webhook, with Google Sheets and GitHub in beta.</li>
+              <li>Reply to a result email to change the task, with one-click undo.</li>
+              <li>Grades every run and warns you when a task has quietly stopped finding anything new.</li>
+              <li>Fetches live stock and crypto prices and headlines before the AI writes: about 230 company names map to tickers, and 37 coins are recognised.</li>
+              <li>Invite a friend and you both get 10 more runs.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>How it&rsquo;s built</h3>
+            <ul class="ticks">
+              <li>One scheduler at a time. Postgres advisory locks keep scheduled jobs on a single leader, so a task never fires twice across instances.</li>
+              <li>Encrypted backups. Nightly database snapshots are AES-256-GCM encrypted and stored off-site, and a full restore has been checked end to end.</li>
+              <li>Stored credentials are encrypted at rest.</li>
+              <li>A launch gate that fails closed. The server alone decides whether the site is open, and a missing or malformed setting keeps it shut.</li>
+              <li>Answer quality. A classifier retries weak answers or switches provider, and an LLM-as-judge eval harness has run 52 times.</li>
+              <li>Release gate, 9 Sep: 456 unit test files and 596 Playwright tests passing, none flaky (from the project&rsquo;s release record).</li>
+            </ul>
+          </div>
+        </div>
+        <figure class="plate plate--duo at-inline">
+          <img src="img/atlas-task-health.jpg" width="1000" height="736" loading="lazy" decoding="async"
+               alt="An Atlas task-health email: a task graded over recent runs, with a note that it has stopped finding anything new.">
+          <figcaption>A task-health email &mdash; Atlas grading its own output</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ scene 1: the release history ============ -->
+    <section class="band" aria-labelledby="h-rel">
+      <div class="band__head">
+        <p class="eyebrow">03 — The release history</p>
+        <h2 class="ink-in" id="h-rel">Ten releases over a current of 2,636 commits</h2>
+        <p id="rel-total">Loading the changelog&hellip;</p>
+      </div>
+
+      <div class="scene rel-scene" id="rel-scene">
+        <canvas class="scene__canvas" id="rel-canvas" aria-hidden="true"></canvas>
+        <svg class="scene__svg ink-svg" id="rel-svg" role="group"
+             aria-label="The ten public Atlas releases as marks on a line, each a button that opens its entry below. Beneath them, 2,636 dots: one per commit to production, by date."></svg>
+      </div>
+      <p class="scene-note" id="rel-state" role="status">the release scene has not started yet</p>
+      <p class="vh">The same releases are listed in full below, newest first, with every entry each one shipped.</p>
+
+      <div class="rel-list" id="rel-list"></div>
+
+      <p class="note">The 337 pre-1.0 releases were never shipped to anyone outside, so the public log restarts
+        at 1.0 on 27 August rather than continuing from v2.365.0. Their count is confirmed against the
+        changelog archive; their individual dates are not published here, so the scene shows them as a span
+        rather than inventing ten dozen marks.</p>
+    </section>
+
+    <!-- ============ scene 2: the system map ============ -->
+    <section class="band" aria-labelledby="h-map">
+      <div class="band__head">
+        <p class="eyebrow">04 — The system</p>
+        <h2 class="ink-in" id="h-map">Fifty parts, sixty-one links</h2>
+        <p>What Atlas actually runs on, transcribed from the map my own dashboard draws. Point at a part, or
+          tab through them, to see what it does and what it touches. Hostnames, ports, paths, keys, buckets
+          and every live probe reading are deliberately left out.</p>
+      </div>
+
+      <div class="map-scene">
+        <svg class="map-svg ink-svg" id="map-svg" role="group"
+             aria-label="A diagram of the 50 parts Atlas runs on, in six tiers, with 61 links between them. Each part is a button that describes itself."></svg>
+      </div>
+      <div class="map-readout" id="map-readout" role="status" aria-live="polite">
+        <span class="k">Readout</span>
+        <b>Point at a part of the map</b>
+        <p>Its tier, its kind and what it does appear here. The whole map is also written out as text below.</p>
+      </div>
+      <p class="scene-note" id="map-state" role="status">the map has not started yet</p>
+
+      <details class="plain">
+        <summary>All 50 parts as text</summary>
+        <div class="node-list" id="node-list"></div>
+      </details>
+
+      <div class="at-plates">
+        <figure class="plate plate--duo at-plate at-plate--l" data-enter="bleed" data-delay="80">
+          <img src="img/site-atlas-home.jpg" width="1400" height="900" loading="lazy" decoding="async"
+               alt="The Atlas home page: the wordmark over a box where you type a task in plain words.">
+          <figcaption>The home page, rebuilt across 16 pages in August 2026</figcaption>
+        </figure>
+        <figure class="plate plate--duo at-plate at-plate--r" data-enter="bleed" data-delay="200">
+          <img src="img/site-atlas-changelog.jpg" width="1400" height="900" loading="lazy" decoding="async"
+               alt="The Atlas public changelog: a vertical timeline of releases, each with a version, a date and a kind.">
+          <figcaption>The public changelog this page&rsquo;s release scene is built from</figcaption>
+        </figure>
+      </div>
+
+      <svg class="at-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <filter id="ink-duo-ink" color-interpolation-filters="sRGB">
+          <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0 0 0 1 0"/>
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues="0.024 0.478"/>
+            <feFuncG type="table" tableValues="0.035 0.455"/>
+            <feFuncB type="table" tableValues="0.047 0.412"/>
+          </feComponentTransfer>
+        </filter>
+        <filter id="ink-duo-paper" color-interpolation-filters="sRGB">
+          <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0 0 0 1 0"/>
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues="0.118 0.937"/>
+            <feFuncG type="table" tableValues="0.137 0.914"/>
+            <feFuncB type="table" tableValues="0.153 0.863"/>
+          </feComponentTransfer>
+        </filter>
+      </svg>
+    </section>
+
+    <footer class="colophon">
+      <div>
+        <h2>About these numbers</h2>
+        <p>Measured on 16 September 2026 from git history and the project&rsquo;s own changelog. Nothing has
+           landed in Atlas since 9 September. The derived figures &mdash; 456 unit test files, 596 Playwright
+           tests, 52 eval runs &mdash; were not remeasured on that date.</p>
+      </div>
+      <div>
+        <h2>About this map</h2>
+        <p>It is the shape of the system, not its live state. Per-node health is a probe result and is
+           deliberately not published. Every vendor named here is one the product already names publicly.</p>
+      </div>
+      <div>
+        <h2>Back</h2>
+        <p><a href="index.html">The index &mdash; 23 projects, 2,986 commits</a></p>
+      </div>
+    </footer>
+
+  </div>
+</main>
+</body>
+</html>

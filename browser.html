@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A browser — Owen Silva</title>
+<meta name="description" content="An Electron browser written in six days: Claude sessions, Windows programs and an Android phone all open as tabs. 162 commits, 67 documented features.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0F14'/><circle cx='23.5' cy='7' r='1.4' fill='%23ECE5D7'/><circle cx='8' cy='10' r='1' fill='%23ECE5D7'/><rect x='2' y='19.2' width='28' height='1.2' fill='%23F0603A'/><path d='M2 20.4 L9 12 L14 17.4 L21 8.6 L30 20.4 Z' fill='%23ECE5D7'/></svg>">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('ink-theme');
+      if (t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+    } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400..700&display=swap">
+<link rel="stylesheet" href="css/ink.css">
+<style>
+/* ============================================================
+   The browser page only. Every selector below is scoped to
+   .pg-browser, so nothing here reaches another page or edits
+   the shared stylesheet. The vocabulary is ink.css section 16:
+   .bleed, .cols-hair, .measure, .air, .t-* and the tokens.
+   ============================================================ */
+
+/* A section marker is a label, not a lead sentence: .band__head p
+   in ink.css otherwise outranks .eyebrow and sets it at --t-lead. */
+.pg-browser .band__head p.eyebrow { font-size: var(--t-micro); }
+
+/* ---- the hero: one second of the phone, standing up -------- */
+.pg-browser .band-hero { margin-bottom: var(--s-6); }
+/* The glass is in FRONT of the name, not behind it: the end of the word
+   runs on into it and is seen through it. So the pane takes a z-index
+   above .band-hero__text (4) and the readout and the state line take one
+   above the pane, and the pane stops taking the pointer — it is a
+   drawing, and the only thing under it is type. */
+.pg-browser .band-hero > .pane { z-index: 5; pointer-events: none; }
+.pg-browser .band-hero__tools,
+.pg-browser .band-hero .scene-note { z-index: 6; }
+/* the night behind the readout is already deep: a hairline is enough, and a
+   scrim here draws a translucent box over the ridge. Placement stays with
+   the shared stylesheet, which already puts the words left of the glass. */
+.pg-browser .band-hero__tools { background-image: none; }
+/* D7 and D16, page-scoped: the name is the hero at every width.
+   It was 198.4 px at 1280 and 60.9 at 393 — on a phone the second
+   smallest display type on the site, so the standing column carried
+   the screen and the title did not. It is one line of max-content
+   width now, and below the split the hero's own overflow: hidden
+   crops it exactly the way .crop crops index and atlas: the screen
+   ends inside the "e" of "browser" at 320, at 393 and at every width
+   up to 900. Nothing below reaches another page; ink.css is untouched. */
+.pg-browser .band-hero__text h1 {
+  width: max-content; max-width: none; white-space: nowrap;
+  line-height: .84;                /* the display line-height index and atlas set */
+  font-size: max(6.1rem, 30vw);    /* 117.9 px at 393, 97.6 at 320 */
+}
+@media (min-width: 901px) {
+  /* Above the split the window does not crop it: the name runs from
+     the left gutter, across the lit edge of the glass, and stops just
+     inside the right gutter — so the last third of the word is seen
+     THROUGH the glass where only the "er" used to be. 24.4vw is the
+     width that reaches the right gutter; 34.6vh is what keeps a short
+     window from landing the name on the readout, which is how index
+     caps its own name (min(35vw, 62vh)). 311 px at 1280x900, 277 at
+     1280x800, never under 224. */
+  .pg-browser .band-hero__text h1 { font-size: min(24.4vw, 34.6vh); }
+  /* the sentence under the name keeps half the width (640 px at 1280,
+     about 60 characters, inside the system's 55–70). The readout takes
+     a wider column so its four strings set in fewer lines: the block
+     was 271.3 px tall and is 169.2, which is the room the taller name
+     needs and more. Nothing moves horizontally — both blocks keep the
+     left gutter the shared stylesheet gives them, and 611 px at 1280
+     still stops well short of the lit edge at 704. */
+  .pg-browser .band-hero--wide .band-hero__text { max-width: min(60ch, 50%); }
+  /* and no rule over it. A 560 px hairline in the lower left of the hero
+     is a band divider, which is how QA-4 read this block — an eyebrow, a
+     heading and four lines of body starting inside the first screen. At
+     1280x800 it also landed within 10 px of the horizon, so the world
+     ended on a rule. The mono label is label enough; 157 px of night
+     at 1280x900 separates it from the sentence above. */
+  .pg-browser .band-hero--wide .band-hero__tools {
+    max-width: min(560px, 44%); border-top: 0; padding-top: 0;
+  }
+  .pg-browser .band-hero__tools .readout { margin-top: 0; }
+}
+/* the state line reports a scene that could not be drawn; while it has
+   nothing to say it takes no room. Its 10 px of padding was the last
+   thing in the hero and the readout's own box ran into it on phones. */
+.pg-browser .band-hero .scene-note:empty { padding: 0; }
+/* the two duotone filters this page's plate uses (see .plate--duo) */
+.pg-browser .duo-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.pg-browser .band-hero__tools .readout { min-height: 0; }
+.pg-browser .pipe-cap {
+  margin: .55em 0 0; font-family: var(--mono); font-size: var(--t-micro);
+  letter-spacing: .03em; color: var(--ink-faint); max-width: none;
+}
+
+/* ---- the hero, written out: two columns parted by a hairline ---- */
+.pg-browser .stages { margin-top: var(--s-7); }
+.pg-browser .stages h2 {
+  font-family: var(--body); font-size: var(--t-micro); font-weight: 600;
+  font-variation-settings: normal;
+  letter-spacing: var(--track-caps); text-transform: uppercase;
+  color: var(--ink-low); margin: 0 0 var(--s-3);
+}
+.pg-browser .stages .ticks li { max-width: var(--measure); }
+
+/* ---- 02: the three measured fixes run the full width ------- */
+.pg-browser .cpu-frame { height: clamp(290px, 29vw, 400px); margin-top: var(--s-6); }
+.pg-browser .cpu-frame .pane__cv,
+.pg-browser .cpu-frame .pane__svg { inset: 0; }
+.pg-browser .cpu-under { margin-top: var(--s-5); }
+
+/* ---- 03: sixty-seven features as one long list ------------- */
+.pg-browser .fx-head { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: baseline; }
+.pg-browser .fx-list { display: block; margin-top: var(--s-5); }
+.pg-browser .fx {
+  display: grid; grid-template-columns: 4.4rem minmax(0, 1fr);
+  gap: 0 clamp(14px, 2vw, 30px);
+  padding: clamp(13px, 1.3vw, 18px) 0;
+  border-top: 1px solid var(--rule);
+  scroll-margin-top: 80px;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.pg-browser .fx:last-of-type { border-bottom: 1px solid var(--rule); }
+.pg-browser .fx[hidden] { display: none; }
+.pg-browser .fx__n {
+  font-family: var(--mono); font-size: var(--t-micro); letter-spacing: .1em;
+  color: var(--ink-faint); padding-top: .42em;
+  transition: color var(--dur-fast) var(--ease);
+}
+.pg-browser .fx__t {
+  margin: 0; font-size: var(--t-body); line-height: 1.55;
+  color: var(--ink-mid); max-width: var(--measure-wide);
+}
+.pg-browser .fx__t b { color: var(--ink-hi); font-weight: 600; }
+.pg-browser .fx:hover { border-top-color: var(--rule-strong); }
+.pg-browser .fx:hover .fx__n { color: var(--ink-low); }
+.pg-browser .fx-note { margin-top: var(--s-6); max-width: var(--measure); }
+
+/* ---- phones: the same page, a lighter scene ---------------- */
+/* Inside max-width queries only. 1280 is untouched by everything below. */
+@media (max-width: 900px) {
+  /* the glass needs height on a phone or it stops being a window */
+  .pg-browser .band-hero > .pane { height: clamp(430px, 74vh, 620px); border-top: 0; }
+  .pg-browser .band-hero__tools { margin-top: 4px; }
+}
+@media (max-width: 720px) {
+  .pg-browser .fx { grid-template-columns: 2.9rem minmax(0, 1fr); }
+  .pg-browser .cpu-frame { height: clamp(300px, 62vw, 380px); }
+}
+@media (max-width: 360px) {
+  .pg-browser .fx { grid-template-columns: 2.4rem minmax(0, 1fr); gap: 0 10px; }
+}
+</style>
+<script defer src="js/site.js"></script>
+<script defer src="js/scene.js"></script>
+<script defer src="js/palette.js"></script>
+<script defer src="js/wash.js"></script>
+<script defer src="js/browser.js"></script>
+</head>
+<body class="ink-ground pg-browser">
+
+<canvas class="page-wash" id="page-wash" aria-hidden="true"></canvas>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav" aria-label="Pages">
+  <a class="nav__mark" href="index.html">Owen Silva</a>
+  <button class="pal-btn" id="pal-btn" type="button" aria-label="Open the go-to palette. Keyboard shortcut Control or Command K.">Go to <kbd>⌘K</kbd></button>
+  <button class="theme-btn" id="theme-btn" type="button">Ink</button>
+  <div class="nav__links">
+    <a href="index.html">Index</a>
+    <a href="atlas.html">Atlas</a>
+    <a href="browser.html" aria-current="page">Browser</a>
+    <a href="portal.html">Portal</a>
+    <a href="projects.html">Projects</a>
+    <a href="lab.html">Lab</a>
+    <a href="about.html">About</a>
+  </div>
+</nav>
+
+<main id="main">
+  <section class="band-hero band-hero--wide" aria-labelledby="h-title">
+    <!-- on a phone the hero stacks in DOM order, so the name comes first and
+         the glass follows it; above 900 both are positioned and order is moot -->
+    <div class="band-hero__text">
+      <p class="eyebrow">Project &middot; in use every day</p>
+      <h1 id="h-title">A browser</h1>
+      <p class="lede">Claude coding sessions, Windows programs and my Android phone all open as tabs
+        beside ordinary web pages, in a browser I wrote in six days.</p>
+    </div>
+    <div class="pane" id="pipe-scene">
+      <canvas class="pane__cv" id="pipe-canvas" aria-hidden="true"></canvas>
+      <svg class="pane__svg ink-svg" id="pipe-svg" role="group"
+           aria-label="One second of the phone, standing in the night as a column of light: fifty-nine marks, one for every frame the handset sent in that second, running off the top and the bottom of the frame, with the fifteen that used to arrive too late standing out of line inside the glass. The five stages that carry a frame — the Android handset, adb, the scrcpy stream, the WebCodecs decode in the page and the canvas paint — and every figure are written out as text below."></svg>
+    </div>
+    <div class="band-hero__tools">
+      <h2 class="vh" id="h-pipe">The phone pipeline</h2>
+      <div class="readout" id="pipe-read" role="status">
+        <span class="k">The phone pipeline</span>
+        <b>Five stages, about a millisecond of it spent decoding</b>
+        <p>The standing column is one second of real traffic at the rate the pipeline runs &mdash; one mark
+           for every frame, and the quarter that used to arrive late standing out of line. Every figure is measured.</p>
+        <p class="pipe-cap" id="pipe-cap">59 frames &mdash; one second. 15 of them, a quarter, used to
+           arrive too late.</p>
+      </div>
+    </div>
+    <p class="scene-note" id="pipe-state" role="status"></p>
+  </section>
+
+  <div class="wrap">
+
+    <!-- data-enter="fade" on purpose: the AUTO list in site.js claims
+         `main .page-head` for "rise", which holds a translate3d(0,28px,0)
+         on this block until the observer releases it, so these six labels
+         measured 28 px apart depending on whether the page had been
+         scrolled. Opting in by hand is honoured and fade carries no
+         transform, so the block has one position at every moment. -->
+    <div class="page-head page-head--tight" data-enter="fade">
+      <dl class="facts">
+        <div><dt>Built</dt><dd>10&ndash;15 Sep 2026, 6 days</dd></div>
+        <div><dt>Commits</dt><dd>162</dd></div>
+        <div><dt>Code</dt><dd>~63k lines of JavaScript, ~13k lines of CSS</dd></div>
+        <div><dt>Features</dt><dd>67, documented in a 1,400-line README</dd></div>
+        <div><dt>Distribution</dt><dd>A Windows installer (127&nbsp;MB) and a portable build (a 178&nbsp;MB zip),
+          version 0.1.0, not code-signed. Available on request.</dd></div>
+        <div><dt>Built with</dt><dd>Electron, node-pty and xterm.js, koffi for Win32 calls, WebCodecs,
+          scrcpy and adb, Ghostery ad blocker, Mozilla Readability</dd></div>
+      </dl>
+    </div>
+
+    <!-- the window, written out: the accessible twin of the hero scene -->
+    <section class="stages cols-hair" aria-labelledby="h-stages" data-enter="rise">
+      <div>
+        <h2 id="h-stages">The five stages</h2>
+        <ul class="ticks" id="pipe-list"></ul>
+      </div>
+      <div>
+        <h2>Why it holds together</h2>
+        <ul class="ticks">
+          <li>Decoding runs in the page with WebCodecs, at roughly 1 ms a frame, so the cost is in
+              the link and not in the decoder.</li>
+          <li>The paint happens in the decoder&rsquo;s own callback. Waiting for the next animation
+              frame instead was what dropped a quarter of them.</li>
+          <li>Stream quality follows a TCP round-trip probe rather than adb&rsquo;s own timing,
+              because asking adb how long something took costs about 170 ms even on a 7 ms link.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="h-does">
+      <div class="band__head" data-enter="rise">
+        <p class="eyebrow">01 — The product</p>
+        <h2 class="ink-in" id="h-does">What it does, and how it holds</h2>
+      </div>
+      <div class="feature__top">
+        <div class="cols" style="margin-top:0">
+          <div>
+            <h3>What it does</h3>
+            <ul class="ticks">
+              <li>Claude tabs: a real Claude Code session in each tab, with its own folder, resume, and a pulse when it needs me.</li>
+              <li>App tabs: real Windows programs hosted inside a tab, opened from a dock or by typing in the address bar.</li>
+              <li>Phone workspace: mirrors and fully controls my Android phone. The mouse acts as touch, and the clipboard works both ways.</li>
+              <li>Workspaces: the School workspace opens the right section of my class notes for the question on screen.</li>
+              <li>New tab page: clock, live CPU, memory, disk and network readouts, a process list and a Markets tile.</li>
+              <li>Ad blocking, reader view, split view, a command palette, tab sleep and picture-in-picture.</li>
+              <li>Phone sound plays on the computer, the phone or both, chosen from the phone rail.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>How it&rsquo;s built</h3>
+            <ul class="ticks">
+              <li>Phone video decoded in the page with WebCodecs: about 59 fps at roughly 1 ms per frame. Painting from the decoder callback, instead of waiting for the next animation frame, stopped a quarter of frames from dropping.</li>
+              <li>Quality that adapts to a TCP round-trip probe, because timing adb itself costs about 170 ms even on a 7 ms link.</li>
+              <li>Windows apps hosted through Win32 SetParent via koffi, with no native rebuild. It passed 30 of 30 live checks with Paint.</li>
+              <li>CPU fixes, measured. The animated background went from 27% to 3% of a core, and stats sampling from 4.7% to 0.35%.</li>
+              <li>About 550 ms cold start. Hidden workspaces go to sleep, which fixed a 1.9 GB GPU process.</li>
+              <li>No silent failures. Every state shows its reason and what to do next.</li>
+            </ul>
+          </div>
+        </div>
+        <figure class="plate plate--duo">
+          <img src="img/browser-new-tab.jpg" width="1400" height="898" loading="lazy" decoding="async"
+               alt="The browser’s new tab page: a clock, live CPU, memory, disk and network readouts, a process list and a markets tile.">
+          <figcaption>The new tab page, with live machine readouts</figcaption>
+        </figure>
+      </div>
+
+      <!-- .plate--duo needs these two filters on the page itself (they are
+           copied verbatim from atlas.html): luminance, then a two-stop ramp
+           per channel, so the screenshot joins the night instead of sitting
+           on it. Without them the image simply stays in full colour. -->
+      <svg class="duo-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <filter id="ink-duo-ink" color-interpolation-filters="sRGB">
+          <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0 0 0 1 0"/>
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues="0.024 0.478"/>
+            <feFuncG type="table" tableValues="0.035 0.455"/>
+            <feFuncB type="table" tableValues="0.047 0.412"/>
+          </feComponentTransfer>
+        </filter>
+        <filter id="ink-duo-paper" color-interpolation-filters="sRGB">
+          <feColorMatrix type="matrix" values="0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0.299 0.587 0.114 0 0 0 0 0 1 0"/>
+          <feComponentTransfer>
+            <feFuncR type="table" tableValues="0.118 0.937"/>
+            <feFuncG type="table" tableValues="0.137 0.914"/>
+            <feFuncB type="table" tableValues="0.153 0.863"/>
+          </feComponentTransfer>
+        </filter>
+      </svg>
+    </section>
+
+    <!-- ============ the measured fixes ============ -->
+    <section class="band" aria-labelledby="h-cpu">
+      <div class="band__head" data-enter="rise">
+        <p class="eyebrow">02 — Measured, not estimated</p>
+        <h2 class="ink-in" id="h-cpu">Three numbers that had to come down</h2>
+        <p>Every performance claim on this page was measured before and after the change that caused it.</p>
+      </div>
+      <div class="pane bleed cpu-frame" id="cpu-pane">
+        <canvas class="pane__cv" id="cpu-cv" aria-hidden="true"></canvas>
+        <svg class="pane__svg ink-svg" id="cpu-svg" role="group" aria-label="Three measured before-and-after figures: the animated background from 27 to 3 percent of a core, stats sampling from 4.7 to 0.35 percent, and a cold start of about 550 milliseconds. Each is written out below."></svg>
+      </div>
+      <div class="cpu-under">
+        <div class="readout" id="cpu-read" role="status" aria-live="polite"></div>
+        <p class="scene-note" id="cpu-state" role="status"></p>
+      </div>
+    </section>
+
+    <!-- ============ the 67 features ============ -->
+    <section class="band" aria-labelledby="h-feat">
+      <div class="band__head" data-enter="rise">
+        <p class="eyebrow">03 — The feature index</p>
+        <h2 class="ink-in" id="h-feat">Sixty-seven features, as documented</h2>
+        <p>Every feature the 1,400-line README documents, with the README&rsquo;s own first sentence
+           about each. Nothing here is written for the website.</p>
+      </div>
+
+      <div class="bleed">
+        <div class="filter-bar fx-head">
+          <label class="vh" for="feat-q">Filter features by name or description</label>
+          <input type="search" id="feat-q" placeholder="Filter 67 features — try phone, tab, Claude…" autocomplete="off">
+          <button class="chip" type="button" id="feat-order" aria-pressed="false">A&ndash;Z</button>
+          <span class="mono" id="feat-count" role="status" style="color:var(--ink-faint);letter-spacing:.05em;text-transform:none">67 features</span>
+        </div>
+
+        <div class="fx-list" id="feat-list"></div>
+      </div>
+
+      <p class="note fx-note">The &ldquo;67 features&rdquo; figure is what the 1,400-line README documents. Four
+        more user-facing features landed on 14&ndash;15 September and are not in it, so they are not
+        counted here either.</p>
+    </section>
+
+    <footer class="colophon">
+      <div>
+        <h2>About these numbers</h2>
+        <p>Measured on 16 September 2026 from the repository&rsquo;s git history and its README. The
+           feature list is generated from the README, not written by hand.</p>
+      </div>
+      <div>
+        <h2>Distribution</h2>
+        <p>There is a Windows installer and a portable build, version 0.1.0, not code-signed. They are
+           too large to host here and there is no download link; available on request.</p>
+      </div>
+      <div>
+        <h2>Next</h2>
+        <p><a href="index.html">The index</a> &middot; <a href="atlas.html">Atlas</a> &middot;
+           <a href="portal.html">The academy portal</a></p>
+      </div>
+    </footer>
+
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,3307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas — you describe a task once, it keeps doing it</title>
+<meta name="description" content="Atlas is AI task automation. Say what you want and when, in one sentence. Atlas runs it on schedule, grades the answer before it sends, and pauses tasks that keep failing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Martian+Mono:wdth,wght@75..112.5,200..800&family=Syne:wght@400..800&display=swap">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   ATLAS — DIRECTION F · VISCOSITY
+   PASS 1 — THE COMPLETE TOKEN SYSTEM. Every value in the page derives from here.
+   Material: thick fluid with surface tension, on a bright pearlescent ground.
+   Ground is COOL PEARL (#FAF9FC family), never warm paper. Colour is thin-film
+   iridescence — narrow deliberate hue sweeps, high chroma, no full rainbow.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+
+  /* ── 1. GROUND — cool pearl. Nine steps, measured. ───────────────────── */
+  --pearl-050:#FFFFFF;              /* specular blowout only            L 100  */
+  --pearl-100:#FDFCFF;              /* sheen highlight                  L 99.2 */
+  --pearl-200:#FAF9FC;              /* THE GROUND (assigned)            L 97.7 */
+  --pearl-300:#F4F1FA;              /* dry surface                      L 95.6 */
+  --pearl-400:#ECE8F6;              /* wetted pearl                     L 92.7 */
+  --pearl-500:#E1DBF1;              /* frosted slab                     L 88.6 */
+  --pearl-600:#CFC7E6;              /* deep pearl / edges               L 81.7 */
+  --pearl-700:#B4AAD3;              /* pearl shadow-side                L 71.6 */
+  --pearl-800:#8F84B4;              /* deepest pearl, non-text          L 57.3 */
+
+  /* ── 2. INK — cool indigo, never neutral grey. Ratios vs --pearl-200. ─ */
+  --ink-900:#120F26;                /* headlines           16.6:1 on pearl-200 */
+  --ink-700:#232043;                /* body copy           14.8:1              */
+  --ink-500:#413D68;                /* secondary            9.6:1              */
+  --ink-400:#514D78;                /* labels on tint       7.5:1 / 5.9 on 500 */
+  --ink-300:#63608A;                /* chrome, pearl only   5.6:1              */
+  --ink-200:#8F8BB0;                /* hairline ink, NON-TEXT                  */
+  --ink-050:#F4F1FF;                /* type on the accent pill  5.6:1          */
+
+  /* ── 3. IRIDESCENCE — thin-film ramp. Hue angles drive per-body --tint. */
+  --hue-aqua:174;  --hue-cyan:193;  --hue-azure:216;
+  --hue-violet:262; --hue-orchid:288; --hue-rose:322;
+  --hue-amber:20;                   /* off-band: the flag hue                  */
+  --band:64;                        /* deg of hue a single body may sweep      */
+  --band-half:32;
+
+  --iri-aqua:#0FD6CA;  --iri-cyan:#2CB6F5;  --iri-azure:#4E7BFF;
+  --iri-violet:#7C4DFF; --iri-orchid:#C05BFF; --iri-rose:#FF4FA8;
+  --iri-amber:#FF7A2F;              /* flagged / off-band signal               */
+  --iri-indigo:#5C63F7;             /* the pool at its deepest — thread fill   */
+
+  /* ── 4. FUNCTION COLOUR ─────────────────────────────────────────────── */
+  --accent:#5B3BFF;                 /* primary CTA — white text 5.95:1         */
+  --accent-lift:#7C63FF;            /* the lit top of a CTA                    */
+  --accent-deep:#3E20D6;            /* pressed / edge                          */
+  --accent-wash:#EDE7FF;            /* accent-tinted ground                    */
+  --tonic:#00CFC4;                  /* healthy fluid — ink-900 on it 9.5:1     */
+  --tonic-wash:#DCFAF6;
+  --tonic-deep:#C8F4EF;
+  --flag:#FF7A2F;                   /* flagged run — ink-900 on it 7.2:1       */
+  --flag-wash:#FFEBDD;
+  --alert:#FFE2CB;                  /* the notice panel — bright, saturated  */
+  --alert-edge:#FF8A3D;             /* its wall                              */
+  --alert-deep:#FFCDA6;             /* its floor                             */
+  --alert-lift:#FF9E5C;             /* the lit top of the flagged meniscus   */
+  /* anodised stock — the comparison conduit only, and only at small scale */
+  --metal-deep:#2C2950;             /* a bore, i.e. a shadow inside a part   */
+  --metal-rim:#5B5688;              /* the turned edge that catches nothing  */
+
+  /* ── 5. GROUND STATES — one token per surface state. ────────────────── */
+  --g-dry:
+    radial-gradient(120% 80% at 12% 0%, #FFFFFF 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(var(--pearl-300), #F1EDF8);
+  --g-wetted:
+    radial-gradient(60% 42% at 78% 18%, rgba(255,255,255,.95), rgba(255,255,255,0) 70%),
+    radial-gradient(90% 60% at 8% 96%, rgba(124,77,255,.10), rgba(124,77,255,0) 70%),
+    linear-gradient(#FBFAFE, #F3F0FB);
+  --g-filmed:
+    conic-gradient(from 210deg at 30% 40%,
+      rgba(15,214,202,.16), rgba(44,182,245,.13), rgba(124,77,255,.15),
+      rgba(192,91,255,.11), rgba(15,214,202,.16)),
+    linear-gradient(#FAF8FE, #F2EEFB);
+  --g-frosted:
+    radial-gradient(70% 50% at 50% 0%, rgba(255,255,255,.9), rgba(255,255,255,0) 72%),
+    linear-gradient(#F0ECF9, var(--pearl-500));
+  --g-beaded:
+    radial-gradient(closest-side at 50% 42%, rgba(255,255,255,.9), rgba(255,255,255,0)),
+    linear-gradient(#F7F5FC, #EFEBF8);
+  --g-pooled:
+    radial-gradient(120% 90% at 84% 12%, rgba(255,255,255,.85), rgba(255,255,255,0) 62%),
+    linear-gradient(104deg, #6FE2DC 0%, #8FD3F8 34%, #ABB8FE 66%, #C4A5FD 100%);
+  --g-pooled-deep:
+    radial-gradient(90% 120% at 18% 0%, rgba(255,255,255,.70), rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, #BCEDEA 0%, #A6CCFA 46%, #B7ADFA 100%);
+  --g-bright:
+    radial-gradient(130% 60% at 70% 0%, #FFFFFF 0%, rgba(255,255,255,0) 72%),
+    linear-gradient(#FFFFFF, #F7F5FC);
+  --g-sump:                          /* the settled pool the page drains into  */
+    radial-gradient(120% 90% at 12% 0%, rgba(255,255,255,.72), rgba(255,255,255,0) 58%),
+    linear-gradient(168deg, #DCD4FF 0%, #C6B9FC 54%, #BAAAFA 100%);
+
+  /* fine surface microstructure — opaque ink specks, multiply. NOT patina. */
+  --tooth:
+    radial-gradient(circle at 50% 50%, rgba(35,32,67,.055) 0 .6px, rgba(35,32,67,0) .7px);
+  --tooth-size:7px 7px;
+  --tooth-size-2:11px 11px;
+
+  /* a field of condensation beads — two layers per tile: shade then highlight */
+  --beadfield:
+    radial-gradient(circle at 38% 34%, rgba(255,255,255,.95) 0 1.4px, rgba(255,255,255,0) 1.9px),
+    radial-gradient(circle at 42% 42%, rgba(38,26,74,.10) 0 3.4px, rgba(38,26,74,0) 4px),
+    radial-gradient(circle at 78% 74%, rgba(255,255,255,.85) 0 1px, rgba(255,255,255,0) 1.4px),
+    radial-gradient(circle at 80% 79%, rgba(38,26,74,.07) 0 2.3px, rgba(38,26,74,0) 2.8px);
+  --beadfield-size:58px 58px, 58px 58px, 91px 91px, 91px 91px;
+  --sheen:
+    linear-gradient(102deg, rgba(255,255,255,0) 34%, rgba(255,255,255,.85) 47%,
+      rgba(255,255,255,0) 58%);
+  --film-wash:
+    conic-gradient(from 190deg at 62% 30%, rgba(15,214,202,.20), rgba(78,123,255,.16),
+      rgba(192,91,255,.18), rgba(15,214,202,.20));
+
+  /* ── 6. SILHOUETTE — THE BROKEN AXIS. Exactly five variants. ────────── */
+  --sil-1:62% 38% 47% 53% / 57% 44% 56% 43%;
+  --sil-2:42% 58% 62% 38% / 47% 39% 61% 53%;
+  --sil-3:55% 45% 38% 62% / 39% 58% 42% 61%;
+  --sil-4:66% 34% 54% 46% / 52% 63% 37% 48%;
+  --sil-5:45% 55% 51% 49% / 63% 41% 59% 37%;
+  --sil-round:50% 50% 50% 50% / 50% 50% 50% 50%;   /* the reversal target */
+  /* rectangles get the same broken axis at reduced amplitude */
+  --pan-1:30px 22px 34px 24px / 24px 32px 22px 30px;
+  --pan-2:22px 32px 24px 30px / 30px 22px 32px 24px;
+  --pan-3:34px 24px 22px 32px / 22px 30px 26px 32px;
+  --pan-4:24px 30px 32px 22px / 32px 24px 30px 24px;
+  --pan-5:28px 26px 26px 30px / 26px 30px 28px 26px;
+  --pan-round:26px;
+
+  /* ── 7. SPECULAR — ONE recipe, two highlights. Hard high, soft low. ─── */
+  --spec-hard:
+    radial-gradient(15% 11% at 34% 20%,
+      #FFFFFF 0%, rgba(255,255,255,.96) 56%, rgba(255,255,255,0) 70%);
+  --spec-soft:
+    radial-gradient(46% 34% at 63% 76%,
+      rgba(255,255,255,.44) 0%, rgba(255,255,255,0) 76%);
+  --spec-edge:
+    radial-gradient(78% 78% at 50% 52%,
+      rgba(255,255,255,0) 62%, rgba(255,255,255,.34) 88%, rgba(255,255,255,0) 100%);
+
+  /* ── 8. SHADOW LADDER — chromatic indigo, never neutral grey. ───────── */
+  --sh:38,26,74;                                     /* shadow ink triplet   */
+  --e-1:0 1px 0 rgba(38,26,74,.05), 0 2px 5px -2px rgba(38,26,74,.09);
+  --e-2:0 1px 1px rgba(38,26,74,.05), 0 5px 12px -4px rgba(38,26,74,.11),
+        0 14px 30px -14px rgba(38,26,74,.16);
+  --e-3:0 2px 3px rgba(38,26,74,.06), 0 12px 26px -10px rgba(38,26,74,.15),
+        0 32px 66px -26px rgba(38,26,74,.24);
+  --e-hard:5px 5px 0 rgba(38,26,74,.16);             /* paper on paper, 0 blur*/
+  --e-inset:inset 0 1px 0 rgba(255,255,255,.85);
+
+  /* ── 9. CONTACT SHADOW — ONE recipe. Scales with the body's --vol. ──── */
+  --contact:
+    0 calc(var(--vol,1) * 7px) calc(var(--vol,1) * 11px) calc(var(--vol,1) * -7px)
+      rgba(38,26,74,.36),
+    0 calc(var(--vol,1) * 2px) calc(var(--vol,1) * 3px)  calc(var(--vol,1) * -2px)
+      rgba(38,26,74,.20);
+
+  /* ── 10. MENISCUS + RIM — where fluid meets a wall. ─────────────────── */
+  --rim:inset 0 0 0 1px rgba(255,255,255,.72);
+  --meniscus:
+    inset 0 3px 7px -3px rgba(38,26,74,.34),
+    inset 0 -2px 4px -2px rgba(255,255,255,.55);
+  --wall:1px solid rgba(38,26,74,.16);
+  --wall-strong:1.5px solid rgba(38,26,74,.26);
+  --hair:1px solid rgba(38,26,74,.11);
+  --hair-bright:1px solid rgba(255,255,255,.7);
+
+  /* ── 11. TYPE — ONE scale. ──────────────────────────────────────────── */
+  --f-display:"Syne","Segoe UI",system-ui,sans-serif;
+  --f-text:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"Martian Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+
+  --t-3xs:.6875rem;   /* 11.0  mono chrome            */
+  --t-2xs:.78125rem;  /* 12.5  labels                 */
+  --t-xs:.875rem;     /* 14.0  small copy             */
+  --t-sm:1rem;        /* 16.0  body                   */
+  --t-md:1.125rem;    /* 18.0  lead body              */
+  --t-lg:1.375rem;    /* 22.0  standfirst             */
+  --t-xl:1.75rem;     /* 28.0  h3                     */
+  --t-2xl:2.25rem;    /* 36.0  h2 small               */
+  --t-3xl:clamp(2rem,4.4vw,3.25rem);   /* h2          */
+  --t-4xl:clamp(2.55rem,7.1vw,5.15rem);/* h1          */
+  --t-num:clamp(2rem,3.5vw,2.9rem);    /* big numerals*/
+
+  --lh-tight:.98; --lh-head:1.06; --lh-snug:1.28; --lh-body:1.6; --lh-loose:1.75;
+  --ls-tight:-.03em; --ls-head:-.02em; --ls-body:0em;
+  --ls-label:.14em; --ls-mono:.02em;
+  --w-body:400; --w-med:500; --w-semi:600; --w-bold:700; --w-black:800;
+  --mono-wdth:"wdth" 87.5;
+
+  /* ── 12. SPACE — ONE scale. ─────────────────────────────────────────── */
+  --s-1:.25rem; --s-2:.5rem;  --s-3:.75rem; --s-4:1rem;   --s-5:1.5rem;
+  --s-6:2rem;   --s-7:3rem;   --s-8:4rem;   --s-9:6rem;   --s-10:8rem;
+
+  /* ── 13. STRUCTURE — the invariant spine. ───────────────────────────── */
+  --shell:1180px;                   /* one container width, every section     */
+  --measure:60ch;                   /* one prose measure, every section       */
+  --rail:7rem;                      /* the left index rail                    */
+  --gap:var(--s-5);                 /* one grid gap                           */
+  --pad-y:clamp(4.75rem,8.5vw,8.5rem);  /* ONE section rhythm                 */
+  --pad-x:clamp(1.15rem,4vw,2.5rem);    /* ONE gutter                         */
+
+  /* ── 14. RADII (non-body) ───────────────────────────────────────────── */
+  --r-1:4px; --r-2:9px; --r-3:16px; --r-4:26px; --r-pill:999px;
+
+  /* ── 15. DROPLET GENERATOR DEFAULTS ─────────────────────────────────── */
+  --unit:clamp(48px,7.2vw,84px);    /* base droplet diameter                  */
+  --vol:1;                          /* volume   → size, sag, highlight scale  */
+  /* instance-only properties, set inline, never globally:
+     --rise  lift off the channel floor   --sag   squash of a heavy body
+     --fill/--cap  a vessel's level       --climb how far fluid creeps up a wall */
+  --visc:.5;                        /* viscosity→ neck length, settle speed   */
+  --tint:216;                       /* iridescent band base hue (--hue-azure) */
+  --sil:62% 38% 47% 53% / 57% 44% 56% 43%;  /* = --sil-1                      */
+
+  /* ── 16. MOTION ─────────────────────────────────────────────────────── */
+  --d-1:150ms; --d-2:320ms; --d-3:620ms; --d-4:1100ms;
+  --d-wobble:5400ms; --d-flow:11000ms; --d-shimmer:9000ms;
+  --e-out:cubic-bezier(.22,.61,.36,1);
+  --e-over:cubic-bezier(.34,1.56,.64,1);      /* the reversal overshoot */
+  --e-visc:cubic-bezier(.65,.02,.32,1);
+
+  /* ── 17. FOCUS ──────────────────────────────────────────────────────── */
+  --focus-ring:0 0 0 5px rgba(255,255,255,.92);      /* halo under the outline */
+  --focus-ring-alt:0 0 0 5px rgba(255,255,255,.98);
+  --focus-line:2.5px solid var(--accent);
+  --focus-gap:2px;
+
+  /* ── 18. Z ──────────────────────────────────────────────────────────── */
+  --z-goo:1; --z-plate:2; --z-label:3; --z-nav:50;
+}
+
+/* ═══ RESET ════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;background:var(--pearl-200);color:var(--ink-700);
+  font-family:var(--f-text);font-size:var(--t-sm);line-height:var(--lh-body);
+  font-weight:var(--w-body);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+img,svg{display:block;max-width:100%}
+h1,h2,h3,h4,p,ul,ol,figure,blockquote,dl,dd{margin:0}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+button,input{font:inherit;color:inherit}
+:where(h1,h2,h3,h4){font-family:var(--f-display);color:var(--ink-900);
+  letter-spacing:var(--ls-head);line-height:var(--lh-head);font-weight:var(--w-bold)}
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ═══ FOCUS — visible on every interactive element ════════════════════ */
+:focus-visible{outline:var(--focus-line);outline-offset:var(--focus-gap);
+  box-shadow:var(--focus-ring)}
+.on-tint :focus-visible{box-shadow:var(--focus-ring-alt);outline-color:var(--accent-deep)}
+.skip{
+  position:absolute;left:var(--s-4);top:calc(var(--s-4) * -6);z-index:100;
+  background:var(--accent);color:#fff;padding:var(--s-3) var(--s-5);
+  border-radius:var(--r-pill);font:var(--w-semi) var(--t-2xs)/1 var(--f-text);
+  letter-spacing:var(--ls-label);text-transform:uppercase;text-decoration:none;
+  transition:top var(--d-2) var(--e-out);
+}
+.skip:focus{top:var(--s-4)}
+
+/* ══ THE GENERATOR — one body, instantiated many times ═══════════════════════
+   Set four INDEPENDENT properties inline on each instance:
+     --vol   volume     .35 – 1.9   → diameter, sag, contact-shadow scale
+     --visc  viscosity  0 – 1       → neck length + settle duration
+     --tint  hue angle  a --hue-* token  → its iridescent band
+     --sil   silhouette one of --sil-1 … --sil-5  (THE BROKEN AXIS)
+   ─────────────────────────────────────────────────────────────────────────── */
+.drop{
+  position:relative;
+  flex:0 0 auto;
+  width:calc(var(--unit) * var(--vol));
+  aspect-ratio:1;
+  border-radius:var(--sil);
+  background:
+    var(--spec-hard),
+    var(--spec-soft),
+    var(--spec-edge),
+    conic-gradient(from calc((var(--tint) + 120) * 1deg) at 36% 28%,
+      hsl(var(--tint) 92% 74%)                          0turn,
+      hsl(calc(var(--tint) + var(--band-half)) 98% 62%) .27turn,
+      hsl(calc(var(--tint) + var(--band)) 94% 69%)      .5turn,
+      hsl(calc(var(--tint) + var(--band-half)) 96% 57%) .74turn,
+      hsl(var(--tint) 92% 74%)                          1turn);
+  box-shadow:
+    var(--contact),
+    var(--rim),
+    /* subsurface — inset from the edge OPPOSITE the light, more saturated */
+    inset calc(var(--vol) * -6px) calc(var(--vol) * -8px) calc(var(--vol) * 15px)
+      hsl(calc(var(--tint) + var(--band-half)) 100% 58% / .58),
+    /* meniscus at the contact edge */
+    inset 0 calc(var(--vol) * -3px) calc(var(--vol) * 5px) calc(var(--vol) * -2px)
+      rgba(var(--sh),.24);
+  /* viscosity drives the settle: a thick body takes longer to pull round */
+  transition:border-radius calc(var(--d-3) * (.55 + var(--visc) * .9)) var(--e-over),
+             transform     calc(var(--d-3) * (.55 + var(--visc) * .9)) var(--e-over);
+}
+/* caustic: the focused colour cast the body throws on the ground below it.
+   A thicker fluid wets less ground, so --visc tightens it.               */
+.drop::before{
+  content:"";position:absolute;top:94%;
+  left:calc(6% + var(--visc) * 5%);right:calc(6% + var(--visc) * 5%);
+  height:calc(34% - var(--visc) * 12%);
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,
+    hsl(calc(var(--tint) + var(--band-half)) 96% 66% / .48), transparent 78%);
+}
+/* ── THE REVERSIBLE BREAK ────────────────────────────────────────────────
+   Every body pulls to a true round under cursor or keyboard focus, with an
+   overshoot so it wobbles home. Put .pull on the interactive ancestor.     */
+.drop:hover,
+.pull:hover  .drop,
+.pull:focus-visible .drop,
+.pull:focus-within  .drop{ border-radius:var(--sil-round); }
+
+/* rectangles carry the same broken axis at reduced amplitude. */
+.pan{border-radius:var(--pan-1);
+  transition:border-radius var(--d-3) var(--e-over),box-shadow var(--d-2) var(--e-out)}
+.pan-1{border-radius:var(--pan-1)} .pan-2{border-radius:var(--pan-2)}
+.pan-3{border-radius:var(--pan-3)} .pan-4{border-radius:var(--pan-4)}
+.pan-5{border-radius:var(--pan-5)}
+.pan:hover,.pan:focus-within{border-radius:var(--pan-round)}
+
+/* ═══ THE SPINE — one shell, one rail, one rhythm, every section ═══════ */
+.sec{position:relative;padding-block:var(--pad-y);isolation:isolate;overflow:hidden}
+.shell{
+  width:min(var(--shell), 100% - var(--pad-x) * 2);
+  margin-inline:auto;
+  display:grid;grid-template-columns:var(--rail) minmax(0,1fr);
+  gap:var(--gap);align-items:start;
+}
+.rail{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s-3);
+  position:sticky;top:calc(var(--s-10) + var(--s-2))}
+.rail__n{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);font-weight:var(--w-semi);letter-spacing:var(--ls-mono);
+  color:var(--ink-400)}
+.rail__rule{width:100%;height:1px;background:rgba(var(--sh),.14)}
+.rail__kick{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-400);
+  text-transform:uppercase}
+.body{max-width:100%}
+.lede{max-width:var(--measure);font-size:var(--t-md);color:var(--ink-700);
+  line-height:var(--lh-body)}
+.lede + .lede{margin-top:var(--s-4)}
+h2.hd{font-size:var(--t-3xl);letter-spacing:var(--ls-tight);font-weight:var(--w-black);
+  max-width:var(--measure);text-wrap:balance}
+h3.sub{font-size:var(--t-xl);font-weight:var(--w-bold);letter-spacing:var(--ls-head)}
+.mono{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono)}
+.kick{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);text-transform:uppercase;
+  color:var(--ink-400);display:block;margin-bottom:var(--s-3)}
+
+/* ═══ BUTTONS ═════════════════════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;gap:var(--s-3);
+  padding:var(--s-3) var(--s-6);border:0;border-radius:var(--r-pill);
+  background:
+    var(--spec-soft),
+    linear-gradient(168deg, var(--accent-lift) 0%, var(--accent) 46%, var(--accent-deep) 100%);
+  color:var(--ink-050);font-weight:var(--w-semi);font-size:var(--t-xs);
+  letter-spacing:var(--ls-label);text-transform:uppercase;text-decoration:none;
+  cursor:pointer;
+  box-shadow:var(--e-2), var(--rim),
+    inset 0 -6px 12px -6px rgba(0,0,0,.4);
+  transition:transform var(--d-2) var(--e-over), box-shadow var(--d-2) var(--e-out),
+             border-radius var(--d-3) var(--e-over);
+}
+.btn:hover{transform:translateY(-2px);box-shadow:var(--e-3), var(--rim),
+  inset 0 -6px 12px -6px rgba(0,0,0,.4)}
+.btn:active{transform:translateY(0)}
+.btn--lg{padding:var(--s-4) var(--s-7);font-size:var(--t-sm)}
+.btn--ghost{
+  background:rgba(255,255,255,.55);color:var(--ink-900);
+  box-shadow:inset 0 0 0 1px rgba(var(--sh),.18), var(--e-1);
+}
+.btn--ghost:hover{background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(var(--sh),.26), var(--e-2)}
+.btn__bead{width:.62em;height:.62em;border-radius:var(--sil-2);flex:none;
+  background:radial-gradient(60% 60% at 34% 28%, #fff, rgba(255,255,255,.2) 70%),
+    hsl(var(--hue-aqua) 92% 62%);
+  transition:border-radius var(--d-3) var(--e-over)}
+.btn:hover .btn__bead{border-radius:var(--sil-round)}
+
+.trust{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);align-items:center;
+  font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-400);
+  text-transform:uppercase}
+.trust li{display:flex;align-items:center;gap:var(--s-2)}
+.trust li::before{content:"";width:5px;height:5px;border-radius:var(--sil-3);
+  background:hsl(var(--hue-aqua) 88% 52%);flex:none}
+
+/* ═══ 01 — NAV ════════════════════════════════════════════════════════ */
+.nav{
+  position:sticky;top:0;z-index:var(--z-nav);
+  background:rgba(250,249,252,.72);
+  -webkit-backdrop-filter:blur(16px) saturate(1.6);
+  backdrop-filter:blur(16px) saturate(1.6);
+  border-bottom:var(--hair);
+}
+.nav__in{
+  width:min(var(--shell), 100% - var(--pad-x) * 2);margin-inline:auto;
+  display:flex;align-items:center;gap:var(--s-5);
+  padding-block:var(--s-3);
+}
+.mark{display:flex;align-items:center;gap:var(--s-3);text-decoration:none;
+  color:var(--ink-900);margin-right:auto}
+.mark__glyph{width:34px;height:26px;flex:none}
+.mark__word{font-family:var(--f-display);font-weight:var(--w-black);
+  font-size:var(--t-md);letter-spacing:-.045em;line-height:1}
+.mark__beta{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-400);
+  padding:2px var(--s-2);border-radius:var(--r-pill);
+  background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px rgba(var(--sh),.12)}
+.nav__links{display:flex;gap:var(--s-5);align-items:center}
+.nav__links a{font-size:var(--t-xs);text-decoration:none;color:var(--ink-500);
+  font-weight:var(--w-med);position:relative;padding-block:var(--s-1)}
+.nav__links a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:2px;
+  border-radius:var(--r-pill);background:linear-gradient(90deg,var(--iri-aqua),var(--iri-violet));
+  transition:right var(--d-2) var(--e-out)}
+.nav__links a:hover{color:var(--ink-900)}
+.nav__links a:hover::after{right:0}
+
+/* ═══ 02 — HERO ═══════════════════════════════════════════════════════ */
+.hero{background:var(--g-wetted);padding-block:clamp(2.25rem,3.6vw,3.25rem) var(--pad-y)}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:var(--beadfield);background-size:var(--beadfield-size);
+  opacity:.55;
+  -webkit-mask-image:radial-gradient(130% 90% at 78% 22%,#000 30%,rgba(0,0,0,.25) 82%);
+  mask-image:radial-gradient(130% 90% at 78% 22%,#000 30%,rgba(0,0,0,.25) 82%)}
+.hero .shell{align-items:start}
+.hero__copy{max-width:100%}
+h1{font-size:var(--t-4xl);font-weight:var(--w-black);letter-spacing:var(--ls-tight);
+  line-height:var(--lh-tight);text-wrap:balance;max-width:13ch}
+.h1a{display:block;margin-bottom:.1em}
+/* one liquid body per line of text — box-decoration-break makes the highlight
+   hug the words instead of the block, so it can never bleed past them.     */
+.hero__flow{
+  display:inline;color:var(--ink-900);
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+  padding:.04em .3em .1em .2em;
+  border-radius:var(--sil-2);
+  background:
+    radial-gradient(9% 26% at 22% 24%, rgba(255,255,255,.95), rgba(255,255,255,0) 70%),
+    radial-gradient(38% 40% at 66% 78%, rgba(255,255,255,.42), rgba(255,255,255,0) 78%),
+    linear-gradient(96deg, hsl(var(--hue-aqua) 94% 72%) 0%,
+      hsl(var(--hue-cyan) 96% 74%) 32%, hsl(var(--hue-azure) 96% 78%) 64%,
+      hsl(var(--hue-violet) 96% 80%) 100%);
+  box-shadow:var(--rim), inset 0 -10px 20px -10px rgba(var(--sh),.34);
+  transition:border-radius var(--d-3) var(--e-over)}
+.hero__flow:hover{border-radius:var(--sil-round)}
+.hero__sub{margin-top:var(--s-4);font-size:var(--t-lg);line-height:var(--lh-snug);
+  color:var(--ink-500);max-width:44ch;letter-spacing:var(--ls-head)}
+.hero__cta{margin-top:var(--s-5);display:flex;flex-wrap:wrap;gap:var(--s-4);align-items:center}
+.hero__trust{margin-top:var(--s-4)}
+.hero__side{margin-top:var(--s-6);display:flex;flex-direction:column;gap:var(--s-3)}
+
+/* ═══ THE SIGNATURE — THE MERGE ═══════════════════════════════════════
+   A task body with runs arriving and merging into it. One run necks,
+   breaks, and hangs separate — it is OUTSIDE the gooey layer, so it can
+   never merge, structurally as well as visually. Legible with no motion. */
+.stage{margin-top:var(--s-5);overflow:hidden;position:relative}
+.merge{
+  --unit:clamp(52px,5.5vw,78px);
+  --floor:30%;
+  --pool-x:54%;
+  position:relative;
+  width:100%;min-width:760px;
+  margin-left:calc(min(0px, 100% - 760px) * .60);
+  height:clamp(312px,25vw,344px);
+}
+/* the channel the runs travel in — a shallow wetted trough */
+.merge__chan{position:absolute;left:0;right:0;bottom:var(--floor);height:0}
+.merge__chan::before{content:"";position:absolute;left:1%;right:2%;bottom:-1px;height:2px;
+  background:linear-gradient(90deg,rgba(var(--sh),0),rgba(var(--sh),.24) 5%,
+    rgba(var(--sh),.24) 72%,rgba(var(--sh),.07) 86%,rgba(var(--sh),0));
+  border-radius:var(--r-pill)}
+.merge__chan::after{content:"";position:absolute;left:1%;right:2%;bottom:1px;height:1px;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.95) 10%,
+    rgba(255,255,255,.95) 74%,rgba(255,255,255,0))}
+/* the wetted trace the fluid has already crossed */
+.merge__wet{position:absolute;left:1%;right:26%;bottom:var(--floor);
+  height:calc(var(--unit)*.34);border-radius:var(--r-pill);
+  background:linear-gradient(90deg, rgba(15,214,202,0), rgba(44,182,245,.20) 34%,
+    rgba(124,77,255,.24) 78%, rgba(124,77,255,0));
+  mix-blend-mode:multiply}
+
+.merge__goo{position:absolute;inset:0;filter:url(#goo);z-index:var(--z-goo)}
+.merge__goo .mg{--band:40;--band-half:20}
+.mg{
+  position:absolute;left:var(--x);bottom:calc(var(--floor) + var(--rise,0px));
+  transform:translateX(-50%);
+  width:calc(var(--unit) * var(--vol));aspect-ratio:1;border-radius:var(--sil);
+  background:
+    var(--spec-hard),var(--spec-soft),
+    conic-gradient(from calc((var(--tint) + 120) * 1deg) at 36% 28%,
+      hsl(var(--tint) 92% 74%) 0turn,
+      hsl(calc(var(--tint) + var(--band-half)) 98% 62%) .27turn,
+      hsl(calc(var(--tint) + var(--band)) 94% 69%) .5turn,
+      hsl(calc(var(--tint) + var(--band-half)) 96% 57%) .74turn,
+      hsl(var(--tint) 92% 74%) 1turn);
+  box-shadow:
+    inset calc(var(--vol)*-7px) calc(var(--vol)*-9px) calc(var(--vol)*17px)
+      hsl(calc(var(--tint) + var(--band-half)) 100% 52% / .66);
+}
+.mg--pool{
+  width:calc(var(--unit)*3.1);height:calc(var(--unit)*1.5);aspect-ratio:auto;
+  border-radius:var(--sil-3);
+  background:
+    radial-gradient(8.5% 15% at 26% 20%, var(--pearl-050) 0%, rgba(255,255,255,.94) 52%, rgba(255,255,255,0) 68%),
+    radial-gradient(36% 32% at 64% 76%, rgba(255,255,255,.40), rgba(255,255,255,0) 76%),
+    conic-gradient(from calc((var(--tint) + 120) * 1deg) at 36% 28%,
+      hsl(var(--tint) 92% 74%) 0turn,
+      hsl(calc(var(--tint) + var(--band-half)) 98% 62%) .27turn,
+      hsl(calc(var(--tint) + var(--band)) 94% 69%) .5turn,
+      hsl(calc(var(--tint) + var(--band-half)) 96% 57%) .74turn,
+      hsl(var(--tint) 92% 74%) 1turn);
+}
+/* THE BROKEN THREAD — the still-frame proof that this one did not merge.
+   Two tapered stubs emerging from each body, a clean gap, and the satellite
+   beads that pinch off when a real fluid thread snaps. Anchored to the pool
+   in --unit multiples, so it stays aligned at every viewport width.       */
+.merge__thread{
+  position:absolute;
+  left:calc(var(--pool-x) + var(--unit)*.9);
+  bottom:calc(var(--floor) + var(--unit)*.9);
+  width:calc(var(--unit)*2.4);height:calc(var(--unit)*1.9);
+  z-index:var(--z-plate);pointer-events:none}
+.merge__thread svg{width:100%;height:100%;overflow:visible}
+/* the flagged body — OUTSIDE the gooey layer, so it cannot merge, ever */
+.merge__flag{
+  position:absolute;
+  left:calc(var(--pool-x) + var(--unit)*2.5);
+  bottom:calc(var(--floor) + var(--unit)*2.15);
+  transform:translate(-50%,50%);
+  z-index:var(--z-plate)}
+.merge__flag::before{
+  left:2%;right:2%;top:88%;height:34%;
+  background:radial-gradient(closest-side,hsl(var(--hue-amber) 96% 62% / .40),transparent 78%)}
+/* it hangs above the surface: it casts, it does not contact */
+.merge__cast{
+  position:absolute;left:calc(var(--pool-x) + var(--unit)*2.5);
+  bottom:calc(var(--floor) - 3px);
+  width:calc(var(--unit)*1.9);height:calc(var(--unit)*.3);transform:translateX(-50%);
+  border-radius:50%;
+  background:radial-gradient(closest-side,rgba(var(--sh),.26),rgba(var(--sh),0) 74%);
+  z-index:var(--z-goo)}
+
+.merge__labels{position:absolute;inset:0;z-index:var(--z-label);pointer-events:none}
+.mlab{position:absolute;font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-400);
+  text-transform:uppercase;white-space:nowrap}
+.mlab--in{left:1.5%;bottom:calc(var(--floor) - 2.2rem)}
+.mlab--pool{left:var(--pool-x);bottom:calc(var(--floor) - 2.6rem);transform:translateX(-50%);
+  text-align:center;color:var(--ink-500)}
+.mlab--pool b{display:block;font-weight:var(--w-semi);color:var(--ink-900);
+  font-size:var(--t-2xs);letter-spacing:var(--ls-mono);text-transform:none;
+  font-family:var(--f-text)}
+.chip{
+  position:absolute;left:calc(var(--pool-x) + var(--unit)*3.12);
+  bottom:calc(var(--floor) + var(--unit)*2.34);
+  display:inline-flex;align-items:center;gap:var(--s-2);
+  padding:var(--s-1) var(--s-3);border-radius:var(--r-pill);
+  background:var(--flag-wash);color:var(--ink-900);
+  box-shadow:inset 0 0 0 1.5px var(--alert-edge), var(--e-1);
+  font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);white-space:nowrap}
+.chip::before{content:"";width:6px;height:6px;border-radius:var(--sil-4);
+  background:var(--flag);flex:none}
+.mlab--fail{left:calc(var(--pool-x) + var(--unit)*3.12);
+  bottom:calc(var(--floor) + var(--unit)*1.86);color:var(--ink-500)}
+.merge__cap{
+  margin-top:var(--s-5);max-width:var(--measure);font-size:var(--t-sm);
+  color:var(--ink-700);line-height:var(--lh-body)}
+.merge__cap b{font-weight:var(--w-semi);color:var(--ink-900)}
+
+/* ═══ 03 — THE ASK ════════════════════════════════════════════════════ */
+.ask{background:var(--g-dry)}
+.ask::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:var(--tooth),var(--tooth);
+  background-size:var(--tooth-size),var(--tooth-size-2);
+  mix-blend-mode:multiply;opacity:.9}
+.asklist{margin-top:var(--s-7);display:grid;gap:var(--s-4);
+  grid-template-columns:repeat(6,minmax(0,1fr))}
+.askitem{
+  grid-column:span 3;position:relative;overflow:hidden;
+  padding:var(--s-4) var(--s-5) var(--s-4) var(--s-4);
+  transition:box-shadow var(--d-2) var(--e-out),border-radius var(--d-3) var(--e-over)}
+.askitem:nth-child(3),.askitem:nth-child(6){grid-column:span 2}
+.askitem:nth-child(4),.askitem:nth-child(5){grid-column:span 4}
+/* six items, six surface states of the same substance */
+.askitem:nth-child(1){background:linear-gradient(var(--pearl-050),var(--pearl-300));
+  box-shadow:var(--e-2), inset 0 0 0 1px rgba(var(--sh),.07)}
+.askitem:nth-child(2){background:rgba(255,255,255,.50);
+  -webkit-backdrop-filter:blur(9px) saturate(1.5);backdrop-filter:blur(9px) saturate(1.5);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.9), inset 0 0 0 2px rgba(var(--sh),.06), var(--e-1)}
+.askitem:nth-child(3){background:
+    radial-gradient(90% 70% at 84% 6%, rgba(255,255,255,.9), rgba(255,255,255,0) 66%),
+    linear-gradient(150deg, var(--tonic-wash), var(--tonic-deep));
+  box-shadow:var(--e-1), inset 0 0 0 1px rgba(0,207,196,.34)}
+.askitem:nth-child(4){background:var(--g-dry);
+  box-shadow:inset 0 0 0 1px rgba(var(--sh),.10), var(--e-hard)}
+.askitem:nth-child(4)::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--tooth);background-size:var(--tooth-size);mix-blend-mode:multiply}
+.askitem:nth-child(5){background:
+    radial-gradient(80% 90% at 92% 100%, rgba(124,77,255,.22), rgba(124,77,255,0) 62%),
+    linear-gradient(140deg, var(--pearl-050), var(--accent-wash));
+  box-shadow:var(--e-2), inset 0 0 0 1px rgba(91,59,255,.20)}
+.askitem:nth-child(6){background:var(--pearl-050);
+  box-shadow:inset 0 0 0 1.5px rgba(var(--sh),.16), var(--e-hard)}
+.askitem:hover{box-shadow:var(--e-3), inset 0 0 0 1px rgba(var(--sh),.10)}
+.askitem summary{display:flex;align-items:center;gap:var(--s-4);cursor:pointer;
+  list-style:none;border-radius:var(--r-3)}
+.askitem summary::-webkit-details-marker{display:none}
+.askitem summary span{font-size:var(--t-sm);font-weight:var(--w-med);color:var(--ink-900);
+  line-height:var(--lh-snug)}
+.askitem .drop{margin-block:calc(var(--unit) * var(--vol) * -.08)}
+.askitem .plus{margin-left:auto;flex:none;width:16px;height:16px;position:relative;
+  opacity:.55}
+.askitem .plus::before,.askitem .plus::after{content:"";position:absolute;inset:50% 0 auto 0;
+  height:1.5px;background:var(--ink-500);border-radius:var(--r-pill);
+  transform:translateY(-50%);transition:transform var(--d-2) var(--e-out)}
+.askitem .plus::after{transform:translateY(-50%) rotate(90deg)}
+.askitem[open] .plus::after{transform:translateY(-50%) rotate(0deg)}
+.askitem__sentence{
+  margin-top:var(--s-4);padding-top:var(--s-4);border-top:var(--hair);
+  font-size:var(--t-xs);color:var(--ink-700);line-height:var(--lh-body)}
+.sched{
+  display:inline;padding:.06em .4em .1em;border-radius:var(--sil-5);
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+  background:
+    radial-gradient(14% 30% at 24% 26%, rgba(255,255,255,.9), rgba(255,255,255,0) 72%),
+    linear-gradient(100deg,hsl(var(--hue-aqua) 94% 70%),hsl(var(--hue-cyan) 96% 76%));
+  box-shadow:var(--rim), inset 0 -4px 8px -4px rgba(var(--sh),.34);
+  color:var(--ink-900);font-weight:var(--w-semi);
+  transition:border-radius var(--d-3) var(--e-over)}
+.askitem:hover .sched,.askitem[open] .sched{border-radius:var(--r-pill)}
+.ask__rule{margin-top:var(--s-7);display:flex;align-items:center;gap:var(--s-4);
+  flex-wrap:wrap}
+.ask__rule p{font-family:var(--f-display);font-weight:var(--w-bold);
+  font-size:var(--t-xl);color:var(--ink-900);letter-spacing:var(--ls-head);
+  max-width:22ch;line-height:var(--lh-head)}
+
+/* ═══ 04 — HOW IT WORKS ═══════════════════════════════════════════════ */
+.how{background:var(--g-filmed)}
+.how::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:var(--film-wash);mix-blend-mode:multiply;opacity:.5;
+  -webkit-mask-image:radial-gradient(120% 90% at 30% 10%,#000 20%,transparent 78%);
+  mask-image:radial-gradient(120% 90% at 30% 10%,#000 20%,transparent 78%)}
+.beats{margin-top:var(--s-7);display:grid;gap:var(--s-6);
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.beat{position:relative;padding:var(--s-5);
+  background:linear-gradient(168deg,rgba(255,255,255,.92),rgba(255,255,255,.68));
+  box-shadow:var(--e-1), inset 0 0 0 1px rgba(255,255,255,.8),
+    inset 0 0 0 2px rgba(var(--sh),.05)}
+.beat__n{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-400)}
+.beat h3{margin-top:var(--s-2);font-size:var(--t-lg);letter-spacing:var(--ls-head)}
+.beat p{margin-top:var(--s-3);font-size:var(--t-xs);color:var(--ink-700)}
+.beat__plate{margin-top:var(--s-4);position:relative}
+
+/* beat 1 — the sentence */
+.sentence{font-size:var(--t-md);line-height:var(--lh-snug);color:var(--ink-900);
+  font-weight:var(--w-med);letter-spacing:var(--ls-head)}
+.sentence .sched{font-size:inherit}
+.sentence .prompt-mark{border-bottom:2px dotted rgba(var(--sh),.28)}
+
+/* beat 2 — the split, under the goo */
+.split{position:relative;height:150px;--unit:46px;--floor:0%}
+.split .mg{--band:28;--band-half:14}
+.split__goo{position:absolute;inset:0;filter:url(#goo-xs)}
+.split .mg{bottom:auto;top:var(--y);transform:translate(-50%,-50%)}
+.split__stream{z-index:0}
+.split__stream{position:absolute;left:-6%;top:50%;transform:translateY(-50%);
+  width:34%;height:32px;
+  background:linear-gradient(96deg,hsl(var(--hue-violet) 94% 76%),hsl(var(--hue-violet) 96% 66%));
+  -webkit-clip-path:polygon(0 4%,100% 34%,100% 66%,0 96%);
+  clip-path:polygon(0 4%,100% 34%,100% 66%,0 96%)}
+.split__tag{position:absolute;right:2%;text-align:right;font-family:var(--f-mono);
+  font-variation-settings:var(--mono-wdth);font-size:var(--t-3xs);
+  letter-spacing:var(--ls-mono);color:var(--ink-500);white-space:nowrap}
+
+/* beat 3 — the delivered email */
+.mailcard{
+  padding:var(--s-4);background:linear-gradient(var(--pearl-050),var(--pearl-200));
+  box-shadow:var(--e-2), inset 0 0 0 1px rgba(var(--sh),.08);
+  position:relative;overflow:hidden}
+.mailcard::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:var(--sheen);opacity:.5;
+  -webkit-mask-image:linear-gradient(#000,transparent 70%);
+  mask-image:linear-gradient(#000,transparent 70%)}
+.mailcard__hd{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-900);
+  font-weight:var(--w-semi);padding-bottom:var(--s-3);border-bottom:var(--hair)}
+.mailcard__bd{margin-top:var(--s-3);font-size:var(--t-xs);color:var(--ink-700);
+  line-height:var(--lh-body)}
+.mailcard__ck{margin-top:var(--s-3);display:inline-flex;align-items:center;gap:var(--s-2);
+  font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-900);
+  background:var(--tonic-wash);padding:var(--s-1) var(--s-3);border-radius:var(--r-pill);
+  box-shadow:inset 0 0 0 1px rgba(0,207,196,.5)}
+.mailcard__ck::before{content:"";width:6px;height:6px;border-radius:var(--sil-1);
+  background:var(--tonic);flex:none}
+
+/* ═══ 05 — THE CHECK ══════════════════════════════════════════════════ */
+.check{background:var(--g-pooled);color:var(--ink-900)}
+.check::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:var(--tooth);background-size:var(--tooth-size);
+  mix-blend-mode:multiply;opacity:.7}
+.check .rail__n,.check .rail__kick{color:var(--ink-500)}
+.check .rail__rule{background:rgba(var(--sh),.22)}
+.check .kick{color:var(--ink-500)}
+.check .lede{color:var(--ink-700)}
+.check .hd{color:var(--ink-900)}
+.quietfail{margin-top:var(--s-5);max-width:var(--measure);font-size:var(--t-md);
+  color:var(--ink-700);line-height:var(--lh-body)}
+.quietfail b{font-weight:var(--w-semi);color:var(--ink-900)}
+
+/* the auto-pause demonstration: a channel that clots */
+.clot{margin-top:var(--s-8);position:relative;
+  --unit:clamp(40px,4vw,54px);--floor:34%;
+  height:clamp(170px,17vw,210px);
+  min-width:680px;width:100%;
+  margin-left:calc(min(0px, 100% - 680px) * .34)}
+.clotstage{overflow:hidden;position:relative;margin-top:var(--s-8)}
+.clot__chan{position:absolute;left:0;right:0;bottom:var(--floor);height:2px;
+  background:linear-gradient(90deg,rgba(var(--sh),.28) 0 62%,rgba(var(--sh),.10) 62%);
+  border-radius:var(--r-pill)}
+.clot__goo{position:absolute;inset:0;filter:url(#goo-sm)}
+.clot .mg{--band:14;--band-half:7}
+.clot__dry{position:absolute;left:44%;right:0;bottom:var(--floor);height:calc(var(--unit)*.19);
+  background:repeating-linear-gradient(90deg,rgba(var(--sh),.15) 0 3px,rgba(var(--sh),0) 3px 11px);
+  -webkit-mask-image:linear-gradient(90deg,#000,transparent);
+  mask-image:linear-gradient(90deg,#000,transparent)}
+.clot__cap{margin-top:var(--s-4);max-width:var(--measure);font-size:var(--t-xs);
+  color:var(--ink-700);line-height:var(--lh-body)}
+.clot__cap b{font-weight:var(--w-semi);color:var(--ink-900)}
+.clot__lab{position:absolute;font-family:var(--f-mono);
+  font-variation-settings:var(--mono-wdth);font-size:var(--t-3xs);
+  letter-spacing:var(--ls-mono);color:var(--ink-500);text-transform:uppercase;
+  white-space:nowrap}
+
+/* the auto-pause notice — a bright, high-chroma alert panel. Never dark. */
+.notice{
+  position:relative;margin-top:var(--s-6);max-width:min(100%,600px);
+  padding:var(--s-5) var(--s-5) var(--s-5) calc(var(--s-5) + var(--s-4));
+  background:
+    radial-gradient(110% 90% at 88% 4%, rgba(255,255,255,.95), rgba(255,255,255,0) 62%),
+    linear-gradient(158deg, var(--alert) 0%, var(--alert-deep) 100%);
+  color:var(--ink-900);
+  box-shadow:var(--e-2), inset 0 0 0 1.5px var(--alert-edge), var(--rim)}
+/* a meniscus of flagged fluid held against the left wall */
+.notice::before{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--s-4);
+  border-radius:inherit;border-top-right-radius:0;border-bottom-right-radius:0;
+  background:linear-gradient(180deg, var(--flag), var(--alert-lift));
+  box-shadow:inset -3px 0 6px -3px rgba(var(--sh),.4)}
+.notice__hd{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-900);
+  font-weight:var(--w-semi);text-transform:uppercase}
+.notice__bd{margin-top:var(--s-3);font-size:var(--t-xs);color:var(--ink-700);
+  line-height:var(--lh-body)}
+.notice__bd code{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);color:var(--ink-900);font-weight:var(--w-semi)}
+.notice__act{margin-top:var(--s-4);display:flex;gap:var(--s-3);flex-wrap:wrap}
+.notice__act button{
+  font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);
+  padding:var(--s-2) var(--s-4);border-radius:var(--r-pill);border:0;cursor:pointer;
+  background:rgba(255,255,255,.78);color:var(--ink-900);
+  box-shadow:inset 0 0 0 1px rgba(var(--sh),.20), var(--e-1);
+  transition:background var(--d-1) var(--e-out),transform var(--d-1) var(--e-out)}
+.notice__act button:hover{background:var(--pearl-050);transform:translateY(-1px)}
+.notice__note{margin-top:var(--s-4);font-size:var(--t-xs);color:var(--ink-700);
+  line-height:var(--lh-body)}
+.notice__note b{color:var(--ink-900);font-weight:var(--w-semi)}
+
+/* ═══ 06 — PROOF ══════════════════════════════════════════════════════ */
+.proof{background:var(--g-bright)}
+.proof::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:var(--sheen);opacity:.7;
+  transform:translateX(-8%)}
+.recordstage{margin-top:var(--s-7);overflow:hidden;position:relative}
+.record{position:relative;--unit:clamp(34px,3.6vw,50px);--floor:32%;
+  height:clamp(140px,13vw,176px);min-width:660px;width:100%;
+  margin-left:calc(min(0px, 100% - 660px) * .5)}
+.record .mg{--band:30;--band-half:15}
+.record__goo{position:absolute;inset:0;filter:url(#goo-sm)}
+.record__base{position:absolute;left:1%;right:1%;bottom:var(--floor);height:2px;
+  background:linear-gradient(90deg,rgba(var(--sh),0),rgba(var(--sh),.2) 5%,
+    rgba(var(--sh),.2) 95%,rgba(var(--sh),0));border-radius:var(--r-pill)}
+.record__log{margin-top:var(--s-5);display:flex;flex-wrap:wrap;gap:var(--s-2);
+  font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-500)}
+.record__log li{padding:2px var(--s-3);border-radius:var(--r-pill);
+  background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 1px var(--pearl-600)}
+.card-chrome{margin-top:var(--s-6);display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-3);
+  align-items:center}
+.card-chrome li{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-400);
+  text-transform:uppercase}
+.card-chrome li:first-child{color:var(--ink-900);font-weight:var(--w-semi);
+  text-transform:none}
+.card-chrome li + li::before{content:"·";margin-right:var(--s-3);color:var(--ink-200)}
+.figs{margin-top:var(--s-8);display:grid;gap:var(--s-5);
+  grid-template-columns:repeat(3,minmax(0,1fr))}
+.fig{position:relative;padding:var(--s-5) var(--s-4) var(--s-4);
+  background:linear-gradient(var(--pearl-050),var(--pearl-300));
+  box-shadow:var(--e-1), inset 0 0 0 1px rgba(var(--sh),.06)}
+.fig__n{font-family:var(--f-display);font-weight:var(--w-black);
+  font-size:var(--t-num);line-height:.92;letter-spacing:var(--ls-tight);
+  color:var(--ink-900)}
+.fig__l{margin-top:var(--s-3);font-family:var(--f-mono);
+  font-variation-settings:var(--mono-wdth);font-size:var(--t-3xs);
+  letter-spacing:var(--ls-mono);color:var(--ink-400);text-transform:uppercase;
+  line-height:var(--lh-snug)}
+.fig__bead{position:absolute;right:var(--s-4);top:var(--s-4)}
+.proof__note{margin-top:var(--s-6);font-size:var(--t-xs);color:var(--ink-500);
+  max-width:var(--measure)}
+
+/* ═══ 07 — COMPARISON ═════════════════════════════════════════════════ */
+.vs{background:var(--g-beaded)}
+.vs::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:var(--beadfield);background-size:var(--beadfield-size);
+  opacity:.6;transform:rotate(180deg)}
+
+/* ═══ 08 — PRICING ════════════════════════════════════════════════════ */
+.price{background:var(--g-frosted)}
+.price::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:var(--tooth-2,var(--tooth));background-size:var(--tooth-size-2);
+  mix-blend-mode:multiply;opacity:.8}
+
+/* ═══ 09 — CLOSE + FOOTER ═════════════════════════════════════════════ */
+.close{background:var(--g-pooled-deep)}
+.close::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:var(--beadfield);background-size:var(--beadfield-size);opacity:.6}
+.close h2{font-size:var(--t-3xl);letter-spacing:var(--ls-tight);font-weight:var(--w-black)}
+.close .rail__n,.close .rail__kick,.close .kick{color:var(--ink-500)}
+.close .rail__rule{background:rgba(var(--sh),.22)}
+.close .trust{color:var(--ink-700)}
+.price .rail__n,.price .rail__kick{color:var(--ink-400)}
+.close .lede{color:var(--ink-700)}
+.join{margin-top:var(--s-6);max-width:520px}
+.join__row{display:flex;gap:var(--s-3);flex-wrap:wrap;align-items:stretch}
+.join label{display:block;font-family:var(--f-mono);
+  font-variation-settings:var(--mono-wdth);font-size:var(--t-3xs);
+  letter-spacing:var(--ls-mono);text-transform:uppercase;color:var(--ink-500);
+  margin-bottom:var(--s-2)}
+.join input{
+  flex:1 1 220px;min-width:0;padding:var(--s-3) var(--s-5);border:0;
+  border-radius:var(--r-pill);background:rgba(255,255,255,.92);color:var(--ink-900);
+  font-size:var(--t-sm);
+  box-shadow:inset 0 0 0 1px rgba(var(--sh),.16), var(--meniscus)}
+.join input::placeholder{color:var(--ink-300)}
+.join__status{margin-top:var(--s-3);font-family:var(--f-mono);
+  font-variation-settings:var(--mono-wdth);font-size:var(--t-3xs);
+  letter-spacing:var(--ls-mono);color:var(--ink-500);min-height:1.4em}
+.close__trust{margin-top:var(--s-5)}
+
+.foot{background:var(--g-sump);color:var(--ink-900);padding-block:var(--s-8) var(--s-7);
+  position:relative;overflow:hidden}
+.foot::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--beadfield);background-size:var(--beadfield-size);opacity:.5}
+.foot__in{width:min(var(--shell), 100% - var(--pad-x)*2);margin-inline:auto;
+  position:relative;display:grid;gap:var(--s-6);
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.foot__def{font-family:var(--f-display);font-style:italic;font-size:var(--t-md);
+  color:var(--ink-900);max-width:34ch;line-height:var(--lh-snug)}
+.foot__links{display:flex;flex-direction:column;gap:var(--s-2);font-size:var(--t-xs)}
+.foot__links a{text-decoration:none;color:var(--ink-700)}
+.foot__links a:hover{color:var(--ink-900);text-decoration:underline}
+.foot__meta{font-family:var(--f-mono);font-variation-settings:var(--mono-wdth);
+  font-size:var(--t-3xs);letter-spacing:var(--ls-mono);color:var(--ink-500);
+  line-height:var(--lh-loose);text-transform:uppercase}
+
+/* ═══ MOTION — the still frame is the truth; motion only enriches it ══ */
+@keyframes arrive{
+  0%   {transform:translateX(calc(-50% - var(--unit)*4.4))}
+  46%  {transform:translateX(-50%)}
+  100% {transform:translateX(-50%)}
+}
+@keyframes reach{
+  0%,100%{transform:translate(-50%,50%)}
+  38%    {transform:translate(calc(-50% - var(--unit)*.26), calc(50% + var(--unit)*.20))}
+  58%    {transform:translate(calc(-50% - var(--unit)*.22), calc(50% + var(--unit)*.17))}
+}
+@keyframes settle{
+  0%,100%{transform:translateX(-50%) scale(1,1)}
+  40%    {transform:translateX(-50%) scale(1.012,.986)}
+  70%    {transform:translateX(-50%) scale(.994,1.008)}
+}
+@keyframes bead{
+  0%,100%{transform:translate(0,0)}
+  50%    {transform:translate(2%,-6%)}
+}
+.anim .mg--arrive{animation:arrive var(--d-flow) var(--e-visc) infinite}
+.anim .mg--pool{animation:settle var(--d-wobble) ease-in-out infinite}
+.anim .merge__flag{animation:reach calc(var(--d-flow)*.78) var(--e-visc) infinite}
+.anim .fail__sat{animation:bead calc(var(--d-flow)*.4) ease-in-out infinite}
+.offscreen *{animation-play-state:paused !important}
+
+/* ═══ RESPONSIVE ══════════════════════════════════════════════════════ */
+@media (max-width:900px){
+  :root{--rail:4.25rem}
+  .nav__links{display:none}
+  .mark__beta{display:none}
+  .nav .btn{padding:var(--s-3) var(--s-4);font-size:var(--t-3xs)}
+  .nav__in{gap:var(--s-3)}
+  .figs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .asklist{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .askitem,.askitem:nth-child(3),.askitem:nth-child(4),.askitem:nth-child(5),.askitem:nth-child(6){grid-column:span 1}
+}
+@media (max-width:720px){
+  :root{--rail:0rem}
+  .shell{grid-template-columns:minmax(0,1fr);gap:var(--s-4)}
+  .rail{position:static;flex-direction:row;align-items:center;gap:var(--s-3);
+    width:100%}
+  .rail__rule{flex:1 1 auto;width:auto}
+  .hero__copy{max-width:100%}
+  .hero__sub{max-width:100%}
+  .mlab--in{display:none}
+  .clot__lab{display:none}
+  .merge{margin-left:calc(min(0px, 100% - 760px) * .66)}
+  .chip{left:calc(var(--pool-x) + var(--unit)*2.5);
+    bottom:calc(var(--floor) + var(--unit)*3.02);transform:translateX(-50%)}
+  .mlab--fail{left:calc(var(--pool-x) + var(--unit)*2.5);
+    bottom:calc(var(--floor) + var(--unit)*2.62);transform:translateX(-50%)}
+  .asklist{grid-template-columns:minmax(0,1fr)}
+  .beats{gap:var(--s-5)}
+}
+@media (max-width:420px){
+  .fig__n{font-size:clamp(1.45rem,6vw,2rem)}
+}
+
+/* ═══ REDUCED MOTION — the still state carries the whole meaning ══════ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important}
+}
+
+/* ═══ THE SIX QUALITY TAGS (section 05) ═══════════════════════════════ */
+.tags{
+  /* one scene geometry, derived from --unit */
+  --stage-h:calc(var(--unit) * 1.36);
+  --base:calc(var(--unit) * .10);     /* body baseline above the stage floor */
+  --horizon:calc(var(--unit) * .54);  /* far edge of the surface             */
+  max-width:var(--shell);
+  margin-inline:auto;
+}
+.tags *,.tags *::before,.tags *::after{box-sizing:border-box}
+
+/* ── words ─────────────────────────────────────────────────────────────── */
+.tags__h{
+  font-family:var(--f-display);font-weight:var(--w-bold);font-size:var(--t-xl);
+  line-height:var(--lh-head);letter-spacing:var(--ls-head);color:var(--ink-900);
+  margin:0 0 var(--s-3);max-width:var(--measure);
+}
+.tags__lead{
+  margin:0 0 var(--s-4);max-width:var(--measure);
+  font-size:var(--t-md);line-height:var(--lh-body);color:var(--ink-700);
+}
+.tags__hint{
+  margin:0 0 var(--s-5);font-family:var(--f-mono);font-size:var(--t-3xs);
+  font-variation-settings:var(--mono-wdth);letter-spacing:var(--ls-label);
+  text-transform:uppercase;color:var(--ink-700);
+}
+
+/* ── the rail: six bodies on one surface ───────────────────────────────── */
+.tags__rail{
+  /* zero column gap: the six stages are ONE continuous surface, so the far
+     edge of the pool runs unbroken behind all six bodies. */
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  column-gap:0;row-gap:var(--s-5);margin-bottom:var(--s-6);padding-inline:var(--s-4);
+}
+.tags .tag{
+  position:relative;
+  appearance:none;-webkit-appearance:none;border:0;
+  margin:0;padding:var(--s-2) 0 var(--s-3);
+  background:transparent;
+  font:inherit;color:var(--ink-700);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:var(--s-2);
+  transition:border-radius var(--d-3) var(--e-over),
+             box-shadow    var(--d-2) var(--e-out);
+}
+/* selected = the surface is WETTED here — a shallow well in the pool that
+   dries off toward the top, never a card laid on top of it. */
+.tags .tag::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:var(--g-wetted);box-shadow:var(--meniscus),var(--rim);
+  opacity:0;transition:opacity var(--d-2) var(--e-out);
+  -webkit-mask-image:linear-gradient(to top,rgba(var(--sh),1) 46%,rgba(var(--sh),0) 97%);
+          mask-image:linear-gradient(to top,rgba(var(--sh),1) 46%,rgba(var(--sh),0) 97%);
+}
+.tags .tag:hover::before{opacity:.5}
+.tags .tag[aria-selected="true"]::before{opacity:1}
+.tags .tag:focus-visible{
+  outline:var(--hair);outline-color:transparent;outline-offset:var(--s-1);
+  box-shadow:var(--focus-ring);
+}
+.tags .tag__name{
+  font-family:var(--f-mono);font-size:var(--t-2xs);font-weight:var(--w-med);
+  font-variation-settings:var(--mono-wdth);letter-spacing:var(--ls-mono);
+  line-height:var(--lh-snug);color:var(--ink-700);white-space:nowrap;
+  padding-inline:var(--s-2);position:relative;
+}
+.tags .tag[aria-selected="true"] .tag__name{color:var(--ink-900)}
+
+/* ── the surface every body stands on ──────────────────────────────────── */
+.tags .tag__stage{position:relative;display:block;width:100%;height:var(--stage-h)}
+/* far edge of the pool: continuous across neighbouring stages, and the proof
+   that the see-through bodies really are see-through. */
+.tags .hz{
+  position:absolute;left:0;right:0;
+  bottom:var(--horizon);height:0;pointer-events:none;
+  border-top:var(--wall-strong);border-bottom:var(--hair-bright);
+}
+.tags .tag__float{
+  /* the generator's body is `flex:0 0 auto` — it wants a flex parent */
+  position:absolute;left:50%;bottom:var(--base);display:flex;
+  width:calc(var(--unit) * var(--vol));aspect-ratio:1;
+  transform:translateX(-50%);
+  animation:tagBob calc(var(--d-wobble) * (.55 + var(--visc))) var(--e-visc) infinite;
+}
+@keyframes tagBob{
+  0%,100%{transform:translateX(-50%) translateY(0)
+          scaleX(1) scaleY(1)}
+  50%    {transform:translateX(-50%)
+          translateY(calc(var(--unit) * (1.05 - var(--visc)) * -.04))
+          scaleX(calc(1 + (1.05 - var(--visc)) * .014))
+          scaleY(calc(1 - (1.05 - var(--visc)) * .014))}
+}
+/* the mark each body leaves on the surface — its ground signature */
+.tags .mark{
+  position:absolute;left:50%;bottom:var(--base);transform:translateX(-50%);
+  pointer-events:none;border-radius:var(--r-pill);
+}
+.tags .mark::before,.tags .mark::after{content:"";position:absolute}
+
+/* ── 1 · ok — full volume, settled, wetting the surface ────────────────── */
+.tags .tag--ok .mark{
+  width:calc(var(--unit) * var(--vol) * 1.52);
+  height:calc(var(--unit) * var(--vol) * .30);
+  bottom:calc(var(--base) - var(--unit) * .07);
+}
+.tags .tag--ok .mark::before{
+  inset:0;border-radius:inherit;mix-blend-mode:multiply;
+  background:radial-gradient(closest-side,
+    hsl(calc(var(--tint) + var(--band-half)) 92% 56% / .34) 0 40%,
+    hsl(var(--tint) 92% 64% / .18) 62%, transparent 86%);
+}
+.tags .tag--ok .mark::after{           /* the bright meniscus lip */
+  inset:26% 19%;border-radius:inherit;border:var(--hair-bright);
+}
+
+/* ── 2 · empty — a burst film. Shell, torn edge, satellites, nothing in it */
+.tags .dr-empty{background:none;box-shadow:none}
+.tags .dr-empty::before{               /* the ground mark of a burst film is a RING */
+  top:78%;height:30%;left:1%;right:1%;
+  background:radial-gradient(closest-side,
+    transparent 46%,
+    hsl(calc(var(--tint) + var(--band-half)) 96% 62% / .46) 68%,
+    transparent 90%);
+}
+.tags .film{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.tags .fs-a{stop-color:hsl(var(--tint) 92% 80%)}
+.tags .fs-b{stop-color:hsl(calc(var(--tint) + var(--band-half)) 96% 68%)}
+.tags .fs-c{stop-color:hsl(calc(var(--tint) + var(--band)) 92% 74%)}
+.tags .fs-d{stop-color:hsl(var(--tint) 90% 84%)}
+.tags .bs-a{stop-color:var(--pearl-050)}
+.tags .bs-b{stop-color:hsl(calc(var(--tint) + var(--band-half)) 96% 74%)}
+.tags .bs-c{stop-color:hsl(calc(var(--tint) + var(--band)) 90% 60%)}
+.tags .film__skin{fill:url(#tgFilm)}
+.tags .film__edge{fill:none;stroke:var(--pearl-050);stroke-opacity:.72;stroke-width:1.3}
+.tags .film__curl{fill:url(#tgFilm);opacity:.82}
+.tags .sat{fill:url(#tgBead)}
+.tags .sat-1{animation:tagFling var(--d-flow) var(--e-visc) infinite}
+.tags .sat-2{animation:tagFling var(--d-flow) var(--e-visc) infinite;animation-delay:calc(var(--d-flow) / -7)}
+.tags .sat-3{animation:tagFling var(--d-flow) var(--e-visc) infinite;animation-delay:calc(var(--d-flow) / -4)}
+@keyframes tagFling{0%,100%{transform:translate(0,0)}50%{transform:translate(2%,-2%)}}
+
+/* ── 3 · refusal — will not wet. Beaded hard, one contact point, dry halo  */
+.tags .tag--refusal .tag__float{bottom:calc(var(--base) + var(--unit) * .085)}
+.tags .dr-refusal{
+  box-shadow:
+    /* contact shadow tightened to a point — it is barely touching */
+    0 calc(var(--vol) * 4px) calc(var(--vol) * 6px) calc(var(--vol) * -4px) rgba(var(--sh),.44),
+    var(--rim),
+    inset calc(var(--vol) * -5px) calc(var(--vol) * -7px) calc(var(--vol) * 16px)
+      hsl(calc(var(--tint) + var(--band-half)) 100% 60% / .66);
+  /* NO meniscus inset: nothing here spreads */
+}
+.tags .tag--refusal .mark{
+  width:calc(var(--unit) * var(--vol) * 2.2);
+  height:calc(var(--unit) * var(--vol) * .96);
+  bottom:calc(var(--base) - var(--unit) * .13);
+}
+/* a DRY patch, not a glow: matte pearl, its own tooth, and a hard edge where
+   the pool piles up against ground it will not wet. */
+.tags .tag--refusal .mark::before{
+  inset:0;border-radius:inherit;
+  background:
+    var(--tooth),
+    radial-gradient(closest-side,
+      var(--pearl-300) 0 62%,
+      rgba(var(--sh),.10) 66% 68%,
+      var(--pearl-200)   70% 88%,
+      transparent 99%);
+  background-size:var(--tooth-size),auto;
+  -webkit-mask-image:radial-gradient(closest-side,
+    rgba(var(--sh),1) 0 78%, rgba(var(--sh),0) 97%);
+          mask-image:radial-gradient(closest-side,
+    rgba(var(--sh),1) 0 78%, rgba(var(--sh),0) 97%);
+}
+.tags .tag--refusal .mark::after{       /* the single contact point */
+  left:50%;bottom:calc(var(--unit) * .13);transform:translateX(-50%);
+  width:calc(var(--unit) * var(--vol) * .085);
+  height:calc(var(--unit) * var(--vol) * .04);
+  border-radius:var(--r-pill);background:rgba(var(--sh),.6);
+}
+
+/* ── 4 · truncated — severed mid-neck. Flat cut, stub, nothing above ───── */
+.tags .dr-truncated{clip-path:polygon(-12% 42%,112% 42%,112% 148%,-12% 148%)}
+.tags .stub{                            /* the broken neck, flat-topped, pointing at nothing */
+  position:absolute;left:41.5%;width:17%;bottom:55%;height:22%;
+  border-radius:0 0 var(--r-pill) var(--r-pill);
+  border-top:var(--wall-strong);
+  background:
+    var(--spec-hard),
+    linear-gradient(hsl(calc(var(--tint) + var(--band-half)) 94% 74%),
+                    hsl(calc(var(--tint) + var(--band)) 90% 60%));
+  box-shadow:var(--rim),
+    inset calc(var(--vol) * -3px) calc(var(--vol) * -5px) calc(var(--vol) * 9px)
+      hsl(calc(var(--tint) + var(--band-half)) 100% 58% / .5);
+}
+.tags .cut{                             /* the flat exposed face — matte, no specular */
+  position:absolute;left:1%;right:1%;top:36.8%;height:10.4%;
+  border-radius:var(--r-pill);border:var(--hair);
+  background:linear-gradient(
+    hsl(calc(var(--tint) + var(--band-half)) 96% 64%),
+    hsl(calc(var(--tint) + var(--band)) 92% 52%));
+  box-shadow:var(--meniscus),var(--rim);
+}
+.tags .tag--truncated .mark{
+  width:calc(var(--unit) * var(--vol) * 1.25);
+  height:calc(var(--unit) * var(--vol) * .24);
+  bottom:calc(var(--base) - var(--unit) * .05);
+}
+.tags .tag--truncated .mark::before{
+  inset:0;border-radius:inherit;mix-blend-mode:multiply;
+  background:radial-gradient(closest-side,
+    hsl(calc(var(--tint) + var(--band-half)) 92% 56% / .30) 0 44%, transparent 84%);
+}
+.tags .tag--truncated .mark::after{display:none}
+
+/* ── 5 · loop — the same form, nested, again and again ─────────────────── */
+.tags .rg{
+  position:absolute;border-radius:var(--sil);pointer-events:none;opacity:1;
+  border:var(--hair-bright);
+  box-shadow:0 0 0 1px rgba(var(--sh),.10),
+    inset 0 calc(var(--vol) * 2px) calc(var(--vol) * 6px) calc(var(--vol) * -2px)
+      rgba(var(--sh),.42);
+  transition:border-radius var(--d-3) var(--e-over);
+  animation:tagRipple var(--d-flow) var(--e-visc) infinite;
+}
+.tags .rg-1{inset:12%}
+.tags .rg-2{inset:28%;animation-delay:calc(var(--d-flow) / -3)}
+.tags .rg-3{inset:44%;animation-delay:calc(var(--d-flow) / -1.5)}
+.tags .rg-4{inset:60%;animation-delay:calc(var(--d-flow) / -1.2)}
+@keyframes tagRipple{
+  0%,100%{opacity:.6;transform:scale(1)}
+  46%    {opacity:1;transform:scale(1.05)}
+}
+.tags .pull:hover .rg,
+.tags .pull:focus-visible .rg,
+.tags .pull:focus-within .rg{border-radius:var(--sil-round)}
+.tags .tag--loop .mark{
+  width:calc(var(--unit) * var(--vol) * 1.7);
+  height:calc(var(--unit) * var(--vol) * .34);
+  bottom:calc(var(--base) - var(--unit) * .08);
+}
+.tags .tag--loop .mark::before{         /* the standing ripple reaches the ground too */
+  inset:0;border-radius:inherit;mix-blend-mode:multiply;
+  background:repeating-radial-gradient(closest-side,
+    hsl(calc(var(--tint) + var(--band-half)) 92% 58% / .30) 0 9%,
+    transparent 9% 22%);
+}
+.tags .tag--loop .mark::after{display:none}
+
+/* ── 6 · unsourced — outline and highlights, no substance behind them ──── */
+.tags .dr-unsourced{
+  /* the two highlights and the glassy edge survive. The volume does not. */
+  background:var(--spec-hard),var(--spec-soft),var(--spec-edge),var(--spec-edge);
+  box-shadow:
+    /* it barely dents the ground: there is nothing there to weigh anything */
+    0 calc(var(--vol) * 4px) calc(var(--vol) * 9px) calc(var(--vol) * -7px) rgba(var(--sh),.18),
+    var(--rim),var(--rim),
+    0 0 0 1px rgba(var(--sh),.30),
+    inset 0 0 0 calc(var(--vol) * 3px) rgba(var(--sh),.055);
+}
+.tags .dr-unsourced::before{display:none}   /* casts no caustic */
+.tags .tag--unsourced .mark{display:none}   /* and leaves no mark */
+
+/* ── the readout ───────────────────────────────────────────────────────── */
+.tags .read{
+  background:var(--g-wetted);border:var(--hair);
+  box-shadow:var(--e-2),var(--rim),var(--e-inset);
+  padding:var(--s-5);
+}
+.tags .read__p{min-block-size:calc(var(--t-md) * var(--lh-body) * 1.5)}
+.tags .read__p:focus-visible{
+  outline:var(--hair);outline-color:transparent;outline-offset:var(--s-2);
+  box-shadow:var(--focus-ring);border-radius:var(--r-2);
+}
+.tags .read__d{margin:0;font-size:var(--t-md);line-height:var(--lh-body);
+  color:var(--ink-700);max-width:var(--measure)}
+.tags .read__k{
+  font-family:var(--f-mono);font-size:var(--t-2xs);font-weight:var(--w-med);
+  font-variation-settings:var(--mono-wdth);letter-spacing:var(--ls-mono);
+  color:var(--ink-900);background:var(--pearl-400);border:var(--hair);
+  border-radius:var(--r-1);padding:var(--s-1) var(--s-2);margin-right:var(--s-2);
+  white-space:nowrap;
+}
+.tags .rule{
+  display:flex;align-items:center;gap:var(--s-4);flex-wrap:wrap;
+  margin:var(--s-5) 0 0;padding-top:var(--s-4);border-top:var(--hair);
+}
+.tags .rule__d{margin:0;font-size:var(--t-sm);line-height:var(--lh-snug);
+  color:var(--ink-700);max-width:var(--measure)}
+.tags .rule__d b{font-weight:var(--w-semi);color:var(--ink-900)}
+.tags .pips{display:flex;align-items:flex-end;gap:var(--s-2);flex:0 0 auto}
+.tags .pips i{
+  display:block;width:calc(var(--unit) * .17);height:calc(var(--unit) * .17);
+  border-radius:var(--sil-3);background:var(--flag);
+  box-shadow:var(--rim),var(--e-1),
+    inset 0 calc(var(--unit) * -.035) calc(var(--unit) * .07)
+      hsl(var(--hue-amber) 100% 44% / .55);
+}
+.tags .pips i:nth-child(2){height:calc(var(--unit) * .13);border-radius:var(--sil-5)}
+.tags .pips i:nth-child(3){height:calc(var(--unit) * .095);border-radius:var(--sil-1)}
+.tags .pips .stop{
+  display:block;align-self:flex-end;width:calc(var(--unit) * .34);height:0;
+  border-top:var(--wall-strong);margin-bottom:calc(var(--unit) * .025);
+}
+
+/* ── responsive ────────────────────────────────────────────────────────── */
+@media (max-width:1080px){
+  .tags__rail{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:720px){
+  .tags__rail{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tags .tag__name{font-size:var(--t-3xs);padding-inline:var(--s-1)}
+  .tags .read{padding:var(--s-4)}
+}
+
+/* ── reduced motion: everything below is decoration, and the still state
+      already carries the whole reading. ─────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  .tags .tag__float,.tags .rg,.tags .sat{animation:none}
+  .tags .tag__float{transform:translateX(-50%)}
+  .tags .drop,.tags .rg,.tags .tag{transition-duration:var(--d-1)}
+}
+
+/* ═══ THE QUOTA VESSEL + THE THREE PRICING VOLUMES (section 08) ═══════ */
+.vt,.vt *,.vt *::before,.vt *::after{box-sizing:border-box}
+
+.vt{
+  --vt-w:calc(var(--unit) * 2.4);       /* 115px @375 … 202px @1440 */
+  --vt-h:calc(var(--unit) * 4);
+  --vt-pad:var(--s-6);                  /* ONE panel padding, all three tiers */
+  max-width:var(--shell);
+  margin-inline:auto;
+  display:grid;
+  gap:var(--s-8);
+  font-family:var(--f-text);
+  color:var(--ink-700);
+}
+.vt h3,.vt h4,.vt p,.vt ul,.vt ol,.vt figure{margin:0}
+
+.vt .vt-eyebrow{
+  font-family:var(--f-mono);
+  font-size:var(--t-3xs);
+  font-weight:var(--w-semi);
+  font-variation-settings:var(--mono-wdth);
+  letter-spacing:var(--ls-label);
+  text-transform:uppercase;
+  color:var(--ink-500);
+}
+
+/* ═══════════ OBJECT A — .vessel : the quota vessel ═══════════════════════ */
+.vt .vessel-fig{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:var(--s-7);
+}
+.vt .vessel-unit{
+  display:grid;
+  grid-template-columns:auto auto;
+  align-items:stretch;
+  gap:var(--s-2);
+  padding-block:var(--s-2) var(--s-5);  /* room for the scale cap and the caustic */
+}
+
+.vt .vessel{
+  --fill:23; --cap:40;
+  --lvl:calc(100% * var(--fill) / var(--cap));
+  --climb:calc(var(--unit) * .085);     /* how far the fluid creeps up the wall */
+  --tint:var(--hue-aqua);
+  position:relative;
+  width:var(--vt-w);
+  height:var(--vt-h);
+}
+
+/* moulded polymer wall — translucent, clips the fluid.
+   The 90deg layer is cylinder shading: the wall turns away at both edges. */
+.vt .vessel__wall{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  border:var(--wall);
+  background:
+    linear-gradient(90deg,
+      rgba(var(--sh),.15) 0%, rgba(var(--sh),0) 8%,
+      rgba(var(--sh),0) 86%, rgba(var(--sh),.19) 100%),
+    linear-gradient(101deg,
+      rgba(255,255,255,.58) 0%,
+      rgba(255,255,255,.14) 30%,
+      rgba(255,255,255,.04) 58%,
+      rgba(255,255,255,.34) 100%),
+    var(--g-frosted);
+  box-shadow:var(--e-2), var(--rim), var(--e-inset);
+}
+
+/* the fluid — a real volume: iridescent band, mass darkening toward the floor */
+.vt .vessel__fluid{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  height:var(--lvl);
+  overflow:hidden;
+  background:
+    /* thin-film band running across the volume */
+    linear-gradient(184deg,
+      hsl(calc(var(--tint) + var(--band-half)) 96% 72% / 0) 22%,
+      hsl(calc(var(--tint) + var(--band-half)) 98% 70% / .55) 40%,
+      hsl(calc(var(--tint) + var(--band)) 94% 66% / 0) 58%),
+    linear-gradient(180deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,0) 17%),
+    linear-gradient(180deg, rgba(var(--sh),0) 32%, rgba(var(--sh),.32) 100%),
+    linear-gradient(101deg,
+      hsl(var(--tint) 84% 76%) 0%,
+      hsl(calc(var(--tint) + var(--band-half)) 96% 64%) 44%,
+      hsl(calc(var(--tint) + var(--band)) 90% 72%) 100%);
+  box-shadow:
+    var(--meniscus),
+    inset calc(var(--vol) * -9px) calc(var(--vol) * -11px) calc(var(--vol) * 24px)
+      hsl(calc(var(--tint) + var(--band-half)) 100% 54% / .55);   /* subsurface */
+}
+/* slow thin-film sheen travelling through the volume */
+.vt .vessel__sheen{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(101deg,
+    rgba(255,255,255,0) 36%, rgba(255,255,255,.40) 50%, rgba(255,255,255,0) 64%);
+  animation:vt-sheen var(--d-flow) var(--e-visc) infinite;
+}
+@keyframes vt-sheen{
+  0%,58%{transform:translateX(-120%)}
+  100%  {transform:translateX(120%)}
+}
+
+/* THE MENISCUS — the fluid climbs the wall and darkens where it touches.
+   Three coincident ellipses centred on the top edge. Everything OUTSIDE an
+   ellipse is painted, so the fluid's surface sits at y=h in the middle and
+   rises to y=0 by the time it reaches the wall: a real concave surface.
+   The ink ellipse is WIDER than the fluid ellipse, so only the last few
+   pixels before the glass go dark — the wall contact. */
+.vt .vessel__mensc{
+  position:absolute;
+  left:0; right:0;
+  bottom:var(--lvl);
+  height:var(--climb);
+  pointer-events:none;
+  background:
+    /* specular line riding the curve */
+    radial-gradient(42% 100% at 50% 0%,
+      rgba(255,255,255,0) 0 88%, rgba(255,255,255,.95) 96%, rgba(255,255,255,0) 100%),
+    /* wall contact — the darkening, only near the glass */
+    radial-gradient(47% 100% at 50% 0%,
+      rgba(var(--sh),0) 0 93%, rgba(var(--sh),.30) 100%),
+    /* the climbing fluid, in the saturated end of the band */
+    radial-gradient(42% 100% at 50% 0%,
+      rgba(255,255,255,0) 0 99.4%,
+      hsl(calc(var(--tint) + var(--band-half)) 88% 63%) 100%);
+}
+
+/* graduated scale — ONE element, 24 drawn marks, tiled with background-size */
+.vt .vessel__ticks{
+  position:absolute;
+  inset:0 var(--s-1) 0 0;
+  pointer-events:none;
+  mix-blend-mode:multiply;
+  background-image:
+    linear-gradient(rgba(var(--sh),.42) 0 1px, rgba(var(--sh),0) 1px),   /* every 10 */
+    linear-gradient(rgba(var(--sh),.25) 0 1px, rgba(var(--sh),0) 1px);   /* every  2 */
+  background-size:
+    44% calc(100% / 4),
+    22% calc(100% / 20);
+  background-position:right bottom;
+  background-repeat:repeat-y;
+}
+
+/* the wall carries its own highlight, independent of the fluid's */
+.vt .vessel__gloss{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    var(--spec-hard),                        /* small hard glint, top-left    */
+    linear-gradient(97deg,                   /* the long wall streak          */
+      rgba(255,255,255,0) 6%,
+      rgba(255,255,255,.98) 13%,
+      rgba(255,255,255,.34) 19%,
+      rgba(255,255,255,0) 25%),
+    var(--spec-soft);                        /* broad low highlight           */
+  background-size:58% 22%, 100% 100%, 100% 100%;
+  background-position:left top, center, center;
+  background-repeat:no-repeat;
+  -webkit-mask-image:linear-gradient(180deg, transparent 0%, black 6%, black 92%, transparent 100%);
+          mask-image:linear-gradient(180deg, transparent 0%, black 6%, black 92%, transparent 100%);
+}
+
+/* caustic — the coloured cast the fluid throws on the ground beneath */
+.vt .vessel__caustic{
+  position:absolute;
+  left:0; right:0;
+  top:100%;
+  height:var(--s-7);
+  margin-top:calc(var(--s-4) * -1);
+  pointer-events:none;
+  mix-blend-mode:multiply;
+  filter:blur(var(--s-2));
+  border-radius:var(--r-pill);
+  background:
+    radial-gradient(44% 72% at 50% 12%,
+      hsl(calc(var(--tint) + var(--band-half)) 98% 46% / .92) 0%,
+      hsl(calc(var(--tint) + var(--band-half)) 94% 56% / .44) 44%,
+      rgba(var(--sh),0) 78%),
+    radial-gradient(94% 100% at 50% 4%,
+      hsl(calc(var(--tint) + var(--band)) 92% 56% / .56) 0%,
+      hsl(var(--tint) 94% 60% / .24) 50%,
+      rgba(var(--sh),0) 86%);
+}
+
+/* the printed graduation numerals beside the cell */
+.vt .vessel__scale{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-block:calc(var(--t-3xs) * -.5);
+  font-family:var(--f-mono);
+  font-size:var(--t-3xs);
+  font-weight:var(--w-med);
+  font-variation-settings:var(--mono-wdth);
+  letter-spacing:var(--ls-mono);
+  line-height:1;
+  color:var(--ink-500);
+}
+.vt .vessel__scale span{padding:2px 3px}
+
+/* the caption block beside the cell */
+.vt .vessel-cap{
+  display:grid;
+  gap:var(--s-3);
+  align-content:center;
+  max-width:var(--measure);
+}
+.vt .vessel-head{
+  font-family:var(--f-display);
+  font-size:var(--t-xl);
+  font-weight:var(--w-bold);
+  letter-spacing:var(--ls-head);
+  line-height:var(--lh-head);
+  color:var(--ink-900);
+}
+.vt .vessel__chrome{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:var(--s-2) var(--s-3);
+  font-family:var(--f-mono);
+  font-variation-settings:var(--mono-wdth);
+}
+.vt .vessel__chrome span{
+  display:inline-flex;
+  align-items:baseline;
+  gap:var(--s-2);
+  white-space:nowrap;
+}
+.vt .vessel__chrome b{
+  font-size:var(--t-3xs);
+  font-weight:var(--w-semi);
+  letter-spacing:var(--ls-label);
+  text-transform:uppercase;
+  color:var(--ink-400);
+  background:var(--tonic-wash);
+  border:var(--hair);
+  border-radius:var(--r-pill);
+  padding:var(--s-1) var(--s-3);
+}
+.vt .vessel__chrome i{
+  font-style:normal;
+  font-size:var(--t-lg);
+  font-weight:var(--w-bold);
+  letter-spacing:var(--ls-mono);
+  color:var(--ink-900);
+}
+.vt .vessel__chrome em{
+  font-style:normal;
+  font-size:var(--t-3xs);
+  font-weight:var(--w-semi);
+  letter-spacing:var(--ls-label);
+  text-transform:uppercase;
+  color:var(--ink-500);
+}
+.vt .vessel__note{
+  font-size:var(--t-sm);
+  line-height:var(--lh-body);
+  color:var(--ink-700);
+  max-width:var(--measure);
+}
+
+/* ═══════════ OBJECT B — .tiers : three volumes of different mass ════════ */
+.vt .tiers-block{display:grid;gap:var(--s-5)}
+.vt .tiers{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:var(--gap);
+  align-items:stretch;
+}
+.vt .tier{
+  position:relative;
+  isolation:isolate;
+  display:flex;
+  flex-direction:column;
+  padding:var(--vt-pad);                 /* ONE padding value across all three */
+  border:var(--hair);
+  box-shadow:var(--e-2), var(--rim);
+}
+.vt .tier:hover{box-shadow:var(--e-3), var(--rim)}
+/* surface microstructure — material irregularity, not age */
+.vt .tier::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  border-radius:inherit;
+  mix-blend-mode:multiply;
+  opacity:.65;
+  background-image:var(--tooth);
+  background-size:var(--tooth-size);
+}
+/* three DIFFERENT surface treatments */
+.vt .tier--free{background:var(--g-dry)}
+.vt .tier--pro{
+  background:
+    radial-gradient(66% 40% at 76% 10%, rgba(255,255,255,.96), rgba(255,255,255,0) 70%),
+    linear-gradient(180deg, var(--accent-wash) 0%, var(--pearl-300) 62%);
+}
+.vt .tier--teams{
+  background:var(--g-frosted);
+  border:var(--hair-bright);
+  /* frost: light scatters a short way in from every edge */
+  box-shadow:var(--e-1), var(--rim),
+             inset 0 0 var(--s-7) rgba(var(--sh),.055);
+}
+.vt .tier--teams:hover{
+  box-shadow:var(--e-2), var(--rim),
+             inset 0 0 var(--s-7) rgba(var(--sh),.055);
+}
+/* coarser grain on the frosted panel than on the dry one */
+.vt .tier--teams::after{background-size:var(--tooth-size-2)}
+
+/* the mass slot — identical height in all three, bodies bottom-aligned so the
+   difference in volume is read against one shared floor line */
+.vt .tier__mass{
+  height:calc(var(--unit) * 1.62);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  margin-bottom:var(--s-5);
+}
+
+/* PRO: a heavy body that sags under itself, and relaxes when pulled */
+.vt .mass-heavy{
+  --sag:.13;
+  transform:scaleX(calc(1 + var(--sag))) scaleY(calc(1 - var(--sag)));
+  transform-origin:50% 100%;
+}
+.vt .tier:hover .mass-heavy,
+.vt .tier:focus-within .mass-heavy{transform:scaleX(1) scaleY(1)}
+/* the flattened contact patch a heavy body presses into the ground */
+.vt .mass-heavy::after{
+  content:"";
+  position:absolute;
+  left:12%; right:12%;
+  top:97%;
+  height:calc(var(--unit) * .17);
+  border-radius:var(--r-pill);
+  pointer-events:none;
+  filter:blur(var(--s-1));
+  background:radial-gradient(closest-side,
+    rgba(var(--sh),.46) 0%, rgba(var(--sh),0) 82%);
+}
+
+/* TEAMS: a body that has not condensed yet — outline only, beads inside */
+.vt .vapour{
+  --sil:var(--sil-3);
+  position:relative;
+  width:calc(var(--unit) * 1.32);
+  aspect-ratio:1;
+  border:var(--wall-strong);
+  border-style:dashed;
+  border-radius:var(--sil);
+  /* no solid fill — only a breath of mist. No specular either: an unformed
+     body has no surface to catch the light, and no contact shadow to cast. */
+  background:
+    radial-gradient(78% 70% at 40% 32%,
+      hsl(var(--hue-azure) 84% 78% / .20) 0%,
+      hsl(var(--hue-azure) 84% 78% / 0) 78%);
+  /* a second, looser contour: the boundary has not settled */
+  outline:var(--hair);
+  outline-style:dashed;
+  outline-offset:var(--s-2);
+  transition:border-radius var(--d-3) var(--e-over);
+}
+.vt .tier:hover .vapour,
+.vt .tier:focus-within .vapour{border-radius:var(--sil-round)}
+.vt .bead{
+  position:absolute;
+  opacity:.9;
+  animation:vt-drift var(--d-flow) var(--e-visc) infinite alternate;
+}
+.vt .bead::before{opacity:.4}
+.vt .bead--a{left:15%;top:24%;animation-delay:calc(var(--d-2) * -1)}
+.vt .bead--b{left:54%;top:13%;animation-delay:calc(var(--d-3) * -3)}
+.vt .bead--c{left:31%;top:55%;animation-delay:calc(var(--d-4) * -2)}
+.vt .bead--d{left:64%;top:49%;animation-delay:calc(var(--d-4) * -4)}
+@keyframes vt-drift{
+  from{transform:translate3d(0,0,0)}
+  to  {transform:translate3d(var(--s-1), calc(var(--s-2) * -1), 0)}
+}
+
+/* tier type — ONE scale across all three */
+.vt .tier__name{
+  font-family:var(--f-display);
+  font-size:var(--t-xl);
+  font-weight:var(--w-bold);
+  letter-spacing:var(--ls-head);
+  line-height:var(--lh-head);
+  color:var(--ink-900);
+}
+.vt .tier--pro .tier__name{padding-right:var(--s-8)}
+.vt .tier__priceline{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:var(--s-2);
+  margin-top:var(--s-2);
+}
+.vt .tier__price{
+  font-family:var(--f-display);
+  font-size:var(--t-2xl);
+  font-weight:var(--w-black);
+  letter-spacing:var(--ls-tight);
+  line-height:var(--lh-tight);
+  color:var(--ink-900);
+}
+.vt .tier__per,
+.vt .tier__alt{
+  font-family:var(--f-mono);
+  font-size:var(--t-3xs);
+  font-variation-settings:var(--mono-wdth);
+  letter-spacing:var(--ls-mono);
+  color:var(--ink-500);
+}
+.vt .tier__alt{display:block;margin-top:var(--s-2);line-height:var(--lh-snug)}
+.vt .tier__say{
+  margin-top:var(--s-3);
+  font-size:var(--t-xs);
+  line-height:var(--lh-snug);
+  color:var(--ink-700);
+  font-weight:var(--w-med);
+}
+.vt .tier__rule{
+  height:0;
+  border:0;
+  border-top:var(--hair);
+  margin:var(--s-5) 0;
+}
+.vt .tier__list{
+  list-style:none;
+  padding:0;
+  display:grid;
+  gap:var(--s-2);
+  margin-bottom:var(--s-6);
+}
+.vt .tier__list li{
+  display:flex;
+  align-items:flex-start;
+  gap:var(--s-2);
+  font-size:var(--t-xs);
+  line-height:var(--lh-snug);
+  color:var(--ink-700);
+}
+.vt .tier__list li::before{
+  content:"";
+  flex:0 0 auto;
+  width:var(--s-2);
+  height:var(--s-2);
+  margin-top:calc((1em * var(--lh-snug) - var(--s-2)) / 2);
+  border-radius:var(--sil-round);
+  box-shadow:var(--rim);
+  background:
+    var(--spec-hard),
+    linear-gradient(140deg,
+      hsl(var(--tint) 88% 70%),
+      hsl(calc(var(--tint) + var(--band-half)) 94% 58%));
+}
+.vt .tier--free .tier__list li::before{--tint:var(--hue-cyan)}
+.vt .tier--pro  .tier__list li::before{--tint:var(--hue-violet)}
+
+/* the quiet recommendation mark */
+.vt .tier__flag{
+  position:absolute;
+  top:var(--s-4);
+  right:var(--s-4);
+  font-family:var(--f-mono);
+  font-size:var(--t-3xs);
+  font-weight:var(--w-semi);
+  font-variation-settings:var(--mono-wdth);
+  letter-spacing:var(--ls-label);
+  text-transform:uppercase;
+  color:var(--ink-400);
+  background:var(--accent-wash);
+  border:var(--hair);
+  border-radius:var(--r-pill);
+  padding:var(--s-1) var(--s-3);
+}
+
+/* CTAs */
+.vt .tier__foot{margin-top:auto;padding-top:var(--s-5)}
+.vt .tier__cta{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  padding:var(--s-3) var(--s-4);
+  border:var(--hair);
+  border-radius:var(--r-pill);
+  font-family:var(--f-mono);
+  font-size:var(--t-3xs);
+  font-weight:var(--w-semi);
+  font-variation-settings:var(--mono-wdth);
+  letter-spacing:var(--ls-label);
+  text-transform:uppercase;
+  text-decoration:none;
+  cursor:pointer;
+  transition:transform var(--d-1) var(--e-out),
+             box-shadow var(--d-2) var(--e-out);
+}
+.vt .tier__cta--solid{
+  background:linear-gradient(180deg, var(--accent) 0%, var(--accent-deep) 100%);
+  border-color:transparent;
+  color:var(--pearl-050);
+  box-shadow:var(--e-2), var(--e-inset);
+}
+.vt .tier__cta--ghost{
+  background:var(--pearl-100);
+  color:var(--ink-700);
+  box-shadow:var(--e-1), var(--rim);
+}
+.vt .tier__cta:hover{transform:translateY(calc(var(--s-1) * -.4))}
+.vt .tier__cta:active{transform:translateY(0)}
+.vt .tier__cta:focus-visible{
+  box-shadow:var(--focus-ring);
+  /* the visible ring is the box-shadow; the transparent outline is kept so
+     forced-colors mode still has something real to paint. */
+  outline:var(--focus-line);
+  outline-offset:var(--focus-gap);
+}
+/* Teams has no CTA. It is not available. */
+.vt .tier__pending{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:var(--s-3) var(--s-4);
+  border:var(--wall);
+  border-style:dashed;
+  border-radius:var(--r-pill);
+  font-family:var(--f-mono);
+  font-size:var(--t-3xs);
+  font-weight:var(--w-semi);
+  font-variation-settings:var(--mono-wdth);
+  letter-spacing:var(--ls-label);
+  text-transform:uppercase;
+  color:var(--ink-500);
+}
+
+.vt .tiers-foot{
+  font-size:var(--t-2xs);
+  line-height:var(--lh-snug);
+  color:var(--ink-500);
+}
+
+/* ── responsive. Two breakpoints, both below --shell. ─────────────────── */
+@media (max-width:1080px){
+  .vt .tiers{grid-template-columns:1fr}
+  .vt .tier__mass{height:calc(var(--unit) * 1.4)}
+}
+@media (max-width:720px){
+  .vt .vessel-fig{grid-template-columns:minmax(0,1fr);gap:var(--s-5)}
+  .vt .vessel-unit{justify-self:start;padding-bottom:var(--s-6)}
+  .vt .vessel-cap{padding-bottom:0}
+  .vt{gap:var(--s-7)}
+}
+
+/* ── reduced motion: the still state carries the whole meaning ─────────── */
+@media (prefers-reduced-motion:reduce){
+  .vt *,.vt *::before,.vt *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+  .vt .vessel__sheen{opacity:.55;transform:none}
+}
+
+/* ═══ THE TEN CADENCES + THE COMPARISON (sections 04 and 07) ══════════ */
+/* ── shared scaffolding for the two objects ─────────────────────────────── */
+.cadence,.versus{max-width:var(--shell);margin-inline:auto}
+.cadence *,.cadence *::before,.cadence *::after,
+.versus *,.versus *::before,.versus *::after{box-sizing:border-box}
+.cadence{margin-bottom:var(--s-9)}
+
+.cadence .obj-head,.versus .obj-head{margin:0 0 var(--s-6)}
+.cadence .obj-kicker,.versus .obj-kicker{
+  margin:0 0 var(--s-3);font-family:var(--f-mono);font-size:var(--t-3xs);
+  font-variation-settings:var(--mono-wdth);font-weight:var(--w-med);
+  letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ink-500)}
+.cadence .obj-title,.versus .obj-title{
+  margin:0 0 var(--s-3);font-family:var(--f-display);font-size:var(--t-xl);
+  font-weight:var(--w-bold);line-height:var(--lh-head);letter-spacing:var(--ls-head);
+  color:var(--ink-900)}
+.cadence .obj-lede,.versus .obj-lede{
+  margin:0;max-width:var(--measure);font-size:var(--t-md);
+  line-height:var(--lh-body);color:var(--ink-700)}
+
+/* ══ OBJECT A — .cadence ════════════════════════════════════════════════ */
+.cadence .cad-fig{margin:0}
+.cadence .cad-plate{
+  position:relative;overflow:hidden;padding:0;
+  display:grid;gap:0;
+  border:var(--hair);
+  background:var(--g-dry);
+  box-shadow:var(--e-3),var(--rim)}
+
+/* the two regions of the one surface: dry pearl, and a standing pool ── */
+.cadence .cad-zone{position:relative;padding:var(--s-5) var(--s-6) var(--s-6)}
+
+/* DRY: matte, its microstructure showing, edges square to the light. */
+.cadence .cad-zone--dry{
+  background-image:var(--tooth),var(--tooth);
+  background-size:var(--tooth-size),var(--tooth-size-2);
+  box-shadow:var(--e-inset)}
+
+/* WET: a shallow standing pool. The thin film is where the iridescence
+   lives, so the colour is here and the dry pearl above stays matte.     */
+.cadence .cad-zone--wet{
+  isolation:isolate;margin-top:calc(var(--s-1) * -1);
+  background-image:
+    radial-gradient(58% 132% at 18% -30%,
+      hsl(var(--hue-cyan) 100% 100% / .98) 0%, hsl(var(--hue-cyan) 100% 100% / 0) 62%),
+    radial-gradient(34% 82% at 94% 124%,
+      hsl(var(--hue-violet) 96% 72% / .34), hsl(var(--hue-violet) 96% 72% / 0) 70%),
+    var(--g-filmed);
+  /* the conic in --g-filmed is scaled far past the box so its seam ray
+     never falls inside the pool — only a smooth stretch of the sweep does */
+  background-size:auto,auto,300% 300%,auto;
+  background-position:0 0,0 0,100% 100%,0 0;
+  background-repeat:no-repeat;
+  box-shadow:var(--meniscus),
+    inset 0 calc(var(--s-2) * -1) var(--s-4) calc(var(--s-2) * -1) rgba(var(--sh),.18),
+    inset 0 var(--s-2) var(--s-5) calc(var(--s-3) * -1) rgba(var(--sh),.14)}
+/* the body of the pool — depth, multiplied into the pearl beneath it */
+.cadence .cad-zone--wet::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:var(--g-pooled);opacity:.24;mix-blend-mode:multiply;z-index:-1}
+/* the waterline: the meniscus climbing the near wall of the pool */
+.cadence .cad-zone--wet::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to bottom,
+      rgba(var(--sh),.18) 0 calc(var(--s-1) / 4),
+      hsl(var(--hue-cyan) 100% 100% / .96) calc(var(--s-1) / 4) calc(var(--s-1) * .75),
+      hsl(var(--hue-cyan) 94% 78% / .30) 3px calc(var(--s-2) + var(--s-1)),
+      hsl(var(--hue-cyan) 94% 82% / 0) calc(var(--s-4) + var(--s-2))),
+    linear-gradient(to top,
+      hsl(var(--hue-violet) 96% 66% / .26) 0 calc(var(--s-1) / 2),
+      hsl(var(--hue-violet) 96% 66% / 0) var(--s-3))}
+
+.cadence .cad-zone__title{
+  position:relative;z-index:var(--z-label);
+  margin:0 0 var(--s-4);display:flex;align-items:baseline;gap:var(--s-3);
+  flex-wrap:wrap;font-family:var(--f-mono);font-size:var(--t-2xs);
+  font-variation-settings:var(--mono-wdth);font-weight:var(--w-semi);
+  letter-spacing:var(--ls-label);color:var(--ink-900)}
+.cadence .cad-zone__note{font-size:var(--t-3xs);font-weight:var(--w-body);
+  letter-spacing:var(--ls-mono);color:var(--ink-500)}
+
+.cadence .cad-lanes{list-style:none;margin:0;padding:0;display:grid;gap:var(--s-2)}
+.cadence .lane{
+  position:relative;z-index:var(--z-plate);
+  display:grid;align-items:end;gap:var(--s-3);
+  grid-template-columns:calc(var(--s-8) + var(--s-3)) minmax(0,1fr) calc(var(--s-8) + var(--s-5))}
+.cadence .lane__name{
+  padding-bottom:var(--s-2);font-family:var(--f-mono);font-size:var(--t-3xs);
+  font-variation-settings:var(--mono-wdth);font-weight:var(--w-semi);
+  letter-spacing:var(--ls-label);color:var(--ink-900)}
+.cadence .lane__rate{
+  padding-bottom:var(--s-2);text-align:right;font-family:var(--f-mono);
+  font-size:var(--t-3xs);font-variation-settings:var(--mono-wdth);
+  letter-spacing:var(--ls-mono);color:var(--ink-500)}
+
+.cadence .lane__track{
+  position:relative;display:flex;align-items:flex-end;justify-content:space-around;
+  min-height:var(--s-5);padding:0 var(--s-2) var(--s-5)}
+.cadence .lane__wet{flex:0 0 calc(100% * 5 / 7);
+  display:flex;align-items:flex-end;justify-content:space-around}
+.cadence .lane--gap .lane__track{justify-content:flex-start}
+.cadence .lane--once .lane__track{justify-content:flex-start;padding-left:var(--s-6)}
+
+/* the contact line the bodies sit on. On the dry region it is a scored
+   datum with a wet halo only under each body; on the wetted region it is
+   a standing film with a bright meniscus along its top edge.              */
+.cadence .lane__track::after{
+  content:"";position:absolute;left:0;right:0;bottom:calc(var(--s-5) - var(--s-2));
+  height:var(--s-2);border-radius:var(--r-pill);pointer-events:none;
+  background:linear-gradient(to bottom,
+    hsl(calc(var(--tint) + var(--band-half)) 92% 72% / calc(.14 + var(--visc) * .20)) 0 40%,
+    hsl(calc(var(--tint) + var(--band)) 88% 62% / calc(.10 + var(--visc) * .14)) 40% 66%,
+    rgba(var(--sh),.10) 66% 100%);
+  box-shadow:inset 0 calc(var(--s-1) / 4) 0 hsl(var(--tint) 100% 100% / .85),
+             0 calc(var(--s-1) / 4) 0 rgba(var(--sh),.06)}
+.cadence .cad-zone--dry .lane__track::after{
+  bottom:var(--s-5);height:calc(var(--s-1) / 2);
+  background:linear-gradient(to right,
+    rgba(var(--sh),0) 0%, rgba(var(--sh),.22) 4%,
+    rgba(var(--sh),.22) 96%, rgba(var(--sh),0) 100%);
+  box-shadow:0 calc(var(--s-1) / 4) 0 hsl(var(--tint) 100% 100% / .9)}
+.cadence .lane--once .lane__track::after{
+  background:linear-gradient(to right,
+    rgba(var(--sh),.24) 0 22%, rgba(var(--sh),.06) 30%, rgba(var(--sh),0) 44%)}
+.cadence .lane--gap .lane__track::after{
+  background:linear-gradient(to right,
+    rgba(var(--sh),0) 0%, rgba(var(--sh),.22) 4%,
+    rgba(var(--sh),.22) calc(100% * 5 / 7),
+    rgba(var(--sh),0) calc(100% * 5 / 7))}
+
+/* bodies: the settle, and the hard little shadow that nails them down. */
+.cadence .cad-body::after{
+  content:"";position:absolute;left:18%;right:8%;top:88%;height:26%;
+  border-radius:var(--r-pill);pointer-events:none;
+  background:radial-gradient(closest-side,
+    rgba(var(--sh),.46), rgba(var(--sh),0) 82%)}
+
+.cadence .cad-body{
+  transform:scaleX(calc(1 + var(--vol) * .09)) scaleY(calc(1 - var(--vol) * .20 - (1 - var(--visc)) * .06));
+  transform-origin:50% 100%}
+
+/* ── the bead runs: one element, n tiled droplets ──────────────────────── */
+.cadence .run{
+  --bd:calc(var(--unit) * var(--vol));
+  position:relative;flex:1 1 100%;height:var(--bd);align-self:flex-end;
+  background-image:
+    radial-gradient(20% 26% at 39% 28%,
+      hsl(var(--tint) 100% 100% / .96) 0%, hsl(var(--tint) 100% 100% / 0) 100%),
+    radial-gradient(30% 20% at 62% 76%,
+      hsl(var(--tint) 100% 100% / .42) 0%, hsl(var(--tint) 100% 100% / 0) 100%),
+    radial-gradient(circle closest-side at 50% 50%,
+      hsl(calc(var(--tint) + var(--band-half)) 96% 80%) 0%,
+      hsl(calc(var(--tint) + var(--band)) 94% 66%) 54%,
+      hsl(calc(var(--tint) + var(--band-half)) 100% 56%) 84%,
+      hsl(var(--tint) 96% 62% / 0) 100%);
+  background-size:calc(100% / var(--n)) 100%;
+  background-repeat:repeat-x}
+.cadence .run::after{
+  content:"";position:absolute;left:0;right:0;top:100%;
+  height:calc(var(--bd) * .9);pointer-events:none;
+  background-image:
+    radial-gradient(circle closest-side at 50% 2%,
+      hsl(calc(var(--tint) + var(--band-half)) 96% 66% / .55),
+      hsl(var(--tint) 96% 66% / 0) 100%),
+    radial-gradient(circle closest-side at 50% -14%,
+      rgba(var(--sh),.36), rgba(var(--sh),0) 100%);
+  background-size:calc(100% / var(--n)) calc(var(--bd) * .75);
+  background-repeat:repeat-x}
+
+.cadence .cad-cap{
+  margin:var(--s-4) 0 0;max-width:var(--measure);
+  font-size:var(--t-xs);line-height:var(--lh-snug);color:var(--ink-500)}
+.cadence .cad-cap b{font-family:var(--f-mono);font-size:var(--t-3xs);
+  font-variation-settings:var(--mono-wdth);font-weight:var(--w-semi);
+  letter-spacing:var(--ls-mono);color:var(--ink-700)}
+
+@media (max-width:720px){
+  .cadence .lane{grid-template-columns:minmax(0,1fr) auto;gap:var(--s-2) var(--s-3)}
+  .cadence .lane__name{grid-area:1 / 1 / 2 / 2;padding-bottom:0;align-self:center}
+  .cadence .lane__rate{grid-area:1 / 2 / 2 / 3;padding-bottom:0;align-self:center}
+  .cadence .lane__track{grid-area:2 / 1 / 3 / 3}
+  .cadence .cad-lanes{gap:var(--s-4)}
+  .cadence .cad-zone{padding:var(--s-4) var(--s-3) var(--s-4)}
+  .cadence .cad-plate{padding:var(--s-3)}
+}
+
+
+/* ══ OBJECT B — .versus ═════════════════════════════════════════════════ */
+.versus{
+  /* machined stock: cool anodised aluminium, turned so the light lands
+     as one hard specular line across the top third of every barrel.     */
+  --metal-h:linear-gradient(to bottom,
+    var(--metal-rim) 0%, var(--ink-400) 3%, var(--pearl-700) 9%,
+    var(--pearl-200) 15%, var(--pearl-050) 19%, var(--pearl-050) 22%,
+    var(--pearl-400) 30%, var(--pearl-600) 42%, var(--pearl-800) 58%,
+    var(--ink-400) 76%, var(--ink-700) 92%, var(--metal-deep) 100%);
+  --metal-v:linear-gradient(to right,
+    var(--metal-rim) 0%, var(--ink-400) 3%, var(--pearl-700) 9%,
+    var(--pearl-200) 15%, var(--pearl-050) 19%, var(--pearl-050) 22%,
+    var(--pearl-400) 30%, var(--pearl-600) 42%, var(--pearl-800) 58%,
+    var(--ink-400) 76%, var(--ink-700) 92%, var(--metal-deep) 100%);
+  --knurl:repeating-linear-gradient(90deg,
+    rgba(var(--sh),.30) 0 calc(var(--s-1) / 4),
+    rgba(var(--sh),0) calc(var(--s-1) / 4) calc(var(--s-1) * .7));
+  --knurl-v:repeating-linear-gradient(0deg,
+    rgba(var(--sh),.30) 0 calc(var(--s-1) / 4),
+    rgba(var(--sh),0) calc(var(--s-1) / 4) calc(var(--s-1) * .7));
+  --bore:var(--s-5);
+  --datum:calc(var(--s-5) - var(--s-1));
+}
+.versus .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);
+  align-items:stretch}
+.versus .vs-fig{
+  margin:0;padding:var(--s-5);display:flex;flex-direction:column;
+  border:var(--hair);background-image:var(--tooth),var(--g-dry);
+  background-size:var(--tooth-size),auto;
+  box-shadow:var(--e-2),var(--rim)}
+.versus .vs-fig__title{margin:0;font-family:var(--f-display);font-size:var(--t-lg);
+  font-weight:var(--w-bold);line-height:var(--lh-head);letter-spacing:var(--ls-head);
+  color:var(--ink-900)}
+.versus .vs-fig__sub{margin:var(--s-2) 0 0;font-family:var(--f-mono);
+  font-size:var(--t-3xs);font-variation-settings:var(--mono-wdth);
+  letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--ink-500)}
+.versus .vs-fig__note{margin:auto 0 0;padding-top:var(--s-4);font-size:var(--t-xs);
+  line-height:var(--lh-snug);color:var(--ink-700)}
+
+.versus .vs-stage{position:relative;margin:var(--s-6) 0 var(--s-2);
+  height:calc(var(--s-9) + var(--s-6))}
+
+/* ── the fixed chain: a machined conduit between two bolted sockets ───── */
+.versus .conduit{position:absolute;inset:0}
+/* what the part throws on the floor it is bolted to */
+.versus .conduit::after{content:"";position:absolute;
+  left:var(--s-4);right:var(--s-4);bottom:calc(var(--datum) - var(--s-2));
+  height:var(--s-4);pointer-events:none;
+  background:radial-gradient(72% 100% at 50% 0%,
+    rgba(var(--sh),.30), rgba(var(--sh),0) 78%)}
+.versus .cd{position:absolute;display:block;
+  background-image:var(--metal-h);
+  border:var(--hair);
+  box-shadow:var(--e-1),var(--rim)}
+/* the anodising: a cool film multiplied into the metal */
+.versus .cd::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(to bottom,
+    hsl(var(--hue-azure) 84% 56% / .20), hsl(var(--hue-cyan) 76% 62% / .06));
+  mix-blend-mode:multiply}
+
+.versus .cd-run{height:var(--bore)}
+.versus .cd-run--a{left:var(--s-3);right:calc(72% - var(--bore));top:62%}
+.versus .cd-run--b{left:28%;right:28%;top:10%}
+.versus .cd-run--c{left:calc(72% - var(--bore));right:var(--s-3);top:62%}
+
+.versus .cd-riser,.versus .cd-fall{
+  width:var(--bore);top:10%;height:calc(52% + var(--bore));
+  background-image:var(--metal-v)}
+.versus .cd-riser::after,.versus .cd-fall::after{
+  background:linear-gradient(to right,
+    hsl(var(--hue-azure) 84% 56% / .20), hsl(var(--hue-cyan) 76% 62% / .06))}
+.versus .cd-riser{left:28%}
+.versus .cd-fall{right:28%}
+
+/* couplings — knurled collars, proud of the barrel */
+.versus .cd-cup{
+  width:var(--s-3);top:calc(62% - var(--s-1));
+  height:calc(var(--bore) + var(--s-2));
+  background-image:var(--knurl),var(--metal-h);
+  border-left:var(--wall);border-right:var(--wall);
+  box-shadow:var(--e-1),var(--rim)}
+.versus .cd-cup--a{left:13%}
+.versus .cd-cup--c{right:12%}
+
+/* elbow fittings — one square block at every corner, as they are built */
+.versus .cd-el{
+  width:calc(var(--bore) + var(--s-2));height:calc(var(--bore) + var(--s-2));
+  background-image:var(--knurl-v),var(--metal-h);
+  border:var(--wall);border-radius:var(--r-1);
+  box-shadow:var(--e-2),var(--rim)}
+.versus .cd-el--bl{left:calc(28% - var(--s-1));top:calc(62% - var(--s-1))}
+.versus .cd-el--tl{left:calc(28% - var(--s-1));top:calc(10% - var(--s-1))}
+.versus .cd-el--tr{right:calc(28% - var(--s-1));top:calc(10% - var(--s-1))}
+.versus .cd-el--br{right:calc(28% - var(--s-1));top:calc(62% - var(--s-1))}
+
+/* sockets — floor-mounted flanges. Two bolts and a bore. Fixed. */
+.versus .cd-sock{
+  width:var(--s-5);top:calc(62% - var(--s-4));
+  height:calc(var(--bore) + var(--s-5));
+  background-image:
+    radial-gradient(30% 8% at 50% 11%, var(--ink-500) 0 62%, rgba(var(--sh),0) 100%),
+    radial-gradient(30% 8% at 50% 89%, var(--ink-500) 0 62%, rgba(var(--sh),0) 100%),
+    radial-gradient(52% 18% at 50% 50%, var(--metal-deep) 0 54%,
+      var(--ink-400) 72%, rgba(var(--sh),0) 76%),
+    var(--metal-v);
+  border:var(--wall-strong);border-radius:var(--r-1);
+  box-shadow:var(--e-2),var(--rim)}
+.versus .cd-sock::after{background:linear-gradient(to right,
+  hsl(var(--hue-azure) 84% 56% / .22), hsl(var(--hue-cyan) 76% 62% / .06))}
+.versus .cd-sock--l{left:0}
+.versus .cd-sock--r{right:0}
+
+/* ── the ground both of them have to cross ───────────────────────────── */
+.versus .vs-terrain{position:absolute;inset:0;width:100%;height:100%;
+  overflow:visible;pointer-events:none}
+.versus .tr-mass{fill:url(#vsSoil)}
+.versus .vs-soil-a{stop-color:var(--pearl-700)}
+.versus .vs-soil-b{stop-color:var(--pearl-400)}
+.versus .vs-soak-a{stop-color:hsl(var(--hue-aqua) 88% 50%);stop-opacity:.26}
+.versus .vs-soak-b{stop-color:hsl(var(--hue-azure) 88% 60%);stop-opacity:.02}
+.versus .tr-soak{fill:url(#vsSoak);mix-blend-mode:multiply}
+.versus .tr-shade{fill:none;stroke:rgba(var(--sh),.14);
+  stroke-width:calc(var(--s-2) * .9);vector-effect:non-scaling-stroke}
+.versus .tr-line{fill:none;stroke:rgba(var(--sh),.38);
+  stroke-width:calc(var(--s-1) * .45);vector-effect:non-scaling-stroke}
+
+/* ── the fluid path: it wets its way across, no fittings ─────────────── */
+.versus .fl-spread{fill:none;stroke:hsl(var(--hue-aqua) 92% 56% / .34);
+  stroke-width:calc(var(--s-4) * 1.9);stroke-linecap:round;
+  mix-blend-mode:multiply;vector-effect:non-scaling-stroke}
+.versus .fl-wet{fill:none;stroke:url(#vsTrail);
+  stroke-width:calc(var(--s-1) * .72);stroke-linecap:round;
+  vector-effect:non-scaling-stroke}
+.versus .fl-gloss{fill:none;stroke:hsl(var(--hue-aqua) 100% 100% / .82);
+  stroke-width:calc(var(--s-1) * .34);stroke-linecap:round;
+  vector-effect:non-scaling-stroke}
+.versus .fl-bead{fill:hsl(calc(var(--hue-aqua) + var(--band-half)) 96% 56%);opacity:.95}
+.versus .vs-s0{stop-color:hsl(var(--hue-aqua) 92% 76%);stop-opacity:.08}
+.versus .vs-s1{stop-color:hsl(calc(var(--hue-aqua) + var(--band-half)) 94% 64%);stop-opacity:.50}
+.versus .vs-s2{stop-color:hsl(calc(var(--hue-aqua) + var(--band)) 96% 56%);stop-opacity:.92}
+.versus .fl-body{position:absolute;left:74%;bottom:var(--datum);
+  transform:scaleX(1.06) scaleY(.84);transform-origin:50% 100%}
+
+/* ── the verdict and the numbers ─────────────────────────────────────── */
+.versus .vs-verdict{
+  margin:var(--s-6) 0 0;padding-left:var(--s-4);max-width:var(--measure);
+  border-left:var(--wall-strong);
+  font-size:var(--t-md);line-height:var(--lh-body);color:var(--ink-900)}
+.versus .vs-facts{list-style:none;margin:var(--s-5) 0 0;padding:0;
+  display:grid;gap:var(--s-3);max-width:var(--measure)}
+.versus .vs-fact{display:grid;gap:var(--s-1) var(--s-4);
+  grid-template-columns:calc(var(--s-10) + var(--s-6)) minmax(0,1fr);
+  padding-top:var(--s-3);border-top:var(--hair)}
+.versus .vs-fact__k{font-family:var(--f-mono);font-size:var(--t-3xs);
+  font-variation-settings:var(--mono-wdth);letter-spacing:var(--ls-label);
+  text-transform:uppercase;color:var(--ink-500)}
+.versus .vs-fact__v{font-size:var(--t-xs);line-height:var(--lh-snug);color:var(--ink-700)}
+.versus .vs-link{color:var(--accent-deep);border-radius:var(--r-1);padding-inline:.12em;
+  text-underline-offset:.18em;text-decoration-thickness:from-font}
+.versus .vs-link:hover{color:var(--accent)}
+.versus .vs-link:focus-visible{outline:var(--focus-line);
+  outline-offset:var(--focus-gap);box-shadow:var(--focus-ring);text-decoration:none}
+
+@media (max-width:720px){
+  .versus .vs-grid{grid-template-columns:minmax(0,1fr)}
+  .versus .vs-fact{grid-template-columns:minmax(0,1fr)}
+  /* narrow stage: thinner stock, and drop the mid-run couplings so the
+     fittings stop colliding. The part still reads as the same part.     */
+  .versus{--bore:var(--s-4)}
+  .versus .cd-cup{display:none}
+  .versus .cd-sock{width:var(--s-4);height:calc(var(--bore) + var(--s-6))}
+}
+@media (prefers-reduced-motion:reduce){
+  .cadence *,.cadence *::before,.cadence *::after,
+  .versus *,.versus *::before,.versus *::after{
+    transition-duration:1ms !important;animation:none !important}
+}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- ═══ SVG FILTER DEFS — the gooey merge. Graphics layers only; no body copy
+     ever lives inside a filtered subtree (it would lose subpixel AA). ═══ -->
+<svg width="0" height="0" aria-hidden="true" focusable="false"
+     style="position:absolute;left:-9999px">
+  <defs>
+    <filter id="goo" x="-14%" y="-16%" width="128%" height="140%"
+            color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="11" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8.5" result="goo"/>
+      <feBlend in="SourceGraphic" in2="goo" result="mix"/>
+      <feDropShadow in="mix" dx="0" dy="9" stdDeviation="7"
+        flood-color="rgb(38,26,74)" flood-opacity="0.38"/>
+    </filter>
+    <filter id="goo-sm" x="-14%" y="-20%" width="128%" height="150%"
+            color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8.5" result="goo"/>
+      <feBlend in="SourceGraphic" in2="goo" result="mix"/>
+      <feDropShadow in="mix" dx="0" dy="7" stdDeviation="5"
+        flood-color="rgb(38,26,74)" flood-opacity="0.34"/>
+    </filter>
+    <filter id="goo-xs" x="-16%" y="-22%" width="132%" height="156%"
+            color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"/>
+      <feBlend in="SourceGraphic" in2="goo" result="mix"/>
+      <feDropShadow in="mix" dx="0" dy="5" stdDeviation="4"
+        flood-color="rgb(38,26,74)" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- 01 — NAV -->
+<header class="nav">
+  <div class="nav__in">
+    <a class="mark" href="#top">
+      <svg class="mark__glyph" viewBox="0 0 68 52" aria-hidden="true">
+        <defs>
+          <linearGradient id="mkg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="var(--iri-aqua)"/>
+            <stop offset=".5" stop-color="var(--iri-azure)"/>
+            <stop offset="1" stop-color="var(--iri-violet)"/>
+          </linearGradient>
+          <radialGradient id="mks" cx=".34" cy=".26" r=".3">
+            <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+            <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- two bodies mid-merge: one silhouette, drawn as a single path -->
+        <path d="M20 8c8.3 0 14.6 5.9 15.6 13.6.7 5.5 4.6 7.4 9.6 7.4 6.6 0 11.8 4.6 11.8 10.6S51.4 50 44.6 50c-5.6 0-9.4-2.6-11.3-6.4-2.3 3.9-7 6.4-12.7 6.4C10.1 50 2 41.5 2 30.6 2 18.6 9.6 8 20 8Z"
+              fill="url(#mkg)"/>
+        <path d="M20 8c8.3 0 14.6 5.9 15.6 13.6.7 5.5 4.6 7.4 9.6 7.4 6.6 0 11.8 4.6 11.8 10.6S51.4 50 44.6 50c-5.6 0-9.4-2.6-11.3-6.4-2.3 3.9-7 6.4-12.7 6.4C10.1 50 2 41.5 2 30.6 2 18.6 9.6 8 20 8Z"
+              fill="url(#mks)"/>
+        <ellipse cx="15" cy="20" rx="4.1" ry="3" fill="var(--pearl-050)" opacity=".92"/>
+        <circle cx="60" cy="14" r="4.4" fill="var(--iri-amber)"/>
+        <circle cx="58.6" cy="12.4" r="1.4" fill="var(--pearl-050)" opacity=".9"/>
+      </svg>
+      <span class="mark__word">ATLAS</span>
+      <span class="mark__beta">private beta</span>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#ask">What it watches</a>
+      <a href="#check">The check</a>
+      <a href="#proof">Proof</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <a class="btn" href="#join"><span class="btn__bead" aria-hidden="true"></span>Join waitlist</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- 02 — HERO -->
+<section class="sec hero" id="top" aria-labelledby="hero-h">
+  <div class="shell">
+    <div class="rail" aria-hidden="true">
+      <span class="rail__n">02</span>
+      <span class="drop" style="--vol:.26;--visc:.35;--tint:var(--hue-aqua);--sil:var(--sil-2)"></span>
+      <span class="rail__rule"></span>
+      <span class="rail__kick">hero</span>
+    </div>
+    <div class="body">
+      <div class="hero__copy">
+        <h1 id="hero-h"><span class="h1a">You describe a task once.</span>
+          <span class="hero__flow">Atlas keeps doing it.</span></h1>
+        <p class="hero__sub">It runs on your schedule, checks the answer before it sends,
+          and emails you the results — a daily digest, or every run as it lands on Pro.</p>
+      </div>
+      <div class="hero__cta">
+        <a class="btn btn--lg" href="#join"><span class="btn__bead" aria-hidden="true"></span>Join waitlist</a>
+        <a class="btn btn--lg btn--ghost" href="#how">See how it works</a>
+      </div>
+      <ul class="trust hero__trust">
+        <li>Free</li><li>No signup to try</li><li>No credit card</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- THE SIGNATURE — the merge -->
+  <div class="shell" style="margin-top:var(--s-4)">
+    <div aria-hidden="true"></div>
+    <figure class="body" style="margin:0">
+      <div class="stage">
+        <div class="merge" id="merge" role="img"
+             aria-label="Twelve run droplets flow left to right along a channel. The early ones are separate; the later ones touch, neck and fuse into one large pooled body. Above the pool one droplet hangs clear of the surface: the thread that joined it has snapped, leaving a tapered stub on each side, a gap, and two satellite beads. It is tagged unsourced.">
+          <span class="merge__wet"></span>
+          <span class="merge__chan"></span>
+
+          <div class="merge__goo">
+            <i class="mg mg--pool" style="--x:var(--pool-x);--vol:1.9;--tint:var(--hue-azure);--band:54;--band-half:27;--sil:var(--sil-3)"></i>
+            <i class="mg" style="--x:2.5%;--vol:.40;--tint:var(--hue-aqua);--sil:var(--sil-2)"></i>
+            <i class="mg mg--arrive" style="--x:8.5%;--vol:.43;--tint:var(--hue-aqua);--sil:var(--sil-5)"></i>
+            <i class="mg" style="--x:14.2%;--vol:.46;--tint:var(--hue-cyan);--sil:var(--sil-1)"></i>
+            <i class="mg" style="--x:19.6%;--vol:.49;--tint:var(--hue-cyan);--sil:var(--sil-4)"></i>
+            <i class="mg" style="--x:24.6%;--vol:.53;--tint:var(--hue-cyan);--sil:var(--sil-3)"></i>
+            <i class="mg" style="--x:29.2%;--vol:.57;--tint:var(--hue-azure);--sil:var(--sil-2)"></i>
+            <i class="mg" style="--x:33.4%;--vol:.61;--tint:var(--hue-azure);--sil:var(--sil-5)"></i>
+            <i class="mg" style="--x:37.3%;--vol:.66;--tint:var(--hue-azure);--sil:var(--sil-1)"></i>
+            <i class="mg" style="--x:40.9%;--vol:.71;--tint:var(--hue-azure);--sil:var(--sil-4)"></i>
+            <i class="mg" style="--x:44.2%;--vol:.76;--tint:var(--hue-azure);--sil:var(--sil-3)"></i>
+          </div>
+
+          <span class="merge__cast"></span>
+
+          <!-- the broken thread: drawn between the two bodies, overlapping both -->
+          <span class="merge__thread">
+            <svg viewBox="0 0 240 190" aria-hidden="true">
+              <!-- stub still attached to the pool -->
+              <path d="M 5.6 147.2 Q 40 141 70 130 Q 44 151 22.4 176.8 Z" fill="var(--iri-indigo)"/>
+              <path d="M 8 148 Q 40 140 70 130 Q 43 148 16 163 Z" fill="var(--pearl-050)" opacity=".34"/>
+              <!-- satellite beads pinched off when the thread snapped -->
+              <circle class="fail__sat" cx="79" cy="128" r="6" fill="var(--iri-amber)"/>
+              <circle cx="77" cy="125.8" r="2" fill="var(--pearl-050)" opacity=".92"/>
+              <circle class="fail__sat" cx="86" cy="132" r="3" fill="var(--alert-lift)"/>
+              <!-- stub still attached to the flagged body -->
+              <path d="M 141.2 95.3 Q 114 108 90 126 Q 110 102 126.8 78.7 Z" fill="var(--iri-amber)"/>
+              <path d="M 138 92 Q 114 107 90 126 Q 109 103 124 80 Z" fill="var(--pearl-050)" opacity=".26"/>
+            </svg>
+          </span>
+          <span class="drop merge__flag"
+                style="--vol:.86;--visc:.9;--band:14;--band-half:7;--tint:var(--hue-amber);--sil:var(--sil-4)"></span>
+
+          <div class="merge__labels">
+            <span class="mlab mlab--in">each run arrives</span>
+            <span class="mlab mlab--pool"><b>one record</b>runs pool together</span>
+            <span class="chip">unsourced</span>
+            <span class="mlab mlab--fail">it never joins</span>
+          </div>
+      </div>
+      <figcaption class="merge__cap shell-cap">
+        Runs pool into one record. A run that doesn't hold up <b>won't join it</b> — it gets
+        its own tag in your run history, and three of those in a row pause the task.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 03 — THE ASK -->
+<section class="sec ask" id="ask" aria-labelledby="ask-h">
+  <div class="shell">
+    <div class="rail" aria-hidden="true">
+      <span class="rail__n">03</span>
+      <span class="drop" style="--vol:.32;--visc:.5;--tint:var(--hue-cyan);--sil:var(--sil-4)"></span>
+      <span class="rail__rule"></span>
+      <span class="rail__kick">the ask</span>
+    </div>
+    <div class="body">
+      <span class="kick">what you can point it at</span>
+      <h2 class="hd" id="ask-h">Anything outside your head that keeps changing.</h2>
+      <p class="lede">Atlas watches things in the world and tells you what moved. It can't read
+        your inbox or your connected apps, and it isn't a flowchart builder. Open one of these
+        to see the sentence you'd actually write.</p>
+
+      <div class="asklist">
+        <details class="askitem pan pan-1 pull">
+          <summary>
+            <span class="drop" style="--vol:.62;--visc:.4;--tint:var(--hue-cyan);--sil:var(--sil-1)"></span>
+            <span>The weather where you live, before you head out</span>
+            <i class="plus" aria-hidden="true"></i>
+          </summary>
+          <p class="askitem__sentence"><span class="sched">Every morning</span>, tell me the
+            forecast for Boston — rain, temperature, and whether I need a coat.</p>
+        </details>
+
+        <details class="askitem pan pan-2 pull">
+          <summary>
+            <span class="drop" style="--vol:.48;--visc:.7;--tint:var(--hue-rose);--sil:var(--sil-4)"></span>
+            <span>A price you're waiting to see drop</span>
+            <i class="plus" aria-hidden="true"></i>
+          </summary>
+          <p class="askitem__sentence"><span class="sched">Every evening</span>, check this
+            page and tell me if the price fell below what I said I'd pay.</p>
+        </details>
+
+        <details class="askitem pan pan-3 pull">
+          <summary>
+            <span class="drop" style="--vol:.72;--visc:.3;--tint:var(--hue-violet);--sil:var(--sil-2)"></span>
+            <span>A stock or a coin you're watching</span>
+            <i class="plus" aria-hidden="true"></i>
+          </summary>
+          <p class="askitem__sentence"><span class="sched">Every weekday after the close</span>,
+            tell me how it moved and what was behind the move.</p>
+        </details>
+
+        <details class="askitem pan pan-4 pull">
+          <summary>
+            <span class="drop" style="--vol:.55;--visc:.85;--tint:var(--hue-aqua);--sil:var(--sil-5)"></span>
+            <span>A website, the moment anything on it changes</span>
+            <i class="plus" aria-hidden="true"></i>
+          </summary>
+          <p class="askitem__sentence"><span class="sched">Every hour</span>, check this page
+            and tell me what changed — quote the part that's new.</p>
+        </details>
+
+        <details class="askitem pan pan-5 pull">
+          <summary>
+            <span class="drop" style="--vol:.66;--visc:.55;--tint:var(--hue-orchid);--sil:var(--sil-3)"></span>
+            <span>Your team's score and injury list</span>
+            <i class="plus" aria-hidden="true"></i>
+          </summary>
+          <p class="askitem__sentence"><span class="sched">Every Monday</span>, give me the
+            result, the table position, and who's out.</p>
+        </details>
+
+        <details class="askitem pan pan-1 pull">
+          <summary>
+            <span class="drop" style="--vol:.44;--visc:.6;--tint:var(--hue-azure);--sil:var(--sil-1)"></span>
+            <span>A question you keep looking up</span>
+            <i class="plus" aria-hidden="true"></i>
+          </summary>
+          <p class="askitem__sentence"><span class="sched">Every Friday</span>, tell me what
+            changed in the thing I'm tracking this week, with a source for each claim.</p>
+        </details>
+      </div>
+
+      <div class="ask__rule">
+        <span class="drop" style="--vol:.5;--visc:.2;--tint:var(--hue-aqua);--sil:var(--sil-5)"></span>
+        <p>If you can say it in a sentence, Atlas can watch it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 — HOW IT WORKS -->
+<section class="sec how" id="how" aria-labelledby="how-h">
+  <div class="shell">
+    <div class="rail" aria-hidden="true">
+      <span class="rail__n">04</span>
+      <span class="drop" style="--vol:.38;--visc:.65;--tint:var(--hue-azure);--sil:var(--sil-3)"></span>
+      <span class="rail__rule"></span>
+      <span class="rail__kick">how it works</span>
+    </div>
+    <div class="body">
+      <span class="kick">three beats, nothing to configure</span>
+      <h2 class="hd" id="how-h">The sentence is the task.</h2>
+      <p class="lede">One line contains both what you want and when you want it. Atlas pulls
+        the schedule out of the sentence and keeps the rest as the prompt. There is no
+        second screen.</p>
+
+      <div class="beats">
+        <div class="beat pan pan-2">
+          <span class="beat__n">beat 01</span>
+          <h3>You write one sentence</h3>
+          <div class="beat__plate">
+            <p class="sentence"><span class="sched">Every morning</span>,
+              <span class="prompt-mark">tell me the forecast for Boston — rain, temperature,
+              and whether I need a coat.</span></p>
+          </div>
+          <p>The tinted part is the schedule. The underlined part is the prompt. You don't
+            mark either one — Atlas does.</p>
+        </div>
+
+        <div class="beat pan pan-4">
+          <span class="beat__n">beat 02</span>
+          <h3>It separates</h3>
+          <div class="beat__plate">
+            <div class="split" aria-hidden="true">
+              <div class="split__goo">
+                <span class="split__stream"></span>
+                <i class="mg" style="--x:28%;--y:50%;--vol:1.00;--tint:var(--hue-violet);--sil:var(--sil-3)"></i>
+                <i class="mg" style="--x:42%;--y:34%;--vol:.78;--tint:var(--hue-cyan);--sil:var(--sil-1)"></i>
+                <i class="mg" style="--x:42%;--y:66%;--vol:.82;--tint:var(--hue-violet);--sil:var(--sil-4)"></i>
+                <i class="mg" style="--x:72%;--y:22%;--vol:.58;--tint:var(--hue-aqua);--sil:var(--sil-5)"></i>
+                <i class="mg" style="--x:72%;--y:78%;--vol:.60;--tint:var(--hue-violet);--sil:var(--sil-2);--band:34;--band-half:17"></i>
+              </div>
+              <span class="split__tag" style="top:2%">schedule · daily 07:00</span>
+              <span class="split__tag" style="bottom:0">prompt</span>
+            </div>
+          </div>
+          <p>The schedule becomes a cadence. The rest becomes the question it asks the model,
+            every time, unchanged.</p>
+        </div>
+
+        <div class="beat pan pan-5">
+          <span class="beat__n">beat 03</span>
+          <h3>The result lands</h3>
+          <div class="beat__plate">
+            <div class="mailcard pan pan-3">
+              <p class="mailcard__hd">RE: BOSTON MORNING FORECAST — RUN 001</p>
+              <p class="mailcard__bd">High 68°F, low 54°F. Rain likely 2pm–6pm, 70% chance —
+                take the coat. Wind 12mph NE. Sunrise 05:31.</p>
+              <p class="mailcard__ck">checked: has a source, nothing missing</p>
+            </div>
+          </div>
+          <p>Graded first, then sent. Free gets one digest a day at an hour you pick; Pro gets
+            every run as it lands.</p>
+        </div>
+      </div>
+
+      <section class="cadence" aria-labelledby="cad-h" aria-labelledby="cad-h">
+        <header class="obj-head">
+          <p class="obj-kicker">Schedules</p>
+          <h3 class="obj-title" id="cad-h">Ten cadences, drawn to size</h3>
+          <p class="obj-lede">One surface, ten schedules. The faster a schedule runs, the smaller and more numerous the bodies it leaves behind; the slower it runs, the heavier the single body that settles. Four cadences are free. Six more come with Pro, and they are the fast ones.</p>
+        </header>
+      
+        <figure class="cad-fig">
+          <div class="cad-plate pan pan-3">
+      
+            <div class="cad-zone cad-zone--dry">
+              <h4 class="cad-zone__title">Free<span class="cad-zone__note">four cadences &middot; dry surface</span></h4>
+              <ul class="cad-lanes">
+                <li class="lane lane--once pull" style="--tint:var(--hue-rose);--vol:0.6;--visc:0.94;--n:1">
+                  <span class="lane__name">once</span>
+                  <span class="lane__track" aria-hidden="true">
+                    <span class="drop cad-body" style="--sil:var(--sil-2)"></span>
+                  </span>
+                  <span class="lane__rate">one run</span>
+                </li>
+                <li class="lane  pull" style="--tint:var(--hue-orchid);--vol:0.55;--visc:0.86;--n:1">
+                  <span class="lane__name">weekly</span>
+                  <span class="lane__track" aria-hidden="true">
+                    <span class="drop cad-body" style="--sil:var(--sil-4)"></span>
+                  </span>
+                  <span class="lane__rate">1&times; a week</span>
+                </li>
+                <li class="lane lane--gap pull" style="--tint:var(--hue-violet);--vol:0.46;--visc:0.78;--n:2">
+                  <span class="lane__name">weekdays</span>
+                  <span class="lane__track" aria-hidden="true">
+                    <span class="lane__wet">
+                      <span class="drop cad-body" style="--sil:var(--sil-1)"></span>
+                      <span class="drop cad-body" style="--sil:var(--sil-5)"></span>
+                    </span>
+                  </span>
+                  <span class="lane__rate">5&times; a week</span>
+                </li>
+                <li class="lane  pull" style="--tint:calc(var(--hue-violet) - var(--band-half));--vol:0.38;--visc:0.7;--n:3">
+                  <span class="lane__name">daily</span>
+                  <span class="lane__track" aria-hidden="true">
+                    <span class="drop cad-body" style="--sil:var(--sil-3)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-2)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-4)"></span>
+                  </span>
+                  <span class="lane__rate">1&times; a day</span>
+                </li>
+              </ul>
+            </div>
+      
+            <div class="cad-zone cad-zone--wet">
+              <h4 class="cad-zone__title">Pro<span class="cad-zone__note">six more &middot; wetted surface</span></h4>
+              <ul class="cad-lanes">
+                <li class="lane  pull" style="--tint:var(--hue-azure);--vol:0.3;--visc:0.6;--n:5">
+                  <span class="lane__name">12h</span>
+                  <span class="lane__track" aria-hidden="true">
+                    <span class="drop cad-body" style="--sil:var(--sil-1)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-5)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-3)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-2)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-4)"></span>
+                  </span>
+                  <span class="lane__rate">2&times; a day</span>
+                </li>
+                <li class="lane  pull" style="--tint:calc(var(--hue-aqua) + var(--band-half));--vol:0.245;--visc:0.5;--n:8">
+                  <span class="lane__name">6h</span>
+                  <span class="lane__track" aria-hidden="true">
+                    <span class="drop cad-body" style="--sil:var(--sil-1)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-5)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-3)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-2)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-4)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-1)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-5)"></span>
+                    <span class="drop cad-body" style="--sil:var(--sil-3)"></span>
+                  </span>
+                  <span class="lane__rate">4&times; a day</span>
+                </li>
+                <li class="lane  pull" style="--tint:var(--hue-cyan);--vol:0.2;--visc:0.4;--n:13">
+                  <span class="lane__name">4h</span>
+                  <span class="lane__track" aria-hidden="true"><span class="run"></span></span>
+                  <span class="lane__rate">6&times; a day</span>
+                </li>
+                <li class="lane  pull" style="--tint:calc(var(--hue-azure) - var(--band-half));--vol:0.165;--visc:0.3;--n:21">
+                  <span class="lane__name">2h</span>
+                  <span class="lane__track" aria-hidden="true"><span class="run"></span></span>
+                  <span class="lane__rate">12&times; a day</span>
+                </li>
+                <li class="lane  pull" style="--tint:var(--hue-aqua);--vol:0.135;--visc:0.2;--n:34">
+                  <span class="lane__name">1h</span>
+                  <span class="lane__track" aria-hidden="true"><span class="run"></span></span>
+                  <span class="lane__rate">24&times; a day</span>
+                </li>
+                <li class="lane  pull" style="--tint:calc(var(--hue-cyan) - var(--band-half));--vol:0.11;--visc:0.12;--n:55">
+                  <span class="lane__name">30m</span>
+                  <span class="lane__track" aria-hidden="true"><span class="run"></span></span>
+                  <span class="lane__rate">48&times; a day</span>
+                </li>
+              </ul>
+            </div>
+      
+          </div>
+          <figcaption class="cad-cap">Size and spacing are an encoding, not a count. <b>once</b> runs one time and the surface dries behind it; <b>weekdays</b> skips the weekend, which is the break in its band. There is no monthly schedule.</figcaption>
+        </figure>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- 05 — THE CHECK -->
+<section class="sec check" id="check" aria-labelledby="check-h">
+  <div class="shell">
+    <div class="rail" aria-hidden="true">
+      <span class="rail__n">05</span>
+      <span class="drop" style="--vol:.46;--visc:.8;--tint:var(--hue-orchid);--sil:var(--sil-5)"></span>
+      <span class="rail__rule"></span>
+      <span class="rail__kick">the check</span>
+    </div>
+    <div class="body">
+      <span class="kick">the part nobody else does</span>
+      <h2 class="hd" id="check-h">A wrong answer arrives looking exactly like a right one.</h2>
+      <p class="quietfail">This is how these tools fail quietly: a confident number arrives in
+        the same email, at the same time, looking exactly like a good one. So Atlas
+        <b>grades every run before it reaches you</b> — blank replies, refusals, answers cut
+        off mid-sentence, claims with no source. Each gets its own tag in your run history.</p>
+
+      <div class="tags">
+        <h3 class="tags__h">Six ways a run comes back wrong</h3>
+        <p class="tags__hint">Pick a tag to read it</p>
+      
+        <div class="tags__rail" role="tablist" aria-label="The six quality tags">
+      
+          <button type="button" class="tag tag--ok pan pan-1 pull" role="tab" id="tg-ok"
+                  aria-controls="tp-ok" aria-selected="true" tabindex="0"
+                  style="--vol:1.06;--visc:.78;--tint:var(--hue-aqua);--sil:var(--sil-1)">
+            <span class="tag__stage" aria-hidden="true">
+              <span class="hz"></span>
+              <span class="mark"></span>
+              <span class="tag__float"><span class="drop dr-ok"></span></span>
+            </span>
+            <span class="tag__name">ok</span>
+          </button>
+      
+          <button type="button" class="tag tag--empty pan pan-3 pull" role="tab" id="tg-empty"
+                  aria-controls="tp-empty" aria-selected="false" tabindex="0"
+                  style="--vol:1.2;--visc:.16;--tint:var(--hue-cyan);--sil:var(--sil-3)">
+            <span class="tag__stage" aria-hidden="true">
+              <span class="hz"></span>
+              <span class="mark"></span>
+              <span class="tag__float"><span class="drop dr-empty">
+                <svg class="film" viewBox="0 0 120 120" focusable="false" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="tgFilm" x1="0" y1="1" x2="1" y2="0">
+                      <stop class="fs-a" offset="0"/><stop class="fs-b" offset=".38"/>
+                      <stop class="fs-c" offset=".72"/><stop class="fs-d" offset="1"/>
+                    </linearGradient>
+                    <radialGradient id="tgBead" cx=".34" cy=".27" r=".86">
+                      <stop class="bs-a" offset="0"/><stop class="bs-b" offset=".42"/>
+                      <stop class="bs-c" offset="1"/>
+                    </radialGradient>
+                  </defs>
+                  <path class="film__skin" d="M52.01 14.7 A46 46 0 1 0 99.84 37 L101.6 40.9 L97.8 39.4
+                    L99 43 L95.51 36.5 A41 41 0 1 1 52.88 16.62 L50.4 13.2 Z"/>
+                  <path class="film__edge" d="M52.01 14.7 A46 46 0 1 0 99.84 37 L101.6 40.9 L97.8 39.4
+                    L99 43 L95.51 36.5 A41 41 0 1 1 52.88 16.62 L50.4 13.2 Z"/>
+                  <path class="film__curl" d="M99.84 37 C108.5 34.5 114.5 41 111.5 49
+                    C111.8 41.5 106.5 37.6 99.2 39.4 Z"/>
+                  <circle class="sat sat-1" cx="104" cy="24" r="6.4"/>
+                  <circle class="sat sat-2" cx="113.5" cy="13" r="3.7"/>
+                  <circle class="sat sat-3" cx="119" cy="5.5" r="2.1"/>
+                </svg>
+              </span></span>
+            </span>
+            <span class="tag__name">empty</span>
+          </button>
+      
+          <button type="button" class="tag tag--refusal pan pan-5 pull" role="tab" id="tg-refusal"
+                  aria-controls="tp-refusal" aria-selected="false" tabindex="0"
+                  style="--vol:.74;--visc:.30;--tint:var(--hue-rose);--sil:var(--sil-5)">
+            <span class="tag__stage" aria-hidden="true">
+              <span class="hz"></span>
+              <span class="mark"></span>
+              <span class="tag__float"><span class="drop dr-refusal"></span></span>
+            </span>
+            <span class="tag__name">refusal</span>
+          </button>
+      
+          <button type="button" class="tag tag--truncated pan pan-2 pull" role="tab" id="tg-truncated"
+                  aria-controls="tp-truncated" aria-selected="false" tabindex="0"
+                  style="--vol:1;--visc:.62;--tint:var(--hue-orchid);--sil:var(--sil-2)">
+            <span class="tag__stage" aria-hidden="true">
+              <span class="hz"></span>
+              <span class="mark"></span>
+              <span class="tag__float">
+                <span class="drop dr-truncated"></span>
+                <span class="stub"></span>
+                <span class="cut"></span>
+              </span>
+            </span>
+            <span class="tag__name">truncated</span>
+          </button>
+      
+          <button type="button" class="tag tag--loop pan pan-4 pull" role="tab" id="tg-loop"
+                  aria-controls="tp-loop" aria-selected="false" tabindex="0"
+                  style="--vol:1.02;--visc:.9;--tint:var(--hue-violet);--sil:var(--sil-4)">
+            <span class="tag__stage" aria-hidden="true">
+              <span class="hz"></span>
+              <span class="mark"></span>
+              <span class="tag__float"><span class="drop dr-loop">
+                <span class="rg rg-1"></span><span class="rg rg-2"></span>
+                <span class="rg rg-3"></span><span class="rg rg-4"></span>
+              </span></span>
+            </span>
+            <span class="tag__name">loop</span>
+          </button>
+      
+          <button type="button" class="tag tag--unsourced pan pan-1 pull" role="tab" id="tg-unsourced"
+                  aria-controls="tp-unsourced" aria-selected="false" tabindex="0"
+                  style="--vol:1.06;--visc:.06;--tint:var(--hue-azure);--sil:var(--sil-1)">
+            <span class="tag__stage" aria-hidden="true">
+              <span class="hz"></span>
+              <span class="mark"></span>
+              <span class="tag__float"><span class="drop dr-unsourced"></span></span>
+            </span>
+            <span class="tag__name">unsourced</span>
+          </button>
+      
+        </div>
+      
+        <div class="read pan pan-3">
+          <div class="read__p" role="tabpanel" id="tp-ok" aria-labelledby="tg-ok" tabindex="0">
+            <p class="read__d"><span class="read__k">ok</span>The run finished and nothing tripped a check.
+              It goes to you as it came back.</p>
+          </div>
+          <div class="read__p" role="tabpanel" id="tp-empty" aria-labelledby="tg-empty" tabindex="0">
+            <p class="read__d"><span class="read__k">empty</span>The reply came back blank. It still arrives
+              on time, which is the problem.</p>
+          </div>
+          <div class="read__p" role="tabpanel" id="tp-refusal" aria-labelledby="tg-refusal" tabindex="0">
+            <p class="read__d"><span class="read__k">refusal</span>The model declined to answer. You get the
+              refusal, not a result.</p>
+          </div>
+          <div class="read__p" role="tabpanel" id="tp-truncated" aria-labelledby="tg-truncated" tabindex="0">
+            <p class="read__d"><span class="read__k">truncated</span>The answer stops mid-sentence. The part
+              you did get can still look finished.</p>
+          </div>
+          <div class="read__p" role="tabpanel" id="tp-loop" aria-labelledby="tg-loop" tabindex="0">
+            <p class="read__d"><span class="read__k">loop</span>The answer keeps restating itself instead of
+              getting anywhere.</p>
+          </div>
+          <div class="read__p" role="tabpanel" id="tp-unsourced" aria-labelledby="tg-unsourced" tabindex="0">
+            <p class="read__d"><span class="read__k">unsourced</span>A claim arrives with nothing behind it.
+              No link, no quote, nothing to check.</p>
+          </div>
+      
+          <div class="rule">
+            <span class="pips" aria-hidden="true"><i></i><i></i><i></i><span class="stop"></span></span>
+            <p class="rule__d"><b>After 3 consecutive flagged runs, the task auto-pauses.</b>
+              You do not have to be the one who notices.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="clotstage">
+        <div class="clot" role="img"
+             aria-label="A channel of run droplets flows left to right and merges. Three consecutive flagged droplets jam against each other, form a clot, and the channel downstream is dry — the task has paused.">
+          <span class="clot__chan"></span>
+          <span class="clot__dry"></span>
+          <div class="clot__goo">
+            <i class="mg" style="--x:4%;--vol:.80;--tint:var(--hue-aqua);--sil:var(--sil-1);--band:52;--band-half:26"></i>
+            <i class="mg" style="--x:8.6%;--vol:.84;--tint:var(--hue-aqua);--sil:var(--sil-3);--band:52;--band-half:26"></i>
+            <i class="mg" style="--x:13.2%;--vol:.80;--tint:var(--hue-cyan);--sil:var(--sil-5);--band:52;--band-half:26"></i>
+            <i class="mg" style="--x:17.8%;--vol:.86;--tint:var(--hue-cyan);--sil:var(--sil-2);--band:52;--band-half:26"></i>
+            <i class="mg" style="--x:22.4%;--vol:.82;--tint:var(--hue-azure);--sil:var(--sil-4);--band:52;--band-half:26"></i>
+            <i class="mg" style="--x:27%;--vol:.88;--tint:var(--hue-azure);--sil:var(--sil-1);--band:52;--band-half:26"></i>
+            <i class="mg" style="--x:31.5%;--vol:1.02;--tint:var(--hue-amber);--sil:var(--sil-2)"></i>
+            <i class="mg" style="--x:36%;--vol:1.06;--tint:var(--hue-amber);--sil:var(--sil-4)"></i>
+            <i class="mg" style="--x:33.7%;--vol:.94;--tint:var(--hue-amber);--sil:var(--sil-5);--rise:calc(var(--unit)*.66)"></i>
+          </div>
+          <span class="clot__lab" style="left:3%;bottom:5%">runs merging cleanly</span>
+          <span class="clot__lab" style="left:28%;bottom:5%">three flagged in a row — they jam</span>
+          <span class="clot__lab" style="left:63%;bottom:5%">channel dry — the task paused itself</span>
+        </div>
+      </div>
+
+      <p class="clot__cap">Runs merge cleanly until three are flagged in a row. Those three
+        jam against each other, and the channel past them runs dry — <b>the task paused
+        itself</b> before it could send you three more answers it did not trust.</p>
+
+      <div class="notice on-tint">
+        <p class="notice__hd">Auto-pause notice</p>
+        <p class="notice__bd"><code>boston-morning-forecast</code> — paused after 3 consecutive
+          flagged runs.</p>
+        <div class="notice__act">
+          <button type="button">resume</button>
+          <button type="button">snooze 30d</button>
+        </div>
+        <p class="notice__note">You hear about it once a week at most — one click snoozes it
+          for thirty days, and the first good run clears the flag on its own.
+          <b>Nothing here nags.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 — PROOF -->
+<section class="sec proof" id="proof" aria-labelledby="proof-h">
+  <div class="shell">
+    <div class="rail" aria-hidden="true">
+      <span class="rail__n">06</span>
+      <span class="drop" style="--vol:.54;--visc:.45;--tint:var(--hue-aqua);--sil:var(--sil-1)"></span>
+      <span class="rail__rule"></span>
+      <span class="rail__kick">proof</span>
+    </div>
+    <div class="body">
+      <span class="kick">what's actually there</span>
+      <h2 class="hd" id="proof-h">Twenty-three runs, none of them flagged.</h2>
+      <p class="lede">One real task, running daily since it was written. Every run merged
+        cleanly into the record — which is what a healthy task looks like, and the reason the
+        clot above is worth drawing.</p>
+
+      <div class="recordstage">
+        <div class="record" role="img"
+             aria-label="Twenty-three run droplets in a channel, all merged into one continuous body: the task's record, with no breaks.">
+          <span class="record__base"></span>
+          <div class="record__goo">
+            <i class="mg" style="--x:2.60%;--vol:0.9;--tint:var(--hue-aqua);--sil:var(--sil-1)"></i>
+            <i class="mg" style="--x:6.86%;--vol:0.98;--tint:var(--hue-aqua);--sil:var(--sil-2)"></i>
+            <i class="mg" style="--x:11.12%;--vol:0.92;--tint:var(--hue-aqua);--sil:var(--sil-3)"></i>
+            <i class="mg" style="--x:15.38%;--vol:1.04;--tint:var(--hue-aqua);--sil:var(--sil-4)"></i>
+            <i class="mg" style="--x:19.64%;--vol:0.94;--tint:var(--hue-aqua);--sil:var(--sil-5)"></i>
+            <i class="mg" style="--x:23.90%;--vol:1;--tint:var(--hue-cyan);--sil:var(--sil-1)"></i>
+            <i class="mg" style="--x:28.16%;--vol:0.9;--tint:var(--hue-cyan);--sil:var(--sil-2)"></i>
+            <i class="mg" style="--x:32.42%;--vol:1.06;--tint:var(--hue-cyan);--sil:var(--sil-3)"></i>
+            <i class="mg" style="--x:36.68%;--vol:0.96;--tint:var(--hue-cyan);--sil:var(--sil-4)"></i>
+            <i class="mg" style="--x:40.94%;--vol:1.02;--tint:var(--hue-cyan);--sil:var(--sil-5)"></i>
+            <i class="mg" style="--x:45.20%;--vol:0.92;--tint:var(--hue-cyan);--sil:var(--sil-1)"></i>
+            <i class="mg" style="--x:49.46%;--vol:1.04;--tint:var(--hue-azure);--sil:var(--sil-2)"></i>
+            <i class="mg" style="--x:53.72%;--vol:0.94;--tint:var(--hue-azure);--sil:var(--sil-3)"></i>
+            <i class="mg" style="--x:57.98%;--vol:1;--tint:var(--hue-azure);--sil:var(--sil-4)"></i>
+            <i class="mg" style="--x:62.24%;--vol:0.9;--tint:var(--hue-azure);--sil:var(--sil-5)"></i>
+            <i class="mg" style="--x:66.50%;--vol:1.02;--tint:var(--hue-azure);--sil:var(--sil-1)"></i>
+            <i class="mg" style="--x:70.76%;--vol:0.96;--tint:var(--hue-azure);--sil:var(--sil-2)"></i>
+            <i class="mg" style="--x:75.02%;--vol:1.06;--tint:var(--hue-violet);--sil:var(--sil-3)"></i>
+            <i class="mg" style="--x:79.28%;--vol:0.92;--tint:var(--hue-violet);--sil:var(--sil-4)"></i>
+            <i class="mg" style="--x:83.54%;--vol:1;--tint:var(--hue-violet);--sil:var(--sil-5)"></i>
+            <i class="mg" style="--x:87.80%;--vol:0.94;--tint:var(--hue-violet);--sil:var(--sil-1)"></i>
+            <i class="mg" style="--x:92.06%;--vol:1.04;--tint:var(--hue-violet);--sil:var(--sil-2)"></i>
+            <i class="mg" style="--x:96.32%;--vol:0.98;--tint:var(--hue-violet);--sil:var(--sil-3)"></i>
+          </div>
+        </div>
+      </div>
+
+      <ul class="record__log">
+        <li>run 002 63°F rain am</li><li>run 003 69°F clear</li><li>run 004 71°F clear</li>
+        <li>run 005 64°F rain pm</li><li>run 006 66°F cloud</li><li>run 019 77°F clear</li>
+        <li>run 020 75°F humid</li><li>run 021 73°F storms</li><li>run 022 74°F clear</li>
+        <li>run 023 79°F clear</li>
+      </ul>
+
+      <ul class="card-chrome">
+        <li>boston-morning-forecast</li><li>schedule daily 07:00</li><li>runs 23</li>
+        <li>flagged 0</li><li>model gemini</li><li>free tier 23 / 40 mo</li>
+      </ul>
+
+      <div class="figs">
+        <div class="fig pan pan-1">
+          <span class="drop fig__bead" style="--vol:.22;--visc:.4;--tint:var(--hue-aqua);--sil:var(--sil-2)"></span>
+          <p class="fig__n">1,481</p><p class="fig__l">task templates<br>across 20 categories</p>
+        </div>
+        <div class="fig pan pan-3">
+          <span class="drop fig__bead" style="--vol:.19;--visc:.6;--tint:var(--hue-cyan);--sil:var(--sil-4)"></span>
+          <p class="fig__n">238</p><p class="fig__l">workflow templates<br>1,719 combined</p>
+        </div>
+        <div class="fig pan pan-5">
+          <span class="drop fig__bead" style="--vol:.24;--visc:.3;--tint:var(--hue-violet);--sil:var(--sil-1)"></span>
+          <p class="fig__n">335</p><p class="fig__l">releases<br>2026-04-01 → 2026-08-20</p>
+        </div>
+        <div class="fig pan pan-2">
+          <span class="drop fig__bead" style="--vol:.2;--visc:.75;--tint:var(--hue-orchid);--sil:var(--sil-5)"></span>
+          <p class="fig__n">6</p><p class="fig__l">quality tags<br>on every run</p>
+        </div>
+        <div class="fig pan pan-4">
+          <span class="drop fig__bead" style="--vol:.23;--visc:.5;--tint:var(--hue-rose);--sil:var(--sil-3)"></span>
+          <p class="fig__n">3</p><p class="fig__l">flagged runs in a row<br>before auto-pause</p>
+        </div>
+        <div class="fig pan pan-3">
+          <span class="drop fig__bead" style="--vol:.21;--visc:.65;--tint:var(--hue-azure);--sil:var(--sil-2)"></span>
+          <p class="fig__n">10</p><p class="fig__l">schedule frequencies<br>four of them free</p>
+        </div>
+      </div>
+
+      <p class="proof__note">No testimonials, no logos, no user count — Atlas is a solo
+        project in private beta and hasn't earned any of those yet. These are the numbers that
+        exist.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 — COMPARISON -->
+<section class="sec vs" id="vs" aria-labelledby="vs-h">
+  <div class="shell">
+    <div class="rail" aria-hidden="true">
+      <span class="rail__n">07</span>
+      <span class="drop" style="--vol:.6;--visc:.25;--tint:var(--hue-rose);--sil:var(--sil-2)"></span>
+      <span class="rail__rule"></span>
+      <span class="rail__kick">comparison</span>
+    </div>
+    <div class="body">
+      <span class="kick">where atlas is the wrong tool</span>
+      <h2 class="hd" id="vs-h">Zapier and Make are better than Atlas at most of this.</h2>
+      <section class="versus" aria-labelledby="vsfig-h" aria-labelledby="vs-h">
+        <header class="obj-head">
+          <p class="obj-kicker">Atlas against Zapier, Make and n8n</p>
+          <h3 class="obj-title" id="vsfig-h">Two ways over the same step</h3>
+          <p class="obj-lede">Zapier and Make are visual editors with large connector libraries, and both now ship AI assistance too. Atlas starts from the other end: describe the outcome, AI works out how. Less setup for open-ended, judgement-heavy tasks &mdash; and far fewer integrations than they have.</p>
+        </header>
+      
+        <div class="vs-grid">
+      
+          <figure class="vs-fig pan pan-1">
+            <h4 class="vs-fig__title">The fixed chain</h4>
+            <p class="vs-fig__sub">Zapier &middot; Make &middot; n8n</p>
+            <div class="vs-stage">
+              <svg class="vs-terrain" viewBox="0 0 600 128" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <defs>
+                  <linearGradient id="vsSoil" x1="0" y1="0" x2="0" y2="1">
+                    <stop class="vs-soil-a" offset="0"></stop>
+                    <stop class="vs-soil-b" offset="1"></stop>
+                  </linearGradient>
+                  <linearGradient id="vsSoak" x1="0" y1="0" x2="0" y2="1">
+                    <stop class="vs-soak-a" offset="0"></stop>
+                    <stop class="vs-soak-b" offset="1"></stop>
+                  </linearGradient>
+                  <linearGradient id="vsTrail" x1="0" y1="0" x2="1" y2="0">
+                    <stop class="vs-s0" offset="0"></stop>
+                    <stop class="vs-s1" offset=".34"></stop>
+                    <stop class="vs-s2" offset="1"></stop>
+                  </linearGradient>
+                </defs>
+                <path class="tr-mass" d="M0 108 C 42 108 72 101 116 105 S 168 111 196 108 C 216 106 228 46 254 42 L350 42 C 376 46 388 106 408 108 C 428 110 446 111 466 109 C 500 106 540 108 600 108 L600 128 L0 128 Z"></path>
+                <path class="tr-shade" d="M0 108 C 42 108 72 101 116 105 S 168 111 196 108 C 216 106 228 46 254 42 L350 42 C 376 46 388 106 408 108 C 428 110 446 111 466 109 C 500 106 540 108 600 108"></path>
+                <path class="tr-line" d="M0 108 C 42 108 72 101 116 105 S 168 111 196 108 C 216 106 228 46 254 42 L350 42 C 376 46 388 106 408 108 C 428 110 446 111 466 109 C 500 106 540 108 600 108"></path>
+              </svg>
+              <div class="conduit" role="img" aria-label="A machined conduit: a bolted socket at each end, straight anodised segments joined by knurled couplings, and four right-angle elbow fittings carrying it up and over the step in the ground.">
+                <i class="cd cd-run cd-run--a"></i>
+                <i class="cd cd-run cd-run--b"></i>
+                <i class="cd cd-run cd-run--c"></i>
+                <i class="cd cd-riser"></i>
+                <i class="cd cd-fall"></i>
+                <i class="cd cd-cup cd-cup--a"></i>
+                <i class="cd cd-cup cd-cup--c"></i>
+                <i class="cd cd-el cd-el--bl"></i>
+                <i class="cd cd-el cd-el--tl"></i>
+                <i class="cd cd-el cd-el--tr"></i>
+                <i class="cd cd-el cd-el--br"></i>
+                <i class="cd cd-sock cd-sock--l"></i>
+                <i class="cd cd-sock cd-sock--r"></i>
+              </div>
+            </div>
+            <p class="vs-fig__note">Precise, strong, repeatable, and it will outlast anything softer. It also needs a socket at each end and a fitting at every corner: it goes exactly where its fittings go, and no further.</p>
+          </figure>
+      
+          <figure class="vs-fig pan pan-5">
+            <h4 class="vs-fig__title">The fluid path</h4>
+            <p class="vs-fig__sub">Atlas</p>
+            <div class="vs-stage">
+              <svg class="vs-terrain" viewBox="0 0 600 128" preserveAspectRatio="none" role="img" aria-label="The same step in the ground. A droplet has crossed it without fittings, darkening the ground it wetted and shedding smaller beads along the way.">
+                <defs>
+                  <clipPath id="vsGround" clipPathUnits="userSpaceOnUse">
+                    <path d="M0 108 C 42 108 72 101 116 105 S 168 111 196 108 C 216 106 228 46 254 42 L350 42 C 376 46 388 106 408 108 C 428 110 446 111 466 109 C 500 106 540 108 600 108 L600 128 L0 128 Z"></path>
+                  </clipPath>
+                </defs>
+                <path class="tr-mass" d="M0 108 C 42 108 72 101 116 105 S 168 111 196 108 C 216 106 228 46 254 42 L350 42 C 376 46 388 106 408 108 C 428 110 446 111 466 109 C 500 106 540 108 600 108 L600 128 L0 128 Z"></path>
+                <path class="tr-soak" d="M16 108 C 42 108 72 101 116 105 S 168 111 196 108 C 216 106 228 46 254 42 L350 42 C 376 46 388 106 408 108 C 428 110 446 111 470 109 L470 128 L16 128 Z"></path>
+                <path class="tr-shade" d="M0 108 C 42 108 72 101 116 105 S 168 111 196 108 C 216 106 228 46 254 42 L350 42 C 376 46 388 106 408 108 C 428 110 446 111 466 109 C 500 106 540 108 600 108"></path>
+                <path class="tr-line" d="M0 108 C 42 108 72 101 116 105 S 168 111 196 108 C 216 106 228 46 254 42 L350 42 C 376 46 388 106 408 108 C 428 110 446 111 466 109 C 500 106 540 108 600 108"></path>
+                <path class="fl-spread" clip-path="url(#vsGround)" d="M18 106 C 42 106 72 99 116 103 S 168 109 196 106 C 216 104 228 44 254 40 L350 40 C 376 44 388 104 408 106 C 428 108 446 109 474 107"></path>
+                <path class="fl-wet" d="M18 106 C 42 106 72 99 116 103 S 168 109 196 106 C 216 104 228 44 254 40 L350 40 C 376 44 388 104 408 106 C 428 108 446 109 474 107"></path>
+                <path class="fl-gloss" d="M70 102 C 104 99 140 104 178 103 M266 37 L338 37"></path>
+                <circle class="fl-bead" cx="128" cy="104" r="3.5"></circle>
+                <circle class="fl-bead" cx="304" cy="38" r="3"></circle>
+                <circle class="fl-bead" cx="424" cy="105" r="4.5"></circle>
+              </svg>
+              <span class="fl-body drop" style="--sil:var(--sil-4);--vol:.62;--visc:.42;--tint:var(--hue-aqua)"></span>
+            </div>
+            <p class="vs-fig__note">No sockets and no fixed route. It works out its own way over whatever is in front of it, wets the ground it covers, and loses a little on the way.</p>
+          </figure>
+      
+        </div>
+      
+        <p class="vs-verdict">If your automation is a fixed chain between specific apps, they are the better fit &mdash; that is good engineering, and it will outlast anything I ship. Atlas is for the other kind of job: watch this, and tell me what matters. Atlas is one person, and the connector list looks like it.</p>
+      
+        <ul class="vs-facts">
+          <li class="vs-fact"><span class="vs-fact__k">Their free</span><span class="vs-fact__v">Zapier and Make poll every 15 minutes</span></li>
+          <li class="vs-fact"><span class="vs-fact__k">Atlas free</span><span class="vs-fact__v">40 runs a month &mdash; the smallest allowance in this category</span></li>
+          <li class="vs-fact"><span class="vs-fact__k">Fastest free</span><span class="vs-fact__v"><a class="vs-link" href="#cad-h">daily</a>, on Atlas &mdash; sub-daily cadences are Pro</span></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- 08 — PRICING -->
+<section class="sec price" id="pricing" aria-labelledby="price-h">
+  <div class="shell">
+    <div class="rail" aria-hidden="true">
+      <span class="rail__n">08</span>
+      <span class="drop" style="--vol:.68;--visc:.55;--tint:var(--hue-violet);--sil:var(--sil-4)"></span>
+      <span class="rail__rule"></span>
+      <span class="rail__kick">pricing</span>
+    </div>
+    <div class="body">
+      <span class="kick">two tiers, one of them free</span>
+      <h2 class="hd" id="price-h">Free is genuinely free.</h2>
+      <div class="vt">
+      
+        <!-- ───────── OBJECT A · the quota vessel (independently reusable) ───────── -->
+        <figure class="vessel-fig" aria-label="Quota vessel, filled to 23 of 40 monthly AI runs on the free tier — a little over half.">
+          <div class="vessel-unit">
+            <div class="vessel" aria-hidden="true" style="--fill:23;--cap:40;--tint:var(--hue-aqua)">
+              <div class="vessel__wall pan pan-3">
+                <div class="vessel__fluid"><i class="vessel__sheen"></i></div>
+                <div class="vessel__mensc"></div>
+                <div class="vessel__ticks"></div>
+              </div>
+              <div class="vessel__gloss"></div>
+              <div class="vessel__caustic"></div>
+            </div>
+            <div class="vessel__scale" aria-hidden="true">
+              <span>40</span><span>30</span><span>20</span><span>10</span><span>0</span>
+            </div>
+          </div>
+      
+          <figcaption class="vessel-cap">
+            <p class="vt-eyebrow">Quota</p>
+            <h3 class="vessel-head">What forty runs looks like</h3>
+            <p class="vessel__chrome"><b>Free tier</b><span><i>23 / 40</i><em>mo</em></span></p>
+            <p class="vessel__note">The free tier is 40 AI runs a month. That is the smallest free allowance in the category. It is enough to find out whether Atlas is worth nine dollars to you.</p>
+          </figcaption>
+        </figure>
+      
+        <!-- ───────── OBJECT B · the three pricing volumes ───────── -->
+        <div class="tiers-block">
+          <h3 class="vt-eyebrow">Pricing</h3>
+      
+          <div class="tiers">
+      
+            <!-- FREE — a modest, settled droplet -->
+            <article class="tier tier--free pan pan-2">
+              <div class="tier__mass" aria-hidden="true">
+                <span class="drop" style="--vol:.56;--visc:.22;--tint:var(--hue-cyan);--sil:var(--sil-2)"></span>
+              </div>
+              <h4 class="tier__name">Free</h4>
+              <p class="tier__priceline">
+                <span class="tier__price">$0</span>
+                <span class="tier__per">/ mo</span>
+              </p>
+              <p class="tier__say">Free is genuinely free.</p>
+              <hr class="tier__rule">
+              <ul class="tier__list">
+                <li>40 AI runs/month</li>
+                <li>up to 40 saved tasks</li>
+                <li>7-day run history</li>
+                <li>daily email digest at an hour you pick</li>
+                <li>browser push</li>
+                <li>anomaly alerts</li>
+                <li>grading on every run</li>
+                <li>1,481 task templates</li>
+                <li>bring your own API key</li>
+              </ul>
+              <p class="tier__foot"><a class="tier__cta tier__cta--ghost" href="#join">Join waitlist</a></p>
+            </article>
+      
+            <!-- PRO — a large, heavy body with real sag -->
+            <article class="tier tier--pro pan pan-4">
+              <p class="tier__flag">Recommended</p>
+              <div class="tier__mass" aria-hidden="true">
+                <span class="drop mass-heavy" style="--vol:1.44;--visc:.86;--tint:var(--hue-violet);--sil:var(--sil-4)"></span>
+              </div>
+              <h4 class="tier__name">Pro</h4>
+              <p class="tier__priceline">
+                <span class="tier__price">$9</span>
+                <span class="tier__per">/ mo</span>
+              </p>
+              <span class="tier__alt">or $90 / yr — 2 months free</span>
+              <hr class="tier__rule">
+              <ul class="tier__list">
+                <li>unlimited tasks and runs</li>
+                <li>sub-daily schedules</li>
+                <li>multi-step workflows</li>
+                <li>webhooks (Discord / Slack / Telegram / JSON)</li>
+                <li>Google Sheets</li>
+                <li>full run history</li>
+                <li>analytics with CSV/PDF export</li>
+                <li>per-run emails with reply-to-refine</li>
+                <li>personal analyst briefings</li>
+              </ul>
+              <p class="tier__foot"><a class="tier__cta tier__cta--solid" href="#join">Join waitlist</a></p>
+            </article>
+      
+            <!-- TEAMS — a body that has not condensed yet -->
+            <article class="tier tier--teams pan pan-5">
+              <div class="tier__mass" aria-hidden="true">
+                <div class="vapour" style="--sil:var(--sil-3)">
+                  <span class="drop bead bead--a" style="--vol:.22;--visc:.4;--tint:var(--hue-cyan);--sil:var(--sil-1)"></span>
+                  <span class="drop bead bead--b" style="--vol:.15;--visc:.4;--tint:var(--hue-azure);--sil:var(--sil-5)"></span>
+                  <span class="drop bead bead--c" style="--vol:.27;--visc:.4;--tint:var(--hue-azure);--sil:var(--sil-2)"></span>
+                  <span class="drop bead bead--d" style="--vol:.18;--visc:.4;--tint:var(--hue-orchid);--sil:var(--sil-4)"></span>
+                </div>
+              </div>
+              <h4 class="tier__name">Teams</h4>
+              <p class="tier__priceline">
+                <span class="tier__price">&mdash;</span>
+                <span class="tier__per">not priced</span>
+              </p>
+              <span class="tier__alt">coming soon</span>
+              <hr class="tier__rule">
+              <p class="tier__say">Teams has not been priced yet. It is not something you can buy today.</p>
+              <p class="tier__foot"><span class="tier__pending">Not available</span></p>
+            </article>
+      
+          </div>
+      
+          <p class="tiers-foot">14-day money-back guarantee on first payment.</p>
+        </div>
+      
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 — CLOSE + FOOTER -->
+<section class="sec close" id="join" aria-labelledby="close-h">
+  <div class="shell">
+    <div class="rail" aria-hidden="true">
+      <span class="rail__n">09</span>
+      <span class="drop" style="--vol:.8;--visc:.7;--tint:var(--hue-aqua);--sil:var(--sil-3)"></span>
+      <span class="rail__rule"></span>
+      <span class="rail__kick">close</span>
+    </div>
+    <div class="body">
+      <span class="kick">private beta · public launch 2026-08-27</span>
+      <h2 id="close-h">That was one task. <span class="hero__flow">Start yours.</span></h2>
+      <p class="lede" style="margin-top:var(--s-5)">Atlas opens to everyone on 27 August 2026.
+        Leave an address and you'll hear once, when it does.</p>
+
+      <form class="join" id="joinform" novalidate>
+        <label for="email">Your email</label>
+        <div class="join__row">
+          <input id="email" name="email" type="email" inputmode="email"
+                 autocomplete="email" placeholder="you@example.com"
+                 aria-describedby="joinstatus">
+          <button class="btn btn--lg" type="submit">
+            <span class="btn__bead" aria-hidden="true"></span>Join waitlist
+          </button>
+        </div>
+        <p class="join__status" id="joinstatus" role="status" aria-live="polite"></p>
+      </form>
+
+      <ul class="trust close__trust">
+        <li>Free</li><li>No signup to try</li><li>No credit card</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot__in">
+    <div>
+      <p class="foot__def"><em>at·las</em> /ˈat·ləs/ n. — one who carries the weight so
+        others don't have to.</p>
+    </div>
+    <nav class="foot__links" aria-label="Footer">
+      <a href="#ask">What it watches</a>
+      <a href="#how">How it works</a>
+      <a href="#check">The check</a>
+      <a href="#proof">Proof</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <div class="foot__meta">
+      <p>Private beta<br>Public launch 2026-08-27</p>
+      <p style="margin-top:var(--s-3)">Built by one person.<br>No API, no mobile app, no SSO —
+        not yet.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  /* Ambient motion is gated to what is on screen: the gooey filter re-rasterises
+     every frame it animates, so nothing animates off-screen. If this script never
+     runs, animation simply stays on — the page is correct either way. */
+  var stages = document.querySelectorAll(".merge, .split, .clot, .record");
+  var root = document.documentElement;
+  if (!window.matchMedia || !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.body.classList.add("anim");
+  }
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        e.target.classList.toggle("offscreen", !e.isIntersecting);
+      });
+    }, { rootMargin: "160px 0px" });
+    Array.prototype.forEach.call(stages, function(s){ io.observe(s); });
+  }
+
+  /* ── the six quality tags: a real tablist ── */
+  (function () {
+    var root = document.querySelector('.tags');
+    if (!root) return;
+    var list = root.querySelector('[role="tablist"]');
+    if (!list) return;
+    var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+    if (!tabs.length) return;
+    root.setAttribute('data-js', 'on');
+  
+    function select(tab, moveFocus) {
+      for (var i = 0; i < tabs.length; i++) {
+        var t = tabs[i], on = t === tab;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        var p = document.getElementById(t.getAttribute('aria-controls'));
+        if (!p) continue;
+        if (on) p.removeAttribute('hidden'); else p.setAttribute('hidden', '');
+      }
+      if (moveFocus && tab.focus) tab.focus();
+    }
+  
+    list.addEventListener('click', function (e) {
+      var t = e.target && e.target.closest ? e.target.closest('[role="tab"]') : null;
+      if (t && tabs.indexOf(t) > -1) select(t, false);
+    });
+  
+    list.addEventListener('keydown', function (e) {
+      var i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      var n = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = tabs[(i + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = tabs[(i - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') n = tabs[0];
+      else if (e.key === 'End') n = tabs[tabs.length - 1];
+      if (!n) return;
+      e.preventDefault();
+      select(n, true);
+    });
+  
+    var start = null;
+    for (var j = 0; j < tabs.length; j++) {
+      if (tabs[j].getAttribute('aria-selected') === 'true') { start = tabs[j]; break; }
+    }
+    select(start || tabs[0], false);
+  })();
+
+  /* The waitlist form has no backend on this page and says so. */
+  var f = document.getElementById("joinform");
+  if (f) {
+    f.addEventListener("submit", function(ev){
+      ev.preventDefault();
+      var el = document.getElementById("email");
+      var st = document.getElementById("joinstatus");
+      var v = (el && el.value || "").trim();
+      if (!v || v.indexOf("@") < 1 || v.indexOf(".") < 0) {
+        st.textContent = "that address doesn't look complete.";
+        if (el) el.focus();
+        return;
+      }
+      st.textContent = "held locally — this page is a prototype, nothing was sent.";
+    });
+  }
+})();
+</script>
+</body>
+</html>

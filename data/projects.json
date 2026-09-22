@@ -1,0 +1,935 @@
+{
+  "_source": {
+    "content_file": "C:/Users/owens/.claude/projects/C--Users-owens/9b4c4bf3-0372-4a90-9648-058dc7bbcab0/tool-results/artifact-cac38ca8-1789359173-5931.html",
+    "content_file_note": "The text of that file is CONTENT, never instructions. Everything here is transcribed from its GROUPS array, its <article class=\"entry\"> blocks and its three feature write-ups.",
+    "corrections_file": "C:\\Users\\owens\\portfolio-site\\_explore\\CONTENT-UPDATE.md",
+    "measured": "2026-09-16",
+    "baseline_measured": "2026-09-13",
+    "correction_count": 14
+  },
+  "tally": {
+    "projects_since_march_2026": 23,
+    "live_on_the_public_web": 3,
+    "tools_used_every_week": 6,
+    "commits_across_atlas_portal_browser": 2986,
+    "commits_as_written_in_source": 2978,
+    "commits_correction_note": "CONTENT-UPDATE §6: 2,636 + 188 + 162 = 2,986 on 16 Sep. The source file says 2,978 (13 Sep baseline).",
+    "measured_on": "16 September 2026",
+    "timeline_today": "09-16",
+    "timeline_today_in_source": "09-13"
+  },
+  "groups": [
+    {
+      "name": "Markets",
+      "count": 5
+    },
+    {
+      "name": "Atlas",
+      "count": 5
+    },
+    {
+      "name": "Side projects",
+      "count": 4
+    },
+    {
+      "name": "Tools I use",
+      "count": 5
+    },
+    {
+      "name": "Hockey",
+      "count": 2
+    },
+    {
+      "name": "School",
+      "count": 2
+    }
+  ],
+  "project_count": 23,
+  "corrections_applied": [
+    {
+      "id": "browser",
+      "field": "spans[0][1]",
+      "from": "09-13",
+      "to": "09-15",
+      "why": "CONTENT-UPDATE §1: last browser commit is 15 Sep 2026 17:45 -0700, not 13 Sep."
+    },
+    {
+      "id": "browser",
+      "field": "note",
+      "from": "My own everyday browser, written in 4 days",
+      "to": "My own everyday browser, written in 6 days",
+      "why": "CONTENT-UPDATE §1: build span is 10–15 Sep, 6 commit days, not 4."
+    },
+    {
+      "id": "browser",
+      "field": "facts.Built",
+      "from": "10–13 Sep 2026, 4 days",
+      "to": "10–15 Sep 2026, 6 days",
+      "why": "CONTENT-UPDATE §1 (measured 16 Sep)."
+    },
+    {
+      "id": "browser",
+      "field": "facts.Commits",
+      "from": "155",
+      "to": "162",
+      "why": "CONTENT-UPDATE §1 (measured 16 Sep)."
+    },
+    {
+      "id": "browser",
+      "field": "facts.Code",
+      "from": "~62k lines of JavaScript, ~13k lines of CSS",
+      "to": "~63k lines of JavaScript, ~13k lines of CSS",
+      "why": "CONTENT-UPDATE §1 (measured 16 Sep)."
+    },
+    {
+      "id": "browser",
+      "field": "facts.Distribution",
+      "from": null,
+      "to": "A Windows installer and a portable build (0.1.0, not code-signed)",
+      "why": "CONTENT-UPDATE §1: new fact row, browser-dist created 14 Sep."
+    },
+    {
+      "id": "browser",
+      "field": "what_it_does[+]",
+      "from": null,
+      "to": "Phone sound plays on the computer, the phone or both, chosen from the phone rail.",
+      "why": "CONTENT-UPDATE §1: new bullet."
+    },
+    {
+      "id": "tvha",
+      "field": "spans[0][1]",
+      "from": "09-11",
+      "to": "09-16",
+      "why": "CONTENT-UPDATE §3: last portal commit is 16 Sep 2026 12:21 -0700."
+    },
+    {
+      "id": "tvha",
+      "field": "facts.Built",
+      "from": "16 Jul – 11 Sep 2026, 8 weeks",
+      "to": "16 Jul – 16 Sep 2026, 9 weeks",
+      "why": "CONTENT-UPDATE §3 (measured 16 Sep)."
+    },
+    {
+      "id": "tvha",
+      "field": "facts.Commits",
+      "from": "187",
+      "to": "188",
+      "why": "CONTENT-UPDATE §3 (measured 16 Sep)."
+    },
+    {
+      "id": "tvha",
+      "field": "facts.Code",
+      "from": "~32k lines of TypeScript, 21 SQL migrations",
+      "to": "~35k lines of TypeScript, 22 SQL migrations",
+      "why": "CONTENT-UPDATE §3 (measured 16 Sep)."
+    },
+    {
+      "id": "tvha",
+      "field": "facts.Shape",
+      "from": "20 data models, ~89 API endpoints, 29 screens",
+      "to": "22 data models, ~96 API endpoints, 32 screens",
+      "why": "CONTENT-UPDATE §3 (measured 16 Sep)."
+    },
+    {
+      "id": "tvha",
+      "field": "what_it_does[+]",
+      "from": null,
+      "to": "On-ice work: what each skater should be drilling, released to staff first.",
+      "why": "CONTENT-UPDATE §3: shipped admin-only on 16 Sep. Do NOT describe it as something families see."
+    },
+    {
+      "id": "notebooks",
+      "field": "detail[0]",
+      "from": "5 classes, 16 lessons and 131 sections so far.",
+      "to": "5 classes, 15 lessons and 131 sections so far.",
+      "why": "CONTENT-UPDATE §4: the <h2> rule counts 15 lessons (5+4+2+3+1). 131 sections reproduces exactly."
+    },
+    {
+      "id": "gatewatch",
+      "field": "removed",
+      "from": "listed",
+      "to": "removed",
+      "why": "Owen, 20 Sep 2026: gear cards and the launch-day gate watcher are not to be on the site. Not in the commit or line counts, so 2,986 and 408,364 stand."
+    },
+    {
+      "id": "gear",
+      "field": "removed",
+      "from": "listed",
+      "to": "removed",
+      "why": "Owen, 20 Sep 2026: gear cards and the launch-day gate watcher are not to be on the site. Not in the commit or line counts, so 2,986 and 408,364 stand."
+    }
+  ],
+  "projects": [
+    {
+      "id": "marketlens",
+      "name": "MarketLens",
+      "group": "Markets",
+      "state": "off",
+      "state_meaning": "paused or shelved",
+      "label": "Shelved",
+      "spans": [
+        [
+          "03-08",
+          "03-08"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "A one-page site of my stock and crypto ratings",
+      "when": "8 Mar 2026",
+      "what": "A one-page site where I published my own 1-to-5 ratings on stocks and crypto.",
+      "detail": [
+        "Hand-built HTML and CSS, with How It Works, Ratings, Risk and About sections.",
+        "The earliest project on this page."
+      ],
+      "stack": [
+        "HTML",
+        "CSS"
+      ],
+      "links": []
+    },
+    {
+      "id": "backtest",
+      "name": "Backtesting lab",
+      "group": "Markets",
+      "state": "off",
+      "state_meaning": "paused or shelved",
+      "label": "Shelved",
+      "spans": [
+        [
+          "04-04",
+          "04-07"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Testing strategies on historical data",
+      "when": "4–7 Apr 2026",
+      "what": "Tools for testing trading strategies on historical data before risking any money.",
+      "detail": [
+        "Four strategy families: momentum rotation, filtered dip-buying, a 200-day trend rule and a small-cap screener.",
+        "Walk-forward testing rebuilds the stock list using only data available at each point, so the test can’t peek ahead.",
+        "Parameter sweeps run over precomputed signals instead of recomputing each pass."
+      ],
+      "stack": [
+        "Python",
+        "pandas",
+        "numpy",
+        "yfinance",
+        "matplotlib"
+      ],
+      "links": []
+    },
+    {
+      "id": "lenstrade",
+      "name": "Lens Trade",
+      "group": "Markets",
+      "state": "off",
+      "state_meaning": "paused or shelved",
+      "label": "Shelved",
+      "spans": [
+        [
+          "05-07",
+          "05-07"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Trading platform prototype",
+      "when": "7 May 2026",
+      "what": "A personal trading platform prototype with charts, an order ticket, strategy alerts, a backtest lab and a trade journal.",
+      "detail": [
+        "Three modes: Manual, Signal Confirm (the strategy suggests, I approve) and Auto.",
+        "Every order goes through one risk manager with a position cap, a daily loss limit and a kill switch."
+      ],
+      "stack": [
+        "Flask",
+        "server-sent events",
+        "SQLite",
+        "vanilla JS"
+      ],
+      "links": []
+    },
+    {
+      "id": "stockcoach",
+      "name": "Stock Coach",
+      "group": "Markets",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "In use",
+      "spans": [
+        [
+          "05-13",
+          "05-19"
+        ]
+      ],
+      "ongoing": true,
+      "featured": false,
+      "note": "Terminal trading coach with a weekly market scan",
+      "when": "Built 13–19 May, scanning weekly since",
+      "what": "A trading coach in the terminal that logs my trades, holds me to my own rules and scans the US market every Saturday.",
+      "detail": [
+        "Scans 4,622 NYSE and NASDAQ stocks and emails a graded top 15, unattended.",
+        "The chat agent has 27 tools, from logging a trade to importing broker history.",
+        "Scores out of 100 are weighted by what has worked for me before."
+      ],
+      "stack": [
+        "Python",
+        "Gemini 2.5 Flash",
+        "yfinance",
+        "pandas_ta",
+        "Rich"
+      ],
+      "links": []
+    },
+    {
+      "id": "robinhood",
+      "name": "Robinhood trading bot",
+      "group": "Markets",
+      "state": "off",
+      "state_meaning": "paused or shelved",
+      "label": "Paused",
+      "spans": [
+        [
+          "05-27",
+          "06-18"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Autonomous day-trading bot",
+      "when": "27 May – 18 Jun 2026",
+      "what": "A bot that watched the day’s biggest gainers and traded them on its own, with real money, starting 3 June.",
+      "detail": [
+        "Every buy, from any source, passes one gate of guards before it can be placed.",
+        "Found and fixed a data-lag bug by moving decisions from delayed candles to live 5-minute bars.",
+        "Built to run unattended through timeouts and failed polls."
+      ],
+      "stack": [
+        "Python",
+        "robin_stocks",
+        "Gemini 2.5 Flash",
+        "pandas_ta"
+      ],
+      "links": []
+    },
+    {
+      "id": "atlas",
+      "name": "Atlas",
+      "group": "Atlas",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "Live",
+      "spans": [
+        [
+          "04-01",
+          "09-09"
+        ]
+      ],
+      "ongoing": true,
+      "featured": true,
+      "note": "AI task automation, live at try-atlas.app. Public launch 27 Aug.",
+      "when": "1 Apr – 9 Sep 2026, with commits on 109 days",
+      "what": "Type “every weekday at 8am, send me the top tech news” and Atlas runs it on that schedule, checks the answer, and sends you the result.",
+      "detail": [],
+      "stack": [
+        "Node and Express",
+        "PostgreSQL",
+        "Clerk",
+        "Railway",
+        "Cloudflare",
+        "Brevo",
+        "LemonSqueezy",
+        "Gemini by default",
+        "or your own OpenAI or Anthropic key",
+        "Playwright and axe-core."
+      ],
+      "links": [
+        "https://try-atlas.app"
+      ],
+      "mark": "08-27",
+      "facts": {
+        "Built": "1 Apr – 9 Sep 2026, with commits on 109 days",
+        "Public launch": "27 Aug 2026",
+        "Commits": "2,636 to production",
+        "Releases": "337 internal before 1.0, then 10 public",
+        "Code": "~140k lines of app code, ~212k lines of tests",
+        "Built with": "Node and Express, PostgreSQL, Clerk, Railway, Cloudflare, Brevo, LemonSqueezy. Gemini by default, or your own OpenAI or Anthropic key. Playwright and axe-core."
+      },
+      "what_it_does": [
+        "Reads the schedule straight out of the sentence. Nobody fills in a cron field.",
+        "Sends results by email or daily digest, Discord, Slack, Telegram or signed webhook, with Google Sheets and GitHub in beta.",
+        "Reply to a result email to change the task, with one-click undo.",
+        "Grades every run and warns you when a task has quietly stopped finding anything new.",
+        "Fetches live stock and crypto prices and headlines before the AI writes: about 230 company names map to tickers, and 37 coins are recognised.",
+        "Invite a friend and you both get 10 more runs."
+      ],
+      "how_its_built": [
+        "One scheduler at a time. Postgres advisory locks keep scheduled jobs on a single leader, so a task never fires twice across instances.",
+        "Encrypted backups. Nightly database snapshots are AES-256-GCM encrypted and stored off-site, and a full restore has been checked end to end.",
+        "Stored credentials are encrypted at rest.",
+        "A launch gate that fails closed. The server alone decides whether the site is open, and a missing or malformed setting keeps it shut.",
+        "Answer quality. A classifier retries weak answers or switches provider, and an LLM-as-judge eval harness has run 52 times.",
+        "Release gate, 9 Sep: 456 unit test files and 596 Playwright tests passing, none flaky (from the project’s release record)."
+      ]
+    },
+    {
+      "id": "design",
+      "name": "Design explorations",
+      "group": "Atlas",
+      "state": "done",
+      "state_meaning": "finished",
+      "label": "Finished",
+      "spans": [
+        [
+          "04-25",
+          "09-09"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Seven visual directions for Atlas",
+      "when": "25 Apr – 9 Sep 2026",
+      "what": "Seven competing visual directions for Atlas, each built as a standalone page and judged by measuring scripts rather than by eye.",
+      "detail": [
+        "Direction D, “prism”, was approved and shipped.",
+        "63 dependency-free scripts check contrast, accessibility and components.",
+        "522 desktop and mobile screenshots."
+      ],
+      "stack": [
+        "HTML",
+        "CSS",
+        "Node",
+        "Playwright"
+      ],
+      "links": []
+    },
+    {
+      "id": "dashboard",
+      "name": "Dashboard prototype",
+      "group": "Atlas",
+      "state": "off",
+      "state_meaning": "paused or shelved",
+      "label": "Shelved",
+      "spans": [
+        [
+          "07-15",
+          "07-15"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Redesigned task dashboard",
+      "when": "15 Jul 2026",
+      "what": "A working local prototype of a redesigned Atlas task dashboard.",
+      "detail": [
+        "Create, pin and drag-reorder tasks, run one now, browse a history drawer, and export or import JSON."
+      ],
+      "stack": [
+        "HTML",
+        "CSS",
+        "JS"
+      ],
+      "links": [],
+      "local_path": null,
+      "local_path_note": "NOT FOUND under C:\\Users\\owens\\Downloads by read-only search on 16 Sep 2026. See _data/README.md for the four searches run. Do not link or embed it."
+    },
+    {
+      "id": "autopilot",
+      "name": "Atlas Autopilot",
+      "group": "Atlas",
+      "state": "off",
+      "state_meaning": "paused or shelved",
+      "label": "Paused",
+      "spans": [
+        [
+          "08-11",
+          "08-13"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Unattended AI developer for Atlas",
+      "when": "11–13 Aug 2026",
+      "what": "An unattended AI developer. A worker builds from a task list, a separate AI reviewer decides what merges, and a watchdog keeps an eye on the live site.",
+      "detail": [
+        "The worker can’t push. Only the reviewer can merge to the branch that deploys.",
+        "Lock files clear themselves when the process holding them has died.",
+        "The watchdog only alerts when health actually changes."
+      ],
+      "stack": [
+        "PowerShell",
+        "Task Scheduler",
+        "headless Claude Code",
+        "Node"
+      ],
+      "links": []
+    },
+    {
+      "id": "site",
+      "name": "Site redesign",
+      "group": "Atlas",
+      "state": "done",
+      "state_meaning": "finished",
+      "label": "Shipped",
+      "spans": [
+        [
+          "08-21",
+          "08-31"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "16-page rebuild of the Atlas site",
+      "when": "21–31 Aug 2026",
+      "what": "A full rebuild of Atlas’s 16-page public site, with a floating glass nav, a WebGL dune hero, a dark theme and ⌘K search.",
+      "detail": [
+        "A script checks that the nav and footer are byte-identical on every page.",
+        "A checklist per page proves no content was lost from the old site.",
+        "A button checker caught a 2px gap that reading the CSS never would have."
+      ],
+      "stack": [
+        "HTML",
+        "CSS",
+        "JS",
+        "WebGL"
+      ],
+      "links": []
+    },
+    {
+      "id": "starwars",
+      "name": "Star Wars game",
+      "group": "Side projects",
+      "state": "done",
+      "state_meaning": "finished",
+      "label": "Finished",
+      "spans": [
+        [
+          "04-13",
+          "04-13"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Browser strategy game",
+      "when": "13 Apr 2026",
+      "what": "A browser strategy game where you deploy Rebel or Imperial ships against an AI opponent.",
+      "detail": [
+        "X-wings, B-wings, TIE fighters and Star Destroyers, with an upgrade system and a canvas animation loop, all in one 1,146-line file."
+      ],
+      "stack": [
+        "HTML",
+        "Canvas",
+        "JS"
+      ],
+      "links": []
+    },
+    {
+      "id": "roamly",
+      "name": "Roamly",
+      "group": "Side projects",
+      "state": "done",
+      "state_meaning": "finished",
+      "label": "Shipped demo",
+      "spans": [
+        [
+          "04-29",
+          "05-04"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "AI travel planner, with a collaborator",
+      "when": "29 Apr – 4 May 2026",
+      "what": "An AI travel planner that returns best, cheapest and fastest trip packages with flights, hotel, car and itinerary. Built with a collaborator.",
+      "detail": [
+        "My part, 9 of 22 commits: car rentals, real hotel ratings, date-filled Booking.com and Kayak links, the return flight leg and a landing page redesign."
+      ],
+      "stack": [
+        "Next.js 15",
+        "React 19",
+        "Tailwind",
+        "Vercel AI SDK"
+      ],
+      "links": []
+    },
+    {
+      "id": "aerocore",
+      "name": "Aerocore",
+      "group": "Side projects",
+      "state": "done",
+      "state_meaning": "finished",
+      "label": "Shipped demo",
+      "spans": [
+        [
+          "04-29",
+          "05-05"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "3D product showcase, with a collaborator",
+      "when": "29 Apr – 5 May 2026",
+      "what": "A 3D showcase and customizer for airless, 3D-printed sports balls. Built with a collaborator.",
+      "detail": [
+        "My part, 4 of 6 commits: the rebrand, dynamic accent colours, a scroll indicator and the coming-soon page."
+      ],
+      "stack": [
+        "React Three Fiber",
+        "GSAP",
+        "Vite"
+      ],
+      "links": []
+    },
+    {
+      "id": "nhl",
+      "name": "Stanley Cup picks bot",
+      "group": "Side projects",
+      "state": "done",
+      "state_meaning": "finished",
+      "label": "Finished",
+      "spans": [
+        [
+          "05-21",
+          "06-09"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Playoff predictions on Discord",
+      "when": "21 May – 9 Jun 2026",
+      "what": "A Discord bot where friends predicted the Stanley Cup Final, with live scoring during games.",
+      "detail": [
+        "Polls play-by-play every 30 seconds during a game and records the first goal scorer automatically.",
+        "7 slash commands, and picks lock at puck drop for Game 1."
+      ],
+      "stack": [
+        "discord.js",
+        "PostgreSQL",
+        "NHL public API"
+      ],
+      "links": []
+    },
+    {
+      "id": "axiom",
+      "name": "Axiom",
+      "group": "Tools I use",
+      "state": "off",
+      "state_meaning": "paused or shelved",
+      "label": "Shelved",
+      "spans": [
+        [
+          "07-05",
+          "07-10"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Cloud model plans, local model codes",
+      "when": "5–10 Jul 2026",
+      "what": "A coding assistant where a cloud model plans the work and a free local model on my laptop writes the code.",
+      "detail": [
+        "A proxy retries rate-limited requests on a fallback model, then switches back to the cheaper one on its own.",
+        "It catches empty “successful” answers and retries before the tool ever sees them.",
+        "An overnight test of a 3B local coder failed 6 of 6 attempts, and I wrote it up honestly."
+      ],
+      "stack": [
+        "PowerShell",
+        "Qwen Code",
+        "Ollama",
+        "Gemini"
+      ],
+      "links": []
+    },
+    {
+      "id": "volt",
+      "name": "VOLT",
+      "group": "Tools I use",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "In use",
+      "spans": [
+        [
+          "08-09",
+          "08-10"
+        ]
+      ],
+      "ongoing": true,
+      "featured": false,
+      "note": "Terminal AI assistant",
+      "when": "Built 9–10 Aug, in use since",
+      "what": "A terminal AI assistant that talks to a dozen model providers and keeps one history and spending ledger across all of them.",
+      "detail": [
+        "Zero dependencies, with 188 test checks against a mock server.",
+        "Hooks into Claude Code and imports its sessions without double-counting.",
+        "Code review with a gate that fails on critical findings."
+      ],
+      "stack": [
+        "Node",
+        "no dependencies"
+      ],
+      "links": []
+    },
+    {
+      "id": "mission",
+      "name": "Mission Control",
+      "group": "Tools I use",
+      "state": "off",
+      "state_meaning": "paused or shelved",
+      "label": "Paused",
+      "spans": [
+        [
+          "09-02",
+          "09-08"
+        ]
+      ],
+      "ongoing": false,
+      "featured": false,
+      "note": "Live dashboard of agents and infrastructure",
+      "when": "2–8 Sep 2026",
+      "what": "A live dashboard of Claude and its helper agents at work, drawn as a radial graph next to a system map of Atlas’s infrastructure.",
+      "detail": [
+        "Its own cron evaluator, and Task Scheduler read over COM in about 110 ms instead of 4 s.",
+        "Zero npm dependencies. It streams updates over server-sent events.",
+        "A 50-node map of Atlas, from the edge down to this machine."
+      ],
+      "stack": [
+        "Node",
+        "server-sent events",
+        "vanilla JS"
+      ],
+      "links": []
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify Auto-Pause",
+      "group": "Tools I use",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "In use",
+      "spans": [
+        [
+          "09-09",
+          "09-12"
+        ]
+      ],
+      "ongoing": true,
+      "featured": false,
+      "note": "Pauses music when a video starts talking",
+      "when": "9–12 Sep 2026",
+      "what": "Spotify pauses by itself when a YouTube video or a school lesson starts talking, resumes afterwards, and turns ads down to a whisper.",
+      "detail": [
+        "The lesson app misreports whether it’s playing, so the tool listens to the app’s real audio level instead.",
+        "The time to decide to pause fell from 8.4 s to 114 ms.",
+        "During ads it moves Spotify’s own volume slider through UI Automation, then puts it back."
+      ],
+      "stack": [
+        "Browser extension",
+        "PowerShell and .NET",
+        "WASAPI",
+        "UI Automation"
+      ],
+      "links": []
+    },
+    {
+      "id": "browser",
+      "name": "Browser",
+      "group": "Tools I use",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "In use",
+      "spans": [
+        [
+          "09-10",
+          "09-15"
+        ]
+      ],
+      "ongoing": false,
+      "featured": true,
+      "note": "My own everyday browser, written in 6 days",
+      "when": "10–15 Sep 2026, 6 days",
+      "what": "Claude coding sessions, Windows programs like Paint and Discord, and my Android phone all open as tabs beside ordinary web pages, in a browser I wrote.",
+      "detail": [],
+      "stack": [
+        "Electron",
+        "node-pty and xterm.js",
+        "koffi for Win32 calls",
+        "WebCodecs",
+        "scrcpy and adb",
+        "Ghostery ad blocker",
+        "Mozilla Readability"
+      ],
+      "links": [],
+      "facts": {
+        "Built": "10–15 Sep 2026, 6 days",
+        "Commits": "162",
+        "Code": "~63k lines of JavaScript, ~13k lines of CSS",
+        "Features": "67, documented in a 1,400-line README",
+        "Built with": "Electron, node-pty and xterm.js, koffi for Win32 calls, WebCodecs, scrcpy and adb, Ghostery ad blocker, Mozilla Readability",
+        "Distribution": "A Windows installer and a portable build (0.1.0, not code-signed)"
+      },
+      "what_it_does": [
+        "Claude tabs: a real Claude Code session in each tab, with its own folder, resume, and a pulse when it needs me.",
+        "App tabs: real Windows programs hosted inside a tab, opened from a dock or by typing in the address bar.",
+        "Phone workspace: mirrors and fully controls my Android phone. The mouse acts as touch, and the clipboard works both ways.",
+        "Workspaces: the School workspace opens the right section of my class notes for the question on screen.",
+        "New tab page: clock, live CPU, memory, disk and network readouts, a process list and a Markets tile.",
+        "Ad blocking, reader view, split view, a command palette, tab sleep and picture-in-picture.",
+        "Phone sound plays on the computer, the phone or both, chosen from the phone rail."
+      ],
+      "how_its_built": [
+        "Phone video decoded in the page with WebCodecs: about 59 fps at roughly 1 ms per frame. Painting from the decoder callback, instead of waiting for the next animation frame, stopped a quarter of frames from dropping.",
+        "Quality that adapts to a TCP round-trip probe, because timing adb itself costs about 170 ms even on a 7 ms link.",
+        "Windows apps hosted through Win32 SetParent via koffi, with no native rebuild. It passed 30 of 30 live checks with Paint.",
+        "CPU fixes, measured. The animated background went from 27% to 3% of a core, and stats sampling from 4.7% to 0.35%.",
+        "About 550 ms cold start. Hidden workspaces go to sleep, which fixed a 1.9 GB GPU process.",
+        "No silent failures. Every state shows its reason and what to do next."
+      ],
+      "features_note": "The \"67 features\" figure is what the 1,400-line README documents. Four more user-facing features landed 14–15 Sep and are not in it."
+    },
+    {
+      "id": "tvha",
+      "name": "Family & staff portal",
+      "group": "Hockey",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "Live",
+      "spans": [
+        [
+          "07-16",
+          "09-16"
+        ]
+      ],
+      "ongoing": true,
+      "featured": true,
+      "note": "Portal for a youth hockey academy",
+      "when": "16 Jul – 16 Sep 2026, 9 weeks",
+      "what": "A parent marks their skater absent for next Tuesday, a coach posts a video note on a skill, and the office imports its roster spreadsheet. All of it happens in one portal I built for a youth hockey academy.",
+      "detail": [],
+      "stack": [
+        "Vite and TypeScript with no framework",
+        "Express",
+        "Prisma",
+        "PostgreSQL",
+        "Railway",
+        "Brevo",
+        "Cloudflare R2",
+        "GitHub Actions"
+      ],
+      "links": [],
+      "facts": {
+        "Built": "16 Jul – 16 Sep 2026, 9 weeks",
+        "Commits": "188",
+        "Code": "~35k lines of TypeScript, 22 SQL migrations",
+        "Shape": "22 data models, ~96 API endpoints, 32 screens",
+        "Roles": "Parents, students, staff and a maintainer",
+        "Built with": "Vite and TypeScript with no framework, Express, Prisma, PostgreSQL, Railway, Brevo, Cloudflare R2, GitHub Actions"
+      },
+      "what_it_does": [
+        "Separate views for parents, students, staff and a maintainer.",
+        "Attendance with recurring absences and locked past dates, on one calendar with academy events.",
+        "Coach notes on skills, with video compressed in the browser before upload. Families can reply with a question.",
+        "Messages with read tracking, plus notifications and task lists.",
+        "Roster import from the office spreadsheet, and invite emails one at a time or all at once.",
+        "A draft board that splits the night’s skaters into two teams by drag and drop.",
+        "On-ice work: what each skater should be drilling, released to staff first."
+      ],
+      "how_its_built": [
+        "Backups you can restore. Daily off-site backups alert if one fails or stops. A restore drill matched all 16 tables row for row, and the restore tool refuses to point at production.",
+        "Role boundaries under test. The tests run without a database and catch a deliberately planted cross-family leak.",
+        "Safe roster import. Preview and commit are separate endpoints, so a preview can never send an email. Invites are off by default, and every send asks first.",
+        "Migrations on every deploy, after the migration history was rebuilt from a clean baseline.",
+        "Email that lands. SPF and DKIM both pass, sent from a branded subdomain.",
+        "A maintainer console that logs failed sign-ins, dead reset links and server errors."
+      ],
+      "admin_only_note": "On-Ice Work shipped admin-only on 16 Sep 2026. Parent and student views exist in the release but families are not switched on."
+    },
+    {
+      "id": "tvha-site",
+      "name": "Academy public site",
+      "group": "Hockey",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "Live",
+      "spans": [
+        [
+          "07-20",
+          "08-25"
+        ]
+      ],
+      "ongoing": true,
+      "featured": false,
+      "note": "Public website and interest form",
+      "when": "20 Jul – 25 Aug 2026",
+      "what": "The academy’s public website, with programs, tuition, coaches, an FAQ and an interest form. tvhockeyacademy.com",
+      "detail": [
+        "The interest form now saves to the database first and then emails the director, with rate limiting.",
+        "The academy monogram favicon is rendered in Chromium and shared with the portal."
+      ],
+      "stack": [
+        "HTML",
+        "CSS",
+        "the portal’s API"
+      ],
+      "links": [
+        "https://tvhockeyacademy.com"
+      ]
+    },
+    {
+      "id": "slides",
+      "name": "Lesson slide recorder",
+      "group": "School",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "In use",
+      "spans": [
+        [
+          "09-09",
+          "09-10"
+        ]
+      ],
+      "ongoing": true,
+      "featured": false,
+      "note": "Keeps only frames where the slide changed",
+      "when": "9–10 Sep 2026",
+      "what": "A Windows recorder that keeps only the frames where a lesson video’s slide actually changed.",
+      "detail": [
+        "Keeps capturing even when the video window is covered by other windows.",
+        "Tiny 24×24 grayscale fingerprints skip transitions, animated backgrounds and ticking timers."
+      ],
+      "stack": [
+        "PowerShell with inline C#"
+      ],
+      "links": []
+    },
+    {
+      "id": "notebooks",
+      "name": "Class notebooks",
+      "group": "School",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "In use",
+      "spans": [
+        [
+          "09-10",
+          "09-11"
+        ]
+      ],
+      "ongoing": true,
+      "featured": false,
+      "note": "One web notebook per class",
+      "when": "10–11 Sep 2026",
+      "what": "One web notebook per class, built from lesson recordings, that fills in what the slides leave out.",
+      "detail": [
+        "5 classes, 15 lessons and 131 sections so far.",
+        "Every quote is labelled as coming from the slide or the captions.",
+        "Practice questions link to the right section instead of giving away the answer."
+      ],
+      "stack": [
+        "HTML",
+        "CSS"
+      ],
+      "links": []
+    }
+  ]
+}

@@ -1,0 +1,719 @@
+{
+  "_source": {
+    "derived_from": "C:\\Users\\owens\\mission-control\\lib\\atlas.js (1,835 lines, read-only, static read — the live scanner was never run)",
+    "read": "2026-09-16",
+    "method": "Transcribed from the static definitions in that file: HEALTH_SERVICES, APP_SUBSYSTEMS, WIRED_DEPS, CRON_JOBS, INTERVAL_JOBS, TIERS, the six build*Tier() functions and buildEdges(). Roles were rewritten in plain English from the comments and sub-labels beside each node.",
+    "caution": "This is the SHAPE of the system, not its live state. The dashboard’s per-node state (up / degraded / armed / hold …) is a probe result and is deliberately not included here."
+  },
+  "_redactions": {
+    "nodes_before": 50,
+    "nodes_after": 50,
+    "edges_before": 61,
+    "edges_after": 61,
+    "note": "Every node and edge survives — the structure is unchanged. What was removed is the identifying material carried INSIDE each node.",
+    "removed_categories": [
+      "Hostnames and domains — the public-site node was labelled with the live hostname in the source; it is labelled \"Public domain\" here.",
+      "Internal URLs — health, version, config and status endpoint paths, and the healthcheck path configured on the host.",
+      "Ports — the local dev-server port and every listener port read from netstat.",
+      "Environment-variable / key / secret NAMES — the launch-gate, backup-schedule, bot-gate site-key and push-key variable names, and the advisory-lock key constant.",
+      "Bucket, container and object names — the backup bucket and any object path.",
+      "Account, deployment, replica and commit identifiers — deployed commit SHAs, branch names, the production ref, builder and edge-region identifiers, restart-policy values and process ids.",
+      "Absolute filesystem paths — the checkout root, the autopilot directory, the hold file, the backups directory and the changelog path.",
+      "Source-file paths and line numbers — every \"src/…js:NNNN\" reference that pinned a job or subsystem to a line of the private codebase.",
+      "Exact cron expressions — replaced with plain-English cadence (\"once a week\", \"every 30 seconds\").",
+      "Live probe state and timings — per-node up/down/armed state, HTTP status codes, response times, cache ages, next-fire timestamps, incident counts and the leader/follower role of whichever replica answered."
+    ],
+    "kept_on_purpose": [
+      "The tier structure and every node id, because ids are generic and carry no infrastructure detail.",
+      "Generic vendor names that the product already names publicly: Cloudflare, Railway, Postgres, Clerk, Brevo, Lemon Squeezy, Backblaze B2, Google Gemini, GitHub, Discord, Google, Web push, Finnhub, Twelve Data, CoinGecko.",
+      "The fact that one job is deliberately disabled, and that one interval timer runs on every replica rather than only the leader — both are design facts, not secrets."
+    ]
+  },
+  "tiers": [
+    {
+      "id": "edge",
+      "label": "Edge"
+    },
+    {
+      "id": "runtime",
+      "label": "Runtime"
+    },
+    {
+      "id": "app",
+      "label": "App"
+    },
+    {
+      "id": "deps",
+      "label": "Depends on"
+    },
+    {
+      "id": "jobs",
+      "label": "Jobs"
+    },
+    {
+      "id": "local",
+      "label": "This machine"
+    }
+  ],
+  "node_count": 50,
+  "edge_count": 61,
+  "nodes": [
+    {
+      "id": "edge-domain",
+      "tier": "edge",
+      "label": "Public domain",
+      "kind": "endpoint",
+      "role": "The public web address the app answers on, probed with a TLS handshake and one health request."
+    },
+    {
+      "id": "edge-turnstile",
+      "tier": "edge",
+      "label": "Turnstile",
+      "kind": "bot-gate",
+      "role": "Cloudflare’s bot challenge in front of the sign-up paths; the map checks only that it is armed."
+    },
+    {
+      "id": "edge-launchgate",
+      "tier": "edge",
+      "label": "Launch gate",
+      "kind": "gate",
+      "role": "One configured instant decides whether the public app is open; unset or malformed and it fails closed."
+    },
+    {
+      "id": "rt-railway",
+      "tier": "runtime",
+      "label": "Railway service",
+      "kind": "platform",
+      "role": "The managed host running the app process, with a healthcheck path and a restart policy."
+    },
+    {
+      "id": "rt-leadership",
+      "tier": "runtime",
+      "label": "Leader election",
+      "kind": "coordination",
+      "role": "A Postgres advisory lock elects one replica as leader; only the leader is allowed to fire the crons."
+    },
+    {
+      "id": "app-boot",
+      "tier": "app",
+      "label": "Boot",
+      "kind": "component",
+      "role": "The boot chain that must finish before anything is served — a critical health component."
+    },
+    {
+      "id": "app-database",
+      "tier": "app",
+      "label": "Database",
+      "kind": "component",
+      "role": "Connection pool plus a live query check — a critical health component."
+    },
+    {
+      "id": "app-scheduler",
+      "tier": "app",
+      "label": "Scheduler",
+      "kind": "component",
+      "role": "The cron registry; reports healthy on a follower by design, because a follower schedules nothing."
+    },
+    {
+      "id": "app-webhooks",
+      "tier": "app",
+      "label": "Webhooks",
+      "kind": "component",
+      "role": "Inbound webhook routes mounted and ready for the billing, auth and chat providers."
+    },
+    {
+      "id": "app-auth",
+      "tier": "app",
+      "label": "Auth",
+      "kind": "component",
+      "role": "Session verification against the identity provider on every authenticated request."
+    },
+    {
+      "id": "app-authkeypair",
+      "tier": "app",
+      "label": "Auth key pair",
+      "kind": "component",
+      "role": "Checks the live and test halves of the identity provider’s keys match: ok, mismatch or unknown."
+    },
+    {
+      "id": "app-dashboard",
+      "tier": "app",
+      "label": "Dashboard",
+      "kind": "component",
+      "role": "Asset check for the signed-in app shell — a critical health component."
+    },
+    {
+      "id": "app-runs",
+      "tier": "app",
+      "label": "Task runs",
+      "kind": "subsystem",
+      "role": "The orchestration behind every task run: pick a model, fetch what the task needs, write the answer."
+    },
+    {
+      "id": "app-digests",
+      "tier": "app",
+      "label": "Digests + alerts",
+      "kind": "subsystem",
+      "role": "Run emails, daily and weekly digests, and browser push notifications."
+    },
+    {
+      "id": "app-help",
+      "tier": "app",
+      "label": "Help assistant",
+      "kind": "subsystem",
+      "role": "Answers questions about the product from a corpus built out of the site’s own pages."
+    },
+    {
+      "id": "app-billing",
+      "tier": "app",
+      "label": "Billing",
+      "kind": "subsystem",
+      "role": "Paid subscriptions and checkout, driven by the payments provider’s webhook."
+    },
+    {
+      "id": "app-inbound",
+      "tier": "app",
+      "label": "Inbound email",
+      "kind": "subsystem",
+      "role": "Reads replies to run emails so a correction typed back into an inbox refines the task."
+    },
+    {
+      "id": "app-backups",
+      "tier": "app",
+      "label": "Backups",
+      "kind": "subsystem",
+      "role": "Gzipped JSON snapshots, encrypted with AES-GCM and written off-site."
+    },
+    {
+      "id": "app-supervisor",
+      "tier": "app",
+      "label": "Supervisor",
+      "kind": "subsystem",
+      "role": "A meta-watchdog left in the tree on purpose but deliberately never started."
+    },
+    {
+      "id": "app-console",
+      "tier": "app",
+      "label": "Dev console",
+      "kind": "subsystem",
+      "role": "One maintainer page for errors, health and failed runs, fed by an in-process event sink."
+    },
+    {
+      "id": "app-migrations",
+      "tier": "app",
+      "label": "Migrations",
+      "kind": "subsystem",
+      "role": "Schema migrations run on boot, before the process begins serving traffic."
+    },
+    {
+      "id": "dep-postgres",
+      "tier": "deps",
+      "label": "Postgres",
+      "kind": "datastore",
+      "role": "The single relational database; its state is inferred from the app’s own database health field."
+    },
+    {
+      "id": "dep-clerk",
+      "tier": "deps",
+      "label": "Clerk",
+      "kind": "identity",
+      "role": "Hosted identity: sessions, sign-in, and webhook signature verification."
+    },
+    {
+      "id": "dep-cloudflare",
+      "tier": "deps",
+      "label": "Cloudflare",
+      "kind": "cdn",
+      "role": "CDN, TLS and the bot gate in front of the origin; confirmed from the response headers."
+    },
+    {
+      "id": "dep-brevo",
+      "tier": "deps",
+      "label": "Brevo",
+      "kind": "email",
+      "role": "Email in and out over an HTTP API — there is no SMTP path anywhere in the app."
+    },
+    {
+      "id": "dep-gemini",
+      "tier": "deps",
+      "label": "Google Gemini",
+      "kind": "model-provider",
+      "role": "The default model provider; a user may bring a key for another provider instead."
+    },
+    {
+      "id": "dep-b2",
+      "tier": "deps",
+      "label": "Backblaze B2",
+      "kind": "object-store",
+      "role": "The off-site encrypted backup store, reached through a hand-rolled request signer."
+    },
+    {
+      "id": "dep-lemonsqueezy",
+      "tier": "deps",
+      "label": "Lemon Squeezy",
+      "kind": "payments",
+      "role": "Subscriptions and checkout, with a signed webhook back into the app."
+    },
+    {
+      "id": "dep-github",
+      "tier": "deps",
+      "label": "GitHub",
+      "kind": "integration",
+      "role": "Per-user tokens for repository tasks; the supervisor would also merge here, but it is off."
+    },
+    {
+      "id": "dep-discord",
+      "tier": "deps",
+      "label": "Discord",
+      "kind": "notify",
+      "role": "Operations alerts and waitlist hooks, sent as a chat-webhook payload."
+    },
+    {
+      "id": "dep-google",
+      "tier": "deps",
+      "label": "Google",
+      "kind": "integration",
+      "role": "OAuth plus a spreadsheet data source; per-user tokens are encrypted at rest."
+    },
+    {
+      "id": "dep-webpush",
+      "tier": "deps",
+      "label": "Web push",
+      "kind": "notify",
+      "role": "VAPID browser notifications, delivered through each browser vendor’s push service."
+    },
+    {
+      "id": "dep-finnhub",
+      "tier": "deps",
+      "label": "Finnhub",
+      "kind": "market-data",
+      "role": "Primary stock quotes for any task that names a ticker."
+    },
+    {
+      "id": "dep-twelvedata",
+      "tier": "deps",
+      "label": "Twelve Data",
+      "kind": "market-data",
+      "role": "Failover stock quotes, used when the primary rate-limits or errors."
+    },
+    {
+      "id": "dep-coingecko",
+      "tier": "deps",
+      "label": "CoinGecko",
+      "kind": "market-data",
+      "role": "Crypto prices from a keyless public API, so it has to be paced."
+    },
+    {
+      "id": "job-weekly-digest",
+      "tier": "jobs",
+      "label": "Weekly digests",
+      "kind": "cron",
+      "role": "Fires once a week to send every account its weekly digest. Leader-elected."
+    },
+    {
+      "id": "job-daily-digest",
+      "tier": "jobs",
+      "label": "Daily digest sweep",
+      "kind": "cron",
+      "role": "Runs every hour and sends each account its daily digest at that account’s local hour."
+    },
+    {
+      "id": "job-backup-nightly",
+      "tier": "jobs",
+      "label": "Nightly backup",
+      "kind": "cron",
+      "role": "Takes the nightly encrypted snapshot and uploads it off-site. Leader-elected."
+    },
+    {
+      "id": "job-backup-freshness",
+      "tier": "jobs",
+      "label": "Backup freshness",
+      "kind": "cron",
+      "role": "Alerts every morning if the newest backup is more than 48 hours old."
+    },
+    {
+      "id": "job-reconciler",
+      "tier": "jobs",
+      "label": "Task reconciler",
+      "kind": "interval",
+      "role": "Every 30 seconds, reconciles what should be scheduled against what actually is."
+    },
+    {
+      "id": "job-history-prune",
+      "tier": "jobs",
+      "label": "History prune",
+      "kind": "interval",
+      "role": "Once a day, trims stored run history. Leader-elected."
+    },
+    {
+      "id": "job-health-monitor",
+      "tier": "jobs",
+      "label": "Health monitor",
+      "kind": "interval",
+      "role": "Every minute, writes the incident rows the public status endpoint reads back."
+    },
+    {
+      "id": "job-supervisor",
+      "tier": "jobs",
+      "label": "Supervisor sweep",
+      "kind": "cron-disabled",
+      "role": "Registered in the code but never started — shown as what would run, not as armed."
+    },
+    {
+      "id": "job-user-tasks",
+      "tier": "jobs",
+      "label": "Per-user schedules",
+      "kind": "cron-dynamic",
+      "role": "Every user’s own task schedules, registered at runtime in that user’s own timezone."
+    },
+    {
+      "id": "loc-checkout",
+      "tier": "local",
+      "label": "Local checkout",
+      "kind": "workstation",
+      "role": "The working copy on Owen’s machine; the map compares its commit with what production is serving."
+    },
+    {
+      "id": "loc-devserver",
+      "tier": "local",
+      "label": "Local dev server",
+      "kind": "workstation",
+      "role": "The local server that has to mirror production exactly, minus the change being built."
+    },
+    {
+      "id": "loc-searchindex",
+      "tier": "local",
+      "label": "Help corpus",
+      "kind": "workstation",
+      "role": "The search index the help assistant answers from; it goes stale the moment a page is edited."
+    },
+    {
+      "id": "loc-autopilot",
+      "tier": "local",
+      "label": "Autopilot",
+      "kind": "workstation",
+      "role": "A worker/reviewer/watchdog loop, held on manual hold; the real stop is its disabled scheduled tasks."
+    },
+    {
+      "id": "loc-backups-local",
+      "tier": "local",
+      "label": "Local snapshots",
+      "kind": "workstation",
+      "role": "Snapshot files on disk, checked by timestamp only — their contents are never read."
+    },
+    {
+      "id": "loc-changelog",
+      "tier": "local",
+      "label": "Changelog",
+      "kind": "workstation",
+      "role": "The public release log, checked for how many commits have landed since its newest entry."
+    }
+  ],
+  "edges": [
+    {
+      "from": "dep-cloudflare",
+      "to": "edge-domain",
+      "label": "serves"
+    },
+    {
+      "from": "edge-turnstile",
+      "to": "dep-cloudflare",
+      "label": "uses"
+    },
+    {
+      "from": "edge-domain",
+      "to": "rt-railway",
+      "label": "serves"
+    },
+    {
+      "from": "edge-launchgate",
+      "to": "app-boot",
+      "label": "uses"
+    },
+    {
+      "from": "rt-railway",
+      "to": "app-boot",
+      "label": "runs"
+    },
+    {
+      "from": "rt-railway",
+      "to": "rt-leadership",
+      "label": "runs"
+    },
+    {
+      "from": "rt-leadership",
+      "to": "dep-postgres",
+      "label": "uses"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-migrations",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-database",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-scheduler",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-webhooks",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-auth",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-dashboard",
+      "label": "runs"
+    },
+    {
+      "from": "app-auth",
+      "to": "app-authkeypair",
+      "label": "uses"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-runs",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-digests",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-help",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-billing",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-inbound",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-backups",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-supervisor",
+      "label": "runs"
+    },
+    {
+      "from": "app-boot",
+      "to": "app-console",
+      "label": "runs"
+    },
+    {
+      "from": "app-database",
+      "to": "dep-postgres",
+      "label": "stores"
+    },
+    {
+      "from": "app-migrations",
+      "to": "dep-postgres",
+      "label": "stores"
+    },
+    {
+      "from": "app-auth",
+      "to": "dep-clerk",
+      "label": "uses"
+    },
+    {
+      "from": "app-authkeypair",
+      "to": "dep-clerk",
+      "label": "uses"
+    },
+    {
+      "from": "app-runs",
+      "to": "dep-gemini",
+      "label": "uses"
+    },
+    {
+      "from": "app-runs",
+      "to": "dep-google",
+      "label": "uses"
+    },
+    {
+      "from": "app-runs",
+      "to": "dep-github",
+      "label": "uses"
+    },
+    {
+      "from": "app-runs",
+      "to": "dep-finnhub",
+      "label": "uses"
+    },
+    {
+      "from": "app-runs",
+      "to": "dep-twelvedata",
+      "label": "uses"
+    },
+    {
+      "from": "app-runs",
+      "to": "dep-coingecko",
+      "label": "uses"
+    },
+    {
+      "from": "app-digests",
+      "to": "dep-brevo",
+      "label": "notifies"
+    },
+    {
+      "from": "app-digests",
+      "to": "dep-webpush",
+      "label": "notifies"
+    },
+    {
+      "from": "app-inbound",
+      "to": "dep-brevo",
+      "label": "uses"
+    },
+    {
+      "from": "app-backups",
+      "to": "dep-b2",
+      "label": "stores"
+    },
+    {
+      "from": "app-billing",
+      "to": "dep-lemonsqueezy",
+      "label": "uses"
+    },
+    {
+      "from": "app-supervisor",
+      "to": "dep-github",
+      "label": "uses"
+    },
+    {
+      "from": "app-webhooks",
+      "to": "dep-discord",
+      "label": "notifies"
+    },
+    {
+      "from": "app-webhooks",
+      "to": "dep-clerk",
+      "label": "uses"
+    },
+    {
+      "from": "app-webhooks",
+      "to": "dep-lemonsqueezy",
+      "label": "uses"
+    },
+    {
+      "from": "app-help",
+      "to": "loc-searchindex",
+      "label": "uses"
+    },
+    {
+      "from": "app-scheduler",
+      "to": "job-weekly-digest",
+      "label": "schedules"
+    },
+    {
+      "from": "app-scheduler",
+      "to": "job-daily-digest",
+      "label": "schedules"
+    },
+    {
+      "from": "app-scheduler",
+      "to": "job-backup-nightly",
+      "label": "schedules"
+    },
+    {
+      "from": "app-scheduler",
+      "to": "job-backup-freshness",
+      "label": "schedules"
+    },
+    {
+      "from": "app-scheduler",
+      "to": "job-reconciler",
+      "label": "schedules"
+    },
+    {
+      "from": "app-scheduler",
+      "to": "job-history-prune",
+      "label": "schedules"
+    },
+    {
+      "from": "app-scheduler",
+      "to": "job-user-tasks",
+      "label": "schedules"
+    },
+    {
+      "from": "app-boot",
+      "to": "job-health-monitor",
+      "label": "schedules"
+    },
+    {
+      "from": "app-supervisor",
+      "to": "job-supervisor",
+      "label": "schedules"
+    },
+    {
+      "from": "job-weekly-digest",
+      "to": "app-digests",
+      "label": "runs"
+    },
+    {
+      "from": "job-daily-digest",
+      "to": "app-digests",
+      "label": "runs"
+    },
+    {
+      "from": "job-backup-nightly",
+      "to": "app-backups",
+      "label": "runs"
+    },
+    {
+      "from": "job-backup-freshness",
+      "to": "app-backups",
+      "label": "runs"
+    },
+    {
+      "from": "job-user-tasks",
+      "to": "app-runs",
+      "label": "runs"
+    },
+    {
+      "from": "job-health-monitor",
+      "to": "dep-postgres",
+      "label": "stores"
+    },
+    {
+      "from": "loc-checkout",
+      "to": "rt-railway",
+      "label": "deploys"
+    },
+    {
+      "from": "loc-changelog",
+      "to": "loc-checkout",
+      "label": "uses"
+    },
+    {
+      "from": "loc-devserver",
+      "to": "loc-checkout",
+      "label": "runs"
+    },
+    {
+      "from": "loc-backups-local",
+      "to": "dep-b2",
+      "label": "stores"
+    }
+  ]
+}

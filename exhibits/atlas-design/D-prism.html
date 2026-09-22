@@ -1,0 +1,1469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas — you describe a task once, Atlas keeps doing it</title>
+<meta name="description" content="Atlas is AI task automation. Say what you want and when you want it in one sentence. Atlas runs it on schedule, grades the answer before it sends, and emails you the result.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&family=JetBrains+Mono:wght@400..600&display=swap">
+<script>
+/* Restore theme before first paint. localStorage throws on some file:// origins. */
+try{ if(localStorage.getItem('atlas-theme')==='dusk') document.documentElement.setAttribute('data-theme','dusk'); }catch(e){}
+</script>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   ATLAS — DIRECTION D · PRISM, rebuilt toward the reference.
+   One rendered form, a nav that detaches into an island, and a great deal of air.
+   TOKENS FIRST. Nothing below this block invents a value.
+   Contrast figures are measured sRGB ratios against the stated ground.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  /* ── 1 · GROUND — cool, bright, near-neutral. The page reads light. ────── */
+  --bg:         #F4F6FA;   /* page ground              L .9205 */
+  --bg-sink:    #EAEEF6;   /* recessed band            L .8626 */
+  --surface:    #FFFFFF;   /* raised plane             L 1.000 */
+  --surface-2:  #FAFBFD;   /* barely-raised plane      L .9662 */
+  --line:       #D9DFEA;   /* hairline                          */
+  --line-soft:  #E7EBF3;   /* quieter hairline                  */
+
+  /* ── 2 · INK — four weights. Body copy never goes lighter than --ink-3. ── */
+  --ink:    #0B0E1A;   /* 17.6:1 on --bg · 13.8:1 on the darkest hero sky */
+  --ink-2:  #333A4E;   /* 10.5:1 on --bg ·  8.2:1 on the darkest hero sky */
+  --ink-3:  #5B6478;   /*  5.5:1 on --bg — body only on --bg / --surface   */
+  --ink-4:  #949CAE;   /*  decorative rules and ticks. Never body copy.    */
+
+  /* ── 3 · RENDERED DEEP — the material of the hero form and the close.
+     Lit darkness, not UI darkness: chromatic, gradient, photographed.      */
+  --deep:      #17132A;
+  --deep-2:    #241C40;
+  --deep-ink:  #F2EFFA;   /* 15.9:1 on --deep */
+  --deep-ink-2:#B9B2D4;   /*  8.9:1 on --deep */
+  --deep-line: rgba(242,239,250,.16);
+
+  /* ── 4 · SPECTRUM — accent as split light, not as paint. ──────────────── */
+  --acc:       #4436E8;   /*  6.6:1 as text on --bg · white on it 7.2:1 */
+  --acc-press: #3527C4;
+  --acc-soft:  #ECEAFE;
+  --sp-blu:    #1E4FE0;
+  --sp-vio:    #6B2FE8;
+  --sp-mag:    #A32BC4;
+  --sp-amb:    #B8452A;
+  --sp-cyn:    #0E8FA8;
+  --sp-grn:    #17795E;
+  --spectrum:  linear-gradient(95deg,var(--sp-blu) 0%,var(--sp-vio) 36%,var(--sp-mag) 66%,var(--sp-amb) 100%);
+
+  /* ── 5 · TYPE ──────────────────────────────────────────────────────────── */
+  --font: "Manrope","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono: "JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --t-micro: .6875rem;
+  --t-xs:    .8125rem;
+  --t-sm:    .9375rem;
+  --t-base:  1.0625rem;
+  --t-md:    clamp(1.0625rem,1rem + .3vw,1.1875rem);
+  --t-lg:    clamp(1.25rem,1.08rem + .7vw,1.6rem);
+  --t-xl:    clamp(1.75rem,1.35rem + 1.7vw,2.6rem);
+  --t-2xl:   clamp(2.1rem,1.5rem + 2.6vw,3.5rem);
+  --t-hero:  clamp(2.4rem,1.5rem + 3.6vw,4.4rem);
+  --lh-tight: .99;
+  --lh-head: 1.08;
+  --lh-body: 1.62;
+  --tr-hero: -.035em;
+  --tr-head: -.025em;
+  --tr-micro: .13em;
+
+  /* ── 6 · SPACE ─────────────────────────────────────────────────────────── */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 24px;
+  --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px; --s10: 128px;
+  --band:  clamp(72px,9vw,136px);
+  --wrap:  1140px;
+  --gutter: clamp(20px,4vw,40px);
+  --measure: 34rem;
+
+  /* ── 7 · EDGE ──────────────────────────────────────────────────────────── */
+  --r-xs: 6px; --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+  --r-pill: 999px;
+  --hair: 1px solid var(--line);
+  --hair-soft: 1px solid var(--line-soft);
+
+  /* ── 8 · ELEVATION — three rungs, used nowhere else. ───────────────────── */
+  --e1: 0 1px 1px rgba(14,18,38,.04), 0 2px 6px -2px rgba(14,18,38,.06);
+  --e2: 0 1px 1px rgba(14,18,38,.05), 0 8px 22px -10px rgba(14,18,38,.16);
+  --e3: 0 1px 1px rgba(14,18,38,.05), 0 10px 28px -12px rgba(14,18,38,.20), 0 26px 56px -28px rgba(14,18,38,.28);
+
+  /* ── 9 · MOTION ────────────────────────────────────────────────────────── */
+  --dur-nav: 560ms;
+  --dur-ui:  180ms;
+  --ease-nav: cubic-bezier(.22,.68,.30,1);
+  --ease-ui:  cubic-bezier(.3,.7,.4,1);
+
+  /* ── 10 · NAV ISLAND — the flush state. Every value here is interpolated
+     to its counterpart in .nav.is-detached; nothing swaps. ──────────────── */
+  --nav-h:     68px;
+  --nav-pad-y: 0px;
+  --nav-pad-x: 0px;
+  --nav-max:   2600px;
+  --nav-r:     0px;
+  --nav-in-x:  var(--gutter);
+  --nav-in-y:  15px;
+  --nav-bg:    rgba(255,255,255,0);
+  --nav-bd:    rgba(255,255,255,0);
+  --nav-blur:  blur(0px) saturate(100%);
+  --nav-sh:    0 1px 1px rgba(14,18,38,0), 0 10px 28px -12px rgba(14,18,38,0), 0 26px 56px -28px rgba(14,18,38,0);
+  --nav-rule:  rgba(11,14,26,0);
+
+  --focus-w: 2.5px;
+  --focus-off: 2px;
+}
+
+/* ── DUSK — the second state of the nav's toggle.
+   This is *rendered* dark: chromatic indigo lit from above, warm highlights.
+   It is deliberately not a neutral #111 developer theme — no grey panels,
+   no low chroma, no syntax-highlight accents.                              */
+:root[data-theme="dusk"]{
+  color-scheme: dark;
+  --bg:         #191430;
+  --bg-sink:    #130F26;
+  --surface:    #241D42;
+  --surface-2:  #1E1837;
+  --line:       #3E3465;
+  --line-soft:  #2F2751;
+  --ink:        #F5F2FF;   /* 15.1:1 on --bg */
+  --ink-2:      #CFC8EC;   /* 10.2:1 on --bg */
+  --ink-3:      #ADA5D0;   /*  7.0:1 on --bg */
+  --ink-4:      #7C7499;
+  --deep:       #100C22;
+  --deep-2:     #1C1638;
+  --acc:        #A79BFF;   /*  7.4:1 as text on --bg · --deep on it 8.9:1 */
+  --acc-press:  #C3B9FF;
+  --acc-soft:   #2A2350;
+  --sp-blu:     #7FA6FF;
+  --sp-vio:     #B294FF;
+  --sp-mag:     #F09BE0;
+  --sp-amb:     #FFB27A;
+  --sp-cyn:     #7FD8E8;
+  --sp-grn:     #7EDCB4;
+  --e1: 0 1px 1px rgba(0,0,0,.30), 0 2px 8px -2px rgba(0,0,0,.40);
+  --e2: 0 1px 1px rgba(0,0,0,.35), 0 10px 26px -12px rgba(0,0,0,.60);
+  --e3: 0 1px 1px rgba(0,0,0,.35), 0 12px 30px -14px rgba(0,0,0,.60), 0 30px 64px -30px rgba(0,0,0,.75);
+  --nav-bg:   rgba(38,30,68,0);
+  --nav-bd:   rgba(190,178,255,0);
+}
+
+/* ═══════════ RESET / BASE ═══════════ */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--font); font-size:var(--t-base); line-height:var(--lh-body);
+  font-weight:400; letter-spacing:-.006em;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+:root[data-theme="dusk"] body{
+  background:
+    radial-gradient(120% 60% at 50% -12%, #2E2456 0%, rgba(46,36,86,0) 62%),
+    radial-gradient(70% 40% at 88% 6%, #3B2A5E 0%, rgba(59,42,94,0) 70%),
+    var(--bg);
+  background-attachment: fixed;
+}
+h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:var(--tr-head); line-height:var(--lh-head)}
+p{margin:0}
+a{color:inherit}
+img,svg,canvas{display:block; max-width:100%}
+ul,ol{margin:0; padding:0; list-style:none}
+button,input{font:inherit; color:inherit}
+table{border-collapse:collapse; width:100%}
+:focus-visible{outline:var(--focus-w) solid var(--acc); outline-offset:var(--focus-off)}
+.close :focus-visible{outline-color:var(--deep-ink)}
+::selection{background:var(--acc); color:#fff}
+
+.wrap{width:100%; max-width:var(--wrap); margin-inline:auto; padding-inline:var(--gutter)}
+.skip{position:absolute; left:-9999px; top:0; z-index:200; background:var(--surface); color:var(--ink);
+  padding:var(--s3) var(--s5); border-radius:var(--r-sm); box-shadow:var(--e2)}
+.skip:focus{left:var(--s4); top:var(--s4)}
+
+/* ═══════════ SHARED PIECES ═══════════ */
+.eyebrow{
+  font-family:var(--mono); font-size:var(--t-micro); font-weight:500;
+  letter-spacing:var(--tr-micro); text-transform:uppercase; color:var(--ink-3);
+  display:flex; align-items:center; gap:var(--s3);
+}
+.eyebrow::before{content:""; width:18px; height:1px; background:var(--ink-4); flex:none}
+.lede{font-size:var(--t-md); line-height:var(--lh-body); color:var(--ink-2); max-width:var(--measure)}
+.note{font-size:var(--t-sm); line-height:1.55; color:var(--ink-3)}
+.mono{font-family:var(--mono); font-variant-ligatures:none}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--s2);
+  height:52px; padding-inline:var(--s6); border-radius:var(--r-pill);
+  font-size:var(--t-sm); font-weight:600; letter-spacing:-.01em; text-decoration:none;
+  border:1px solid transparent; cursor:pointer; white-space:nowrap;
+  transition:background-color var(--dur-ui) var(--ease-ui), color var(--dur-ui) var(--ease-ui),
+             border-color var(--dur-ui) var(--ease-ui), box-shadow var(--dur-ui) var(--ease-ui),
+             transform var(--dur-ui) var(--ease-ui);
+}
+.btn--primary{background:var(--acc); color:#fff; box-shadow:var(--e2)}
+:root[data-theme="dusk"] .btn--primary{color:var(--deep)}
+.btn--primary:hover{background:var(--acc-press); transform:translateY(-1px)}
+.btn--ghost{background:transparent; color:var(--ink); border-color:var(--line)}
+.btn--ghost:hover{background:var(--surface); border-color:var(--ink-4)}
+.btn--sm{height:40px; padding-inline:var(--s5); font-size:var(--t-xs)}
+.btn--onDeep{background:var(--deep-ink); color:var(--deep); border-color:transparent}
+.btn--onDeep:hover{background:#fff; transform:translateY(-1px)}
+@media (prefers-reduced-motion:reduce){ .btn:hover{transform:none} }
+
+.tag{
+  display:inline-flex; align-items:center; gap:var(--s2);
+  font-family:var(--mono); font-size:var(--t-micro); font-weight:500; letter-spacing:.06em;
+  text-transform:uppercase; padding:5px 10px; border-radius:var(--r-pill);
+  border:1px solid var(--line); color:var(--ink-2); background:var(--surface);
+}
+
+/* ═══════════ SECTION RHYTHM — the one structural rule.
+   Every section: a mono index + short label, then a display head, then a
+   lede at one measure, then the body. Same spine, top to bottom.  ════════ */
+.band{padding-block:var(--band); position:relative}
+.band--sink{background:var(--bg-sink)}
+.band--surface{background:var(--surface)}
+.band__head{max-width:var(--wrap); margin-inline:auto; margin-bottom:clamp(40px,5vw,72px)}
+.band__idx{
+  font-family:var(--mono); font-size:var(--t-micro); font-weight:500;
+  letter-spacing:var(--tr-micro); text-transform:uppercase; color:var(--ink-3);
+  display:flex; align-items:baseline; gap:var(--s4); margin-bottom:var(--s5);
+}
+.band__idx b{color:var(--ink); font-weight:600}
+.band__idx span{flex:1; height:1px; background:var(--line); transform:translateY(-4px)}
+.band__h{font-size:var(--t-2xl); max-width:20ch}
+.band__sub{margin-top:var(--s5); font-size:var(--t-md); line-height:var(--lh-body); color:var(--ink-2); max-width:var(--measure)}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   01 · NAV — flush at rest, an island once you scroll.
+   One object changing state: padding, width, radius, border, shadow and
+   backdrop-blur all interpolate between the two token sets. No element is
+   swapped, nothing is duplicated.
+   NOTE: neither .nav nor .nav__bar may take opacity/filter/transform/
+   will-change — any of those creates a new backdrop root and backdrop-filter
+   silently renders nothing.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.nav{
+  position:fixed; top:0; left:0; right:0; z-index:60;
+  display:flex; justify-content:center;
+  padding:var(--nav-pad-y) var(--nav-pad-x);
+  transition:padding var(--dur-nav) var(--ease-nav);
+}
+.nav__bar{
+  width:100%; max-width:var(--nav-max);
+  display:flex; align-items:center; gap:var(--s5);
+  padding:var(--nav-in-y) var(--nav-in-x);
+  border-radius:var(--nav-r);
+  background:var(--nav-bg);
+  border:1px solid var(--nav-bd);
+  box-shadow:var(--nav-sh);
+  -webkit-backdrop-filter:var(--nav-blur);
+  backdrop-filter:var(--nav-blur);
+  transition:
+    max-width var(--dur-nav) var(--ease-nav),
+    padding var(--dur-nav) var(--ease-nav),
+    border-radius var(--dur-nav) var(--ease-nav),
+    background-color var(--dur-nav) var(--ease-nav),
+    border-color var(--dur-nav) var(--ease-nav),
+    box-shadow var(--dur-nav) var(--ease-nav),
+    -webkit-backdrop-filter var(--dur-nav) var(--ease-nav),
+    backdrop-filter var(--dur-nav) var(--ease-nav);
+}
+/* the hairline the flush nav sits on; it fades out as the island lifts away */
+.nav::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
+  background:var(--nav-rule); transition:background-color var(--dur-nav) var(--ease-nav);
+}
+.nav.is-detached{
+  --nav-pad-y:14px;
+  --nav-pad-x:14px;
+  --nav-max:1120px;
+  --nav-r:var(--r-pill);
+  --nav-in-x:10px;
+  --nav-in-y:9px;
+  --nav-bg:rgba(255,255,255,.68);
+  --nav-bd:rgba(255,255,255,.62);
+  --nav-blur:blur(20px) saturate(180%);
+  --nav-sh:0 1px 1px rgba(14,18,38,.05), 0 10px 28px -12px rgba(14,18,38,.22), 0 26px 56px -28px rgba(14,18,38,.30);
+  --nav-rule:rgba(11,14,26,0);
+}
+:root[data-theme="dusk"] .nav.is-detached{
+  --nav-bg:rgba(46,37,84,.62);
+  --nav-bd:rgba(190,178,255,.20);
+}
+.nav__brand{display:flex; align-items:center; gap:10px; text-decoration:none; padding:6px 8px; border-radius:var(--r-sm); flex:none}
+.nav__mark{width:22px; height:22px; flex:none}
+.nav__word{font-size:var(--t-sm); font-weight:700; letter-spacing:-.02em; color:var(--ink)}
+.nav__links{display:flex; align-items:center; gap:2px; margin-left:var(--s4)}
+.nav__links a{
+  text-decoration:none; color:var(--ink-2); font-size:var(--t-xs); font-weight:500;
+  padding:8px 12px; border-radius:var(--r-pill);
+  transition:color var(--dur-ui) var(--ease-ui), background-color var(--dur-ui) var(--ease-ui);
+}
+.nav__links a:hover{color:var(--ink); background:rgba(11,14,26,.05)}
+:root[data-theme="dusk"] .nav__links a:hover{background:rgba(255,255,255,.08)}
+.nav__spacer{flex:1}
+.nav__toggle{
+  width:36px; height:36px; flex:none; display:grid; place-items:center;
+  border-radius:var(--r-pill); border:1px solid var(--line); background:transparent;
+  cursor:pointer; color:var(--ink-2);
+  transition:color var(--dur-ui) var(--ease-ui), border-color var(--dur-ui) var(--ease-ui), background-color var(--dur-ui) var(--ease-ui);
+}
+.nav__toggle:hover{color:var(--ink); border-color:var(--ink-4)}
+.nav__toggle svg{width:16px; height:16px}
+.nav__toggle .moon{display:none}
+:root[data-theme="dusk"] .nav__toggle .sun{display:none}
+:root[data-theme="dusk"] .nav__toggle .moon{display:block}
+@media (max-width:760px){
+  .nav__links{display:none}
+  .nav{--nav-in-y:12px}
+  .nav.is-detached{--nav-in-y:8px; --nav-pad-x:10px; --nav-pad-y:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  .nav,.nav__bar,.nav::after{transition:none}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   02 · HERO — one rendered form under a pale sky, and nothing else.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hero{
+  position:relative; min-height:100svh; display:flex; flex-direction:column;
+  padding-top:calc(var(--nav-h) + clamp(20px,4vh,44px));
+  padding-bottom:clamp(40px,7vh,80px);
+  overflow:hidden;
+}
+.hero__fallback{
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(90% 46% at 22% 12%, rgba(255,248,236,.92) 0%, rgba(255,248,236,0) 62%),
+    linear-gradient(180deg,#D5DBEB 0%,#E4E8F1 34%,#F1F2F5 58%,#B9B3CB 65%,#4A3F6B 72%,#2A2148 83%,#17132A 100%);
+}
+.hero__canvas{position:absolute; inset:0; z-index:1; width:100%; height:100%}
+.hero__inner{position:relative; z-index:2; width:100%}
+.hero__grid{max-width:var(--wrap); margin-inline:auto; padding-inline:var(--gutter)}
+.hero__eyebrow{
+  display:inline-flex; align-items:center; gap:var(--s3);
+  font-family:var(--mono); font-size:var(--t-micro); font-weight:500;
+  letter-spacing:var(--tr-micro); text-transform:uppercase; color:var(--ink-2);
+  padding:7px 14px 7px 12px; border-radius:var(--r-pill);
+  background:rgba(255,255,255,.55); border:1px solid rgba(255,255,255,.7);
+  -webkit-backdrop-filter:blur(10px) saturate(150%); backdrop-filter:blur(10px) saturate(150%);
+}
+:root[data-theme="dusk"] .hero__eyebrow{background:rgba(40,32,72,.5); border-color:rgba(190,178,255,.22)}
+.hero__eyebrow i{width:7px; height:7px; border-radius:50%; background:var(--acc); flex:none}
+.hero__h1{
+  margin-top:clamp(20px,3.2vh,32px);
+  font-size:var(--t-hero); font-weight:500;
+  letter-spacing:var(--tr-hero); line-height:var(--lh-tight);
+  max-width:20ch;
+}
+.h1-acc{color:var(--sp-vio)}
+:root[data-theme="dusk"] .h1-acc{color:var(--acc)}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .h1-acc{
+    background:var(--spectrum);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent; -webkit-text-fill-color:transparent;
+  }
+  /* on the dusk sky the ink-weight spectrum is unreadable; this one is lit */
+  :root[data-theme="dusk"] .h1-acc{
+    background:linear-gradient(95deg,#8FB4FF 0%,#C0A5FF 36%,#F4A6E4 66%,#FFC28E 100%);
+    -webkit-background-clip:text; background-clip:text;
+  }
+}
+.hero__sub{
+  margin-top:clamp(16px,2.4vh,26px); max-width:38rem;
+  font-size:var(--t-md); line-height:1.55; color:var(--ink-2); font-weight:500;
+}
+.hero__cta{display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:clamp(22px,3vh,34px)}
+.hero__trust{
+  margin-top:var(--s5); font-family:var(--mono); font-size:var(--t-micro);
+  letter-spacing:var(--tr-micro); text-transform:uppercase; color:var(--ink-2);
+}
+@media (max-width:480px){
+  .hero__eyebrow{font-size:10px; letter-spacing:.08em; padding:6px 12px 6px 10px}
+}
+@media (max-width:560px){
+  .hero__cta .btn{flex:1 1 100%}
+  .hero__h1{max-width:none}
+  .hero{padding-top:calc(var(--nav-h) + 14px); padding-bottom:32px}
+  .hero__trust{margin-top:var(--s4)}
+}
+
+/* ═══════════ 03 · THE ASK — a list, not a card grid. ═══════════ */
+.ask__list{max-width:var(--wrap); margin-inline:auto; border-top:var(--hair)}
+.ask__row{
+  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:var(--s5);
+  padding:clamp(18px,2.4vw,26px) var(--s2); border-bottom:var(--hair);
+  transition:background-color var(--dur-ui) var(--ease-ui), padding-left var(--dur-ui) var(--ease-ui);
+}
+.ask__row:hover,.ask__row:focus-within{background:var(--surface); padding-left:var(--s5)}
+.ask__n{font-family:var(--mono); font-size:var(--t-micro); color:var(--ink-4); letter-spacing:.08em}
+.ask__t{font-size:var(--t-lg); font-weight:500; letter-spacing:-.02em; color:var(--ink); line-height:1.25}
+.ask__wl{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.06em; color:var(--ink-3); white-space:nowrap}
+.ask__wl i{display:inline-block; width:26px; height:6px; border-radius:3px; margin-right:8px; vertical-align:middle; background:var(--c)}
+.ask__pull{
+  margin:clamp(48px,6vw,84px) 0 0;
+  font-size:var(--t-xl); font-weight:500; letter-spacing:var(--tr-head); line-height:1.18;
+  color:var(--ink); max-width:22ch;
+}
+.ask__foot{max-width:var(--wrap); margin:var(--s6) auto 0}
+@media (max-width:640px){
+  .ask__row{grid-template-columns:auto 1fr; gap:var(--s4); row-gap:var(--s2)}
+  .ask__wl{grid-column:2; justify-self:start}
+}
+
+/* ═══════════ 04 · HOW IT WORKS — three beats. ═══════════ */
+.beats{max-width:var(--wrap); margin-inline:auto; display:grid; gap:clamp(48px,6vw,84px)}
+.beat{display:grid; grid-template-columns:minmax(0,7rem) minmax(0,1fr); gap:clamp(20px,3vw,48px); align-items:start}
+.beat__n{
+  font-family:var(--mono); font-size:var(--t-micro); letter-spacing:var(--tr-micro);
+  text-transform:uppercase; color:var(--ink-3); padding-top:8px;
+  border-top:2px solid var(--ink); display:block;
+}
+.beat__h{font-size:var(--t-xl); font-weight:500; letter-spacing:var(--tr-head)}
+.beat__p{margin-top:var(--s4); font-size:var(--t-base); line-height:var(--lh-body); color:var(--ink-2); max-width:var(--measure)}
+@media (max-width:720px){ .beat{grid-template-columns:1fr; gap:var(--s5)} }
+
+/* the sentence, split — the product's whole idea, drawn once */
+.sent{
+  margin-top:var(--s6); padding:clamp(20px,3vw,32px);
+  background:var(--surface); border:var(--hair); border-radius:var(--r-lg); box-shadow:var(--e1);
+}
+.sent__line{font-size:var(--t-lg); line-height:1.42; font-weight:500; letter-spacing:-.02em}
+.seg{position:relative; padding:2px 6px; border-radius:var(--r-xs); box-decoration-break:clone; -webkit-box-decoration-break:clone}
+.seg--sched{background:rgba(30,79,224,.12); color:var(--sp-blu); top:-2px}
+.seg--prompt{background:rgba(163,43,196,.10); color:var(--sp-mag); top:2px}
+:root[data-theme="dusk"] .seg--sched{background:rgba(127,166,255,.16)}
+:root[data-theme="dusk"] .seg--prompt{background:rgba(240,155,224,.14)}
+.sent__out{display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:var(--s5); padding-top:var(--s5); border-top:var(--hair-soft)}
+.sent__out b{font-weight:600; color:var(--ink)}
+.sent__cap{margin-top:var(--s4)}
+
+/* schedule frequencies */
+.freq{display:flex; flex-wrap:wrap; gap:var(--s2); margin-top:var(--s5)}
+.freq li{
+  font-family:var(--mono); font-size:var(--t-xs); letter-spacing:.02em;
+  padding:8px 14px; border-radius:var(--r-pill); border:var(--hair); background:var(--surface); color:var(--ink-2);
+}
+.freq li[data-pro]{border-style:dashed; color:var(--ink-3)}
+.freq li[data-pro]::after{content:"pro"; font-size:var(--t-micro); margin-left:8px; color:var(--acc); letter-spacing:.1em; text-transform:uppercase}
+
+/* the delivered email */
+.mail{
+  margin-top:var(--s6); background:var(--surface); border:var(--hair);
+  border-radius:var(--r-lg); box-shadow:var(--e2); overflow:hidden; max-width:40rem;
+}
+.mail__bar{display:flex; align-items:center; gap:var(--s2); padding:var(--s4) var(--s5); border-bottom:var(--hair-soft); background:var(--surface-2)}
+.mail__dot{width:8px; height:8px; border-radius:50%; background:var(--ink-4)}
+.mail__sub{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); margin-left:var(--s2)}
+.mail__body{padding:var(--s5); font-size:var(--t-base); line-height:1.62; color:var(--ink)}
+.mail__grade{
+  margin-top:var(--s4); padding-top:var(--s4); border-top:var(--hair-soft);
+  font-family:var(--mono); font-size:var(--t-xs); color:var(--sp-grn); display:flex; align-items:center; gap:var(--s2);
+}
+
+/* ═══════════ 05 · THE CHECK — the argument. ═══════════ */
+.check__quote{
+  margin:0 0 clamp(40px,5vw,68px);
+  font-size:var(--t-lg); line-height:1.5; font-weight:500; letter-spacing:-.018em;
+  color:var(--ink); max-width:44rem;
+}
+.gates{
+  max-width:var(--wrap); margin-inline:auto; position:relative;
+  padding:clamp(28px,4vw,44px) clamp(20px,3vw,36px);
+  background:var(--surface-2); border:var(--hair); border-radius:var(--r-xl);
+}
+.gates__grid{display:grid; grid-template-columns:repeat(6,1fr); gap:clamp(8px,1.4vw,18px)}
+.gate{position:relative; display:flex; flex-direction:column; gap:var(--s3); align-items:center; text-align:center}
+/* the plate: a thin pane of coloured glass, lit from the left edge */
+.gate__plate{
+  width:100%; height:clamp(84px,11vw,124px); border-radius:var(--r-sm);
+  background:
+    linear-gradient(102deg, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 38%),
+    linear-gradient(180deg, color-mix(in oklab, var(--c) 34%, transparent) 0%, color-mix(in oklab, var(--c) 12%, transparent) 100%);
+  border:1px solid color-mix(in oklab, var(--c) 38%, transparent);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.5), var(--e1);
+  position:relative; overflow:hidden;
+}
+.gate__plate::after{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--c); opacity:.85;
+}
+.gate__name{font-family:var(--mono); font-size:var(--t-xs); font-weight:600; color:var(--ink); letter-spacing:.02em}
+.gate__d{font-size:var(--t-micro); line-height:1.4; color:var(--ink-3)}
+/* run A passes all six; run B is stopped at the fifth */
+.gate--stop .gate__plate{
+  background:
+    linear-gradient(102deg, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 38%),
+    linear-gradient(180deg, color-mix(in oklab, var(--c) 62%, transparent) 0%, color-mix(in oklab, var(--c) 34%, transparent) 100%);
+  border-color:color-mix(in oklab, var(--c) 70%, transparent);
+}
+.beamline{position:absolute; left:0; right:0; height:1px; pointer-events:none}
+.gates__rail{position:relative; height:74px; margin-top:clamp(20px,3vw,30px); border-top:var(--hair-soft); padding-top:var(--s5)}
+.runline{position:absolute; left:0; height:2px; border-radius:2px}
+.runline--a{top:14px; right:0; background:linear-gradient(90deg,var(--sp-blu),var(--sp-cyn) 60%,var(--sp-grn))}
+.runline--b{top:44px; width:74%; background:linear-gradient(90deg,var(--sp-blu),var(--sp-vio) 60%,var(--sp-amb))}
+.runline--b::after{
+  content:""; position:absolute; right:-2px; top:-9px; width:4px; height:20px; border-radius:2px; background:var(--sp-amb);
+}
+.runlab{position:absolute; font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2)}
+.runlab--a{top:22px; right:0; background:var(--surface-2); padding-left:8px}
+.runlab--b{top:52px; left:calc(74% + 10px); color:var(--sp-amb)}
+.runlab--a0{top:22px; left:0; background:var(--surface-2); padding-right:8px}
+.runlab--b0{top:52px; left:0; background:var(--surface-2); padding-right:8px}
+@media (max-width:760px){
+  .gates__grid{grid-template-columns:repeat(2,1fr)}
+  .gates__rail{display:none}
+  .gate__plate{height:64px}
+}
+.check__read{max-width:46rem; margin:clamp(28px,3.4vw,40px) 0 0}
+.strikes{
+  max-width:var(--wrap); margin:clamp(56px,7vw,96px) auto 0;
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:clamp(28px,4vw,64px); align-items:center;
+}
+@media (max-width:820px){ .strikes{grid-template-columns:1fr} }
+.wedges{display:flex; align-items:flex-end; gap:var(--s3)}
+.wedge{
+  flex:1; height:calc(52px + var(--i) * 26px); border-radius:var(--r-xs) var(--r-xs) 3px 3px;
+  background:linear-gradient(180deg, color-mix(in oklab, var(--sp-amb) calc(22% + var(--i)*26%), transparent), color-mix(in oklab, var(--sp-amb) calc(10% + var(--i)*22%), transparent));
+  border:1px solid color-mix(in oklab, var(--sp-amb) 40%, transparent);
+  position:relative;
+}
+.wedge b{position:absolute; left:0; right:0; bottom:-24px; text-align:center; font-family:var(--mono); font-size:var(--t-micro); color:var(--ink-3); font-weight:500}
+.wedge--stop{flex:0 0 10px; height:132px; background:var(--ink); border:none; border-radius:3px}
+.pause{
+  margin-top:var(--s7); padding:var(--s5); border-radius:var(--r-lg);
+  background:var(--surface); border:1px solid color-mix(in oklab, var(--sp-amb) 40%, var(--line)); box-shadow:var(--e1);
+}
+.pause__t{font-family:var(--mono); font-size:var(--t-xs); color:var(--ink); line-height:1.6}
+.pause__t b{color:var(--sp-amb); font-weight:600}
+.pause__btns{display:flex; gap:var(--s2); margin-top:var(--s4)}
+.pause__btns button{
+  font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.06em; text-transform:uppercase;
+  padding:8px 14px; border-radius:var(--r-pill); border:var(--hair); background:var(--surface-2); color:var(--ink-2); cursor:pointer;
+}
+.pause__btns button:hover{border-color:var(--ink-4); color:var(--ink)}
+
+/* ═══════════ 06 · PROOF ═══════════ */
+.figs{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:1px; background:var(--line)}
+@media (min-width:900px){ .figs{grid-template-columns:repeat(4,1fr)} .figs .fig:last-child{grid-column:span 2} }
+.fig{background:var(--bg); padding:var(--s5) var(--s4)}
+.band--surface .fig{background:var(--surface)}
+.fig b{display:block; font-size:clamp(1.5rem,1.1rem + 1.3vw,2.1rem); font-weight:600; letter-spacing:-.03em; color:var(--ink); line-height:1.1}
+.fig span{display:block; margin-top:var(--s2); font-size:var(--t-xs); line-height:1.4; color:var(--ink-3)}
+.quota{max-width:var(--wrap); margin:clamp(56px,7vw,88px) auto 0}
+.quota__bar{position:relative; height:56px; margin-top:var(--s5); border:var(--hair); border-radius:var(--r-sm); background:var(--surface); overflow:hidden}
+.quota__ticks{position:absolute; inset:0; background:repeating-linear-gradient(90deg, var(--line-soft) 0 1px, transparent 1px calc(100%/40))}
+.quota__used{
+  position:absolute; left:0; top:0; bottom:0; width:57.5%;
+  background:linear-gradient(90deg,var(--sp-blu),var(--sp-vio) 45%,var(--sp-mag) 78%,var(--sp-amb));
+}
+.quota__used::after{content:""; position:absolute; inset:0; background:repeating-linear-gradient(90deg, rgba(255,255,255,.75) 0 1px, transparent 1px calc(100%/40))}
+.quota__mark{position:absolute; left:57.5%; top:0; bottom:0; width:2px; background:var(--ink)}
+.quota__legend{display:flex; justify-content:space-between; margin-top:var(--s3); font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
+.log{max-width:var(--wrap); margin:clamp(56px,7vw,88px) auto 0}
+.log__strip{display:flex; align-items:flex-end; gap:clamp(4px,.8vw,10px); height:190px; margin-top:var(--s5); padding-bottom:var(--s6); border-bottom:var(--hair)}
+.run{
+  flex:1; min-width:0; height:var(--h); border-radius:var(--r-xs) var(--r-xs) 0 0; position:relative;
+  background:linear-gradient(180deg, color-mix(in oklab, var(--c) 70%, transparent), color-mix(in oklab, var(--c) 26%, transparent));
+  border:1px solid color-mix(in oklab, var(--c) 55%, transparent); border-bottom:none;
+  transition:transform var(--dur-ui) var(--ease-ui);
+}
+.run:hover{transform:translateY(-4px)}
+.run b{position:absolute; left:0; right:0; bottom:-40px; text-align:center; font-family:var(--mono); font-size:var(--t-micro); color:var(--ink-2); font-weight:500}
+.run b i{display:block; font-style:normal; color:var(--ink-4); font-size:9px; letter-spacing:.06em}
+.run--gap{background:none; border:1px dashed var(--line); border-bottom:none; height:52px}
+.log__meta{display:flex; flex-wrap:wrap; gap:var(--s2) var(--s4); margin-top:var(--s7); font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
+.log__meta b{color:var(--ink); font-weight:600}
+@media (max-width:640px){
+  .log__strip{height:150px}
+  .run b i{display:none}
+}
+@media (prefers-reduced-motion:reduce){ .run:hover{transform:none} }
+
+/* ═══════════ 07 · COMPARISON ═══════════ */
+.cmp{max-width:var(--wrap); margin-inline:auto; overflow-x:auto; -webkit-overflow-scrolling:touch}
+.cmp table{min-width:640px}
+.cmp caption{text-align:left; font-size:var(--t-sm); color:var(--ink-3); padding-bottom:var(--s4)}
+.cmp th,.cmp td{text-align:left; vertical-align:top; padding:var(--s5) var(--s4); border-bottom:var(--hair)}
+.cmp thead th{
+  font-family:var(--mono); font-size:var(--t-micro); letter-spacing:var(--tr-micro); text-transform:uppercase;
+  color:var(--ink-3); font-weight:500; border-bottom:2px solid var(--ink); padding-block:var(--s3)
+}
+.cmp tbody th{font-size:var(--t-sm); font-weight:600; color:var(--ink); width:26%}
+.cmp td{font-size:var(--t-sm); color:var(--ink-3); width:37%}
+.cmp td b{display:block; font-size:var(--t-base); font-weight:600; color:var(--ink); margin-bottom:6px; letter-spacing:-.015em}
+.verdict{display:inline-block; margin-top:var(--s2); font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.08em; text-transform:uppercase; padding:3px 9px; border-radius:var(--r-pill); border:1px solid currentColor}
+.verdict--lose{color:var(--sp-amb)}
+.verdict--draw{color:var(--ink-3)}
+.verdict--win{color:var(--sp-grn)}
+.absent{max-width:var(--wrap); margin:clamp(48px,6vw,72px) auto 0; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:clamp(24px,4vw,56px)}
+@media (max-width:820px){ .absent{grid-template-columns:1fr} }
+.absent ul{display:flex; flex-wrap:wrap; gap:var(--s2)}
+.absent li{
+  font-family:var(--mono); font-size:var(--t-xs); padding:8px 14px; border-radius:var(--r-pill);
+  border:1px dashed var(--line); color:var(--ink-3); text-decoration:line-through; text-decoration-color:var(--ink-4);
+}
+
+/* ═══════════ 08 · PRICING ═══════════ */
+.bill{display:inline-flex; padding:4px; border-radius:var(--r-pill); border:var(--hair); background:var(--surface); gap:2px; margin-top:var(--s5)}
+.bill button{
+  border:none; background:transparent; cursor:pointer; border-radius:var(--r-pill);
+  padding:9px 18px; font-size:var(--t-xs); font-weight:600; color:var(--ink-3);
+  transition:background-color var(--dur-ui) var(--ease-ui), color var(--dur-ui) var(--ease-ui);
+}
+.bill button[aria-pressed="true"]{background:var(--ink); color:var(--bg)}
+.plans{max-width:var(--wrap); margin-inline:auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:var(--s5)}
+.plan{
+  background:var(--surface); border:var(--hair); border-radius:var(--r-xl);
+  padding:clamp(24px,3vw,34px); display:flex; flex-direction:column; box-shadow:var(--e1);
+}
+.plan--pro{border-color:transparent; box-shadow:var(--e3), 0 0 0 1.5px var(--acc)}
+.plan__n{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:var(--tr-micro); text-transform:uppercase; color:var(--ink-3)}
+.plan__price{display:flex; align-items:baseline; gap:6px; margin-top:var(--s4)}
+.plan__price b{font-size:clamp(2.2rem,1.6rem + 1.8vw,2.9rem); font-weight:600; letter-spacing:-.04em; color:var(--ink); line-height:1}
+.plan__price span{font-size:var(--t-sm); color:var(--ink-3)}
+.plan__save{margin-top:var(--s2); font-size:var(--t-xs); color:var(--acc); font-weight:600; min-height:1.3em}
+.plan__note{margin-top:var(--s3); font-size:var(--t-xs); color:var(--ink-3)}
+.plan__list{margin-top:var(--s5); padding-top:var(--s5); border-top:var(--hair-soft); display:grid; gap:11px; align-content:start; flex:1}
+.plan--teams .plan__price b{font-size:var(--t-lg); letter-spacing:var(--tr-head)}
+.plan__list li{position:relative; padding-left:22px; font-size:var(--t-sm); color:var(--ink-2); line-height:1.5}
+.plan__list li::before{
+  content:""; position:absolute; left:0; top:.55em; width:9px; height:9px; border-radius:2px;
+  background:var(--spectrum); opacity:.9;
+}
+.plan--free .plan__list li::before{background:var(--ink-4); opacity:.65}
+.plan--teams .plan__list li::before{background:none; border:1px dashed var(--ink-4)}
+.plan__glass{margin-top:var(--s5); font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-4)}
+.plan .btn{margin-top:var(--s5); width:100%}
+.plan__foot{max-width:var(--wrap); margin:var(--s7) auto 0; display:grid; gap:var(--s3)}
+
+/* ═══════════ 09 · CLOSE — the rendered form returns. ═══════════ */
+.close{position:relative; overflow:hidden; padding-block:clamp(96px,13vw,180px); color:var(--deep-ink)}
+.close__fallback{position:absolute; inset:0; z-index:0;
+  background:linear-gradient(180deg,#0D0A1C 0%,#171130 42%,#2B1C3E 62%,#191233 82%,#0F0B1F 100%)}
+.close__canvas{position:absolute; inset:0; z-index:1; width:100%; height:100%}
+.close__inner{position:relative; z-index:2}
+.close__eyebrow{color:var(--deep-ink-2)}
+.close__eyebrow::before{background:var(--deep-ink-2)}
+.close__h{font-size:var(--t-2xl); font-weight:500; letter-spacing:var(--tr-hero); color:var(--deep-ink); max-width:16ch; margin-top:var(--s5)}
+.close__h em{font-style:normal; color:#fff}
+.close__form{display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:clamp(28px,4vw,40px); max-width:34rem}
+.close__field{flex:1 1 240px; min-width:0}
+.close__field label{
+  display:block; font-family:var(--mono); font-size:var(--t-micro); letter-spacing:var(--tr-micro);
+  text-transform:uppercase; color:var(--deep-ink-2); margin-bottom:var(--s2);
+}
+.close__field input{
+  width:100%; height:52px; padding-inline:var(--s5); border-radius:var(--r-pill);
+  background:rgba(255,255,255,.10); border:1px solid rgba(242,239,250,.30); color:var(--deep-ink);
+  font-size:var(--t-sm);
+}
+.close__field input::placeholder{color:rgba(242,239,250,.55)}
+.close__field input:focus-visible{outline-color:var(--deep-ink)}
+.close__submit{align-self:flex-end}
+.close__trust{margin-top:var(--s5); font-family:var(--mono); font-size:var(--t-micro); letter-spacing:var(--tr-micro); text-transform:uppercase; color:var(--deep-ink-2)}
+.close__msg{margin-top:var(--s4); font-size:var(--t-sm); color:var(--deep-ink); min-height:1.4em}
+
+/* ═══════════ FOOTER ═══════════ */
+.foot{background:var(--bg); padding-block:clamp(56px,7vw,88px); border-top:var(--hair)}
+.foot__top{display:grid; grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,.8fr)); gap:clamp(28px,4vw,56px)}
+@media (max-width:720px){ .foot__top{grid-template-columns:1fr 1fr} .foot__brand{grid-column:1 / -1} }
+.foot__word{display:flex; align-items:center; gap:10px; font-size:var(--t-md); font-weight:700; letter-spacing:-.02em}
+.foot__def{margin-top:var(--s4); font-size:var(--t-sm); line-height:1.6; color:var(--ink-3); max-width:30rem}
+.foot__def i{color:var(--ink-2)}
+.foot__col h3{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:var(--tr-micro); text-transform:uppercase; color:var(--ink-3); font-weight:500}
+.foot__col ul{margin-top:var(--s4); display:grid; gap:10px}
+.foot__col a{font-size:var(--t-sm); color:var(--ink-2); text-decoration:none}
+.foot__col a:hover{color:var(--acc)}
+.foot__bot{margin-top:clamp(40px,5vw,64px); padding-top:var(--s5); border-top:var(--hair); display:flex; flex-wrap:wrap; gap:var(--s4) var(--s6); justify-content:space-between}
+.foot__bot p{font-size:var(--t-xs); color:var(--ink-3); max-width:46rem}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- 01 — NAV -->
+<header class="nav" id="nav">
+  <div class="nav__bar">
+    <a class="nav__brand" href="#top">
+      <svg class="nav__mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="mk" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="#1E4FE0"/><stop offset=".4" stop-color="#6B2FE8"/>
+            <stop offset=".72" stop-color="#A32BC4"/><stop offset="1" stop-color="#E07A38"/>
+          </linearGradient>
+        </defs>
+        <path d="M12 3.4 21 19.6H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M12 8.2l4.6 8.2H7.4z" fill="url(#mk)"/>
+      </svg>
+      <span class="nav__word">Atlas</span>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#how">How it works</a>
+      <a href="#check">The check</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <div class="nav__spacer"></div>
+    <button class="nav__toggle" id="themeBtn" type="button" aria-pressed="false">
+      <span class="sr-only">Switch to dusk</span>
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/>
+      </svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2z"/>
+      </svg>
+    </button>
+    <a class="btn btn--primary btn--sm" href="#close">Join waitlist</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- 02 — HERO -->
+<section class="hero" id="top" aria-labelledby="heroH">
+  <div class="hero__fallback" aria-hidden="true"></div>
+  <canvas class="hero__canvas" id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="hero__inner">
+    <div class="hero__grid" id="heroContent">
+      <p class="hero__eyebrow"><i aria-hidden="true"></i>Private beta · Public launch 2026-08-27</p>
+      <h1 class="hero__h1" id="heroH">You describe a task once. <span class="h1-acc">Atlas</span> keeps doing it.</h1>
+      <p class="hero__sub">It runs on your schedule, checks the answer before it sends, and emails you the results — a daily digest, or every run as it lands on Pro.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" href="#close">Join waitlist</a>
+        <a class="btn btn--ghost" href="#check">See what the check does</a>
+      </div>
+      <p class="hero__trust">Free · No signup to try · No credit card</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 — THE ASK -->
+<section class="band" id="ask" aria-labelledby="askH">
+  <div class="wrap">
+    <div class="band__head">
+      <p class="band__idx"><b>03</b> The ask <span aria-hidden="true"></span></p>
+      <h2 class="band__h" id="askH">What you can ask it to watch.</h2>
+      <p class="band__sub">Atlas points outward. Name a thing in the world and the sentence you would use to check on it. It is not a flowchart builder and not an integrations marketplace — there is nothing to connect.</p>
+    </div>
+    <ul class="ask__list">
+      <li class="ask__row"><span class="ask__n">01</span><span class="ask__t">The weather where you live, before you head out</span><span class="ask__wl" style="--c:var(--sp-cyn)"><i aria-hidden="true"></i>492 nm</span></li>
+      <li class="ask__row"><span class="ask__n">02</span><span class="ask__t">A price you're waiting to see drop</span><span class="ask__wl" style="--c:var(--sp-amb)"><i aria-hidden="true"></i>583 nm</span></li>
+      <li class="ask__row"><span class="ask__n">03</span><span class="ask__t">A stock or a coin you're watching</span><span class="ask__wl" style="--c:var(--sp-grn)"><i aria-hidden="true"></i>532 nm</span></li>
+      <li class="ask__row"><span class="ask__n">04</span><span class="ask__t">A website, the moment anything on it changes</span><span class="ask__wl" style="--c:var(--sp-vio)"><i aria-hidden="true"></i>412 nm</span></li>
+      <li class="ask__row"><span class="ask__n">05</span><span class="ask__t">Your team's score and injury list</span><span class="ask__wl" style="--c:var(--sp-mag)"><i aria-hidden="true"></i>645 nm</span></li>
+      <li class="ask__row"><span class="ask__n">06</span><span class="ask__t">A question you keep looking up</span><span class="ask__wl" style="--c:var(--sp-blu)"><i aria-hidden="true"></i>610 nm</span></li>
+    </ul>
+    <p class="ask__pull">If you can say it in a sentence, Atlas can watch it.</p>
+    <p class="ask__foot note">It watches things outside your accounts, not inside them. It cannot read your inbox or your connected apps.</p>
+  </div>
+</section>
+
+<!-- 04 — HOW IT WORKS -->
+<section class="band band--surface" id="how" aria-labelledby="howH">
+  <div class="wrap">
+    <div class="band__head">
+      <p class="band__idx"><b>04</b> How it works <span aria-hidden="true"></span></p>
+      <h2 class="band__h" id="howH">A sentence goes in whole. What comes back is separated.</h2>
+      <p class="band__sub">Three beats, and nothing to configure between them.</p>
+    </div>
+
+    <div class="beats">
+      <article class="beat">
+        <p class="beat__n">Beat 1 — In</p>
+        <div>
+          <h3 class="beat__h">The sentence goes in</h3>
+          <p class="beat__p">One English sentence carrying both halves: what you want, and when you want it. There is no second screen. The sentence is the task.</p>
+          <div class="sent">
+            <p class="sent__line"><span class="seg seg--sched">Every morning,</span> <span class="seg seg--prompt">tell me the forecast for Boston — rain, temperature, and whether I need a coat.</span></p>
+            <div class="sent__out">
+              <span class="tag" style="color:var(--sp-blu)">Schedule <b>daily 07:00</b></span>
+              <span class="tag" style="color:var(--sp-mag)">Prompt <b>the rest of it</b></span>
+            </div>
+            <p class="sent__cap note">The two halves are read through different filters, so they leave the sentence slightly displaced from one another.</p>
+          </div>
+          <p class="beat__p">Plain English is not ours alone — Zapier Copilot ships it free. It is only the honest way in.</p>
+        </div>
+      </article>
+
+      <article class="beat">
+        <p class="beat__n">Beat 2 — Worked</p>
+        <div>
+          <h3 class="beat__h">The schedule is parsed</h3>
+          <p class="beat__p">“Every morning” resolves to <b>daily 07:00</b>. Ten frequencies exist, and the split between them is a paywall, so here it is plainly.</p>
+          <ul class="freq">
+            <li>daily</li><li>weekdays</li><li>weekly</li><li>once</li>
+            <li data-pro>30m</li><li data-pro>1h</li><li data-pro>2h</li><li data-pro>4h</li><li data-pro>6h</li><li data-pro>12h</li>
+          </ul>
+          <p class="beat__p">Free's floor is daily. Sub-daily is a Pro feature, and that is a real limit: Zapier and Make will poll every fifteen minutes on their free tiers. Atlas will not. There is no monthly schedule on any plan.</p>
+          <p class="note" style="margin-top:var(--s4)">Model — Gemini 3.1 Flash Lite, included, no key required. Or bring your own key for OpenAI, Anthropic, Groq, or any OpenAI-compatible endpoint.</p>
+        </div>
+      </article>
+
+      <article class="beat">
+        <p class="beat__n">Beat 3 — Out</p>
+        <div>
+          <h3 class="beat__h">The result is delivered</h3>
+          <p class="beat__p">Every run is graded before it reaches you. Six quality tags; after three flagged runs in a row the task pauses itself rather than keep spending your allowance.</p>
+          <div class="mail">
+            <div class="mail__bar">
+              <span class="mail__dot" aria-hidden="true"></span><span class="mail__dot" aria-hidden="true"></span><span class="mail__dot" aria-hidden="true"></span>
+              <span class="mail__sub">Re: Boston morning forecast — run 001</span>
+            </div>
+            <div class="mail__body">
+              <p>High 68°F, low 54°F. Rain likely 2pm–6pm, 70% chance — take the coat. Wind 12mph NE. Sunrise 05:31.</p>
+              <p class="mail__grade">checked: has a source, nothing missing</p>
+            </div>
+          </div>
+          <p class="beat__p">Email arrives as a daily digest on Free, at an hour you pick — every run as it lands is Pro. Browser push and anomaly alerts either way.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 05 — THE CHECK -->
+<section class="band" id="check" aria-labelledby="checkH">
+  <div class="wrap">
+    <div class="band__head">
+      <p class="band__idx"><b>05</b> The check <span aria-hidden="true"></span></p>
+      <h2 class="band__h" id="checkH">Every run is graded before it reaches you.</h2>
+    </div>
+    <p class="check__quote">This is how these tools fail quietly: a confident number arrives in the same email, at the same time, looking exactly like a good one. So Atlas grades every run before it reaches you — blank replies, refusals, answers cut off mid-sentence, claims with no source. Each gets its own tag in your run history.</p>
+
+    <div class="gates">
+      <h3 class="band__idx" style="margin-bottom:var(--s5)"><b>The filter stack</b> <span aria-hidden="true"></span></h3>
+      <div class="gates__grid">
+        <div class="gate" style="--c:var(--sp-cyn)">
+          <div class="gate__plate" aria-hidden="true"></div>
+          <p class="gate__name">empty</p><p class="gate__d">the reply comes back blank</p>
+        </div>
+        <div class="gate" style="--c:var(--sp-blu)">
+          <div class="gate__plate" aria-hidden="true"></div>
+          <p class="gate__name">refusal</p><p class="gate__d">the model declines to answer</p>
+        </div>
+        <div class="gate" style="--c:var(--sp-vio)">
+          <div class="gate__plate" aria-hidden="true"></div>
+          <p class="gate__name">truncated</p><p class="gate__d">the answer stops mid-sentence</p>
+        </div>
+        <div class="gate" style="--c:var(--sp-mag)">
+          <div class="gate__plate" aria-hidden="true"></div>
+          <p class="gate__name">loop</p><p class="gate__d">it repeats itself and stalls</p>
+        </div>
+        <div class="gate gate--stop" style="--c:var(--sp-amb)">
+          <div class="gate__plate" aria-hidden="true"></div>
+          <p class="gate__name">unsourced</p><p class="gate__d">a claim with no source — run B stops here</p>
+        </div>
+        <div class="gate" style="--c:var(--sp-grn)">
+          <div class="gate__plate" aria-hidden="true"></div>
+          <p class="gate__name">ok</p><p class="gate__d">nothing caught it — it reaches you</p>
+        </div>
+      </div>
+      <div class="gates__rail" aria-hidden="true">
+        <span class="runlab runlab--a0">run A</span>
+        <span class="runline runline--a"></span>
+        <span class="runlab runlab--a">ok</span>
+        <span class="runlab runlab--b0">run B</span>
+        <span class="runline runline--b"></span>
+        <span class="runlab runlab--b">unsourced</span>
+      </div>
+    </div>
+
+    <p class="check__read note">Two runs go in at the left, and they look identical on the way in — that is the whole problem. Run A passes all six filters and leaves the far side tagged <b>ok</b>. Run B carries a claim with no source: it travels normally until the fifth filter and is stopped there, tagged <b>unsourced</b>. Nothing continues past that plate.</p>
+
+    <div class="strikes">
+      <div>
+        <h3 class="beat__h">Three strikes, then it stops</h3>
+        <p class="beat__p">A task that keeps failing pauses itself. Three consecutive flagged runs, then it stops — it does not keep spending your runs on an answer that isn't arriving.</p>
+        <div class="pause">
+          <p class="pause__t"><b>Auto-pause notice</b> — boston-morning-forecast — paused after 3 consecutive flagged runs.</p>
+          <div class="pause__btns"><button type="button">resume</button><button type="button">snooze 30d</button></div>
+        </div>
+        <p class="beat__p">You hear about it once a week at most — one click snoozes it for thirty days, and the first good run clears the flag on its own. <b>Nothing here nags.</b></p>
+      </div>
+      <div>
+        <div class="wedges" aria-hidden="true">
+          <span class="wedge" style="--i:0"><b>flag 1</b></span>
+          <span class="wedge" style="--i:1"><b>flag 2</b></span>
+          <span class="wedge" style="--i:2"><b>flag 3</b></span>
+          <span class="wedge wedge--stop"></span>
+        </div>
+        <p class="note" style="margin-top:var(--s8)">A density wedge for each consecutive flagged run. The third is fully dense, and the bar after it is where the task stops itself.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 — PROOF -->
+<section class="band band--sink" id="proof" aria-labelledby="proofH">
+  <div class="wrap">
+    <div class="band__head">
+      <p class="band__idx"><b>06</b> Proof <span aria-hidden="true"></span></p>
+      <h2 class="band__h" id="proofH">There is nobody to quote yet.</h2>
+      <p class="band__sub">Atlas is a solo project in private beta, so there are no customers to put on this page — no testimonials, no logos, no user count. What there is instead is a build record, one real run log, and a free tier small enough to be embarrassing.</p>
+    </div>
+
+    <div class="figs">
+      <div class="fig"><b>1,481</b><span>task templates</span></div>
+      <div class="fig"><b>238</b><span>workflow templates</span></div>
+      <div class="fig"><b>1,719</b><span>combined; the site rounds down to 1,700+</span></div>
+      <div class="fig"><b>335</b><span>releases, 1 Apr – 20 Aug 2026</span></div>
+      <div class="fig"><b>20</b><span>template categories</span></div>
+      <div class="fig"><b>10</b><span>schedule frequencies</span></div>
+      <div class="fig"><b>6</b><span>quality tags applied on grading</span></div>
+      <div class="fig"><b>3</b><span>flagged runs before auto-pause</span></div>
+      <div class="fig"><b>40</b><span>AI runs a month on Free</span></div>
+      <div class="fig"><b>7</b><span>days of run history on Free</span></div>
+      <div class="fig"><b>14</b><span>days money-back on a first payment</span></div>
+    </div>
+
+    <div class="quota">
+      <h3 class="beat__h">Forty exposures a month</h3>
+      <p class="beat__p">The free allowance, drawn at its real size: forty graduations, twenty-three of them spent by the one task on this page.</p>
+      <div class="quota__bar" role="img" aria-label="23 of 40 monthly runs used">
+        <span class="quota__ticks" aria-hidden="true"></span>
+        <span class="quota__used" aria-hidden="true"></span>
+        <span class="quota__mark" aria-hidden="true"></span>
+      </div>
+      <p class="quota__legend"><span>0</span><span>23 / 40 · resets monthly</span><span>40</span></p>
+      <p class="beat__p">Forty AI runs a month on Free. That is the smallest free allowance in the category and there is no way to dress it up — on volume, Atlas hands you less than the incumbents do. It resets monthly and it asks for no card.</p>
+    </div>
+
+    <div class="log">
+      <h3 class="beat__h">One task, ten runs, nothing flagged</h3>
+      <p class="beat__p">The real log for the one task that has actually been running. Hue is the recorded condition, height is the recorded temperature. Runs 007 to 018 are not in the log, so the strip breaks there rather than inventing them.</p>
+      <div class="log__strip" role="img" aria-label="Ten logged runs: 002 63°F rain am, 003 69°F clear, 004 71°F clear, 005 64°F rain pm, 006 66°F cloud, a gap where runs 007 to 018 are missing, 019 77°F clear, 020 75°F humid, 021 73°F storms, 022 74°F clear, 023 79°F clear. None flagged.">
+        <span class="run" style="--h:64px;  --c:var(--sp-blu)"><b>002<i>63° rain am</i></b></span>
+        <span class="run" style="--h:100px; --c:var(--sp-cyn)"><b>003<i>69° clear</i></b></span>
+        <span class="run" style="--h:113px; --c:var(--sp-cyn)"><b>004<i>71° clear</i></b></span>
+        <span class="run" style="--h:70px;  --c:var(--sp-blu)"><b>005<i>64° rain pm</i></b></span>
+        <span class="run" style="--h:83px;  --c:var(--sp-vio)"><b>006<i>66° cloud</i></b></span>
+        <span class="run run--gap"><b>⋯<i>007–018</i></b></span>
+        <span class="run" style="--h:151px; --c:var(--sp-grn)"><b>019<i>77° clear</i></b></span>
+        <span class="run" style="--h:138px; --c:var(--sp-grn)"><b>020<i>75° humid</i></b></span>
+        <span class="run" style="--h:125px; --c:var(--sp-mag)"><b>021<i>73° storms</i></b></span>
+        <span class="run" style="--h:132px; --c:var(--sp-grn)"><b>022<i>74° clear</i></b></span>
+        <span class="run" style="--h:164px; --c:var(--sp-amb)"><b>023<i>79° clear</i></b></span>
+      </div>
+      <p class="log__meta">
+        <span>boston-morning-forecast</span><span>schedule <b>daily 07:00</b></span><span>runs <b>23</b></span>
+        <span>flagged <b>0</b></span><span>model <b>gemini</b></span><span>free tier <b>23 / 40 mo</b></span>
+      </p>
+      <p class="note" style="margin-top:var(--s6)">Every figure on this page can be counted out of the repository or read off the pricing page. Nothing here is a forecast. The only rounded number, 1,700+, rounds down.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 07 — COMPARISON -->
+<section class="band band--surface" id="compare" aria-labelledby="cmpH">
+  <div class="wrap">
+    <div class="band__head">
+      <p class="band__idx"><b>07</b> Comparison <span aria-hidden="true"></span></p>
+      <h2 class="band__h" id="cmpH">Atlas is a narrow filter.</h2>
+      <p class="band__sub">Zapier, Make and n8n are visual editors with hundreds of connectors, and all three ship AI assistance now. Atlas starts from the other end: you describe the outcome, and the model works out how. Less setup for open-ended, judgement-heavy work — and far fewer integrations than any of them. If your automation is a fixed chain between two specific apps, they are the better tool. If it is <i>watch this and tell me what matters</i>, that is this one.</p>
+    </div>
+
+    <div class="cmp">
+      <table>
+        <caption>Row by row. Atlas loses more of these than it wins.</caption>
+        <thead>
+          <tr><th scope="col">Feature</th><th scope="col">Atlas</th><th scope="col">Zapier · Make · n8n</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Integrations</th>
+            <td><b>Far fewer</b>Email out, webhooks, Google Sheets. That is close to all of it.<span class="verdict verdict--lose">Atlas loses</span></td>
+            <td><b>Hundreds</b>Their connector libraries are the whole product. Nothing here comes near it.</td>
+          </tr>
+          <tr>
+            <th scope="row">Free schedule floor</th>
+            <td><b>Daily</b>Free runs daily, weekdays, weekly or once. Anything sub-daily starts at Pro.<span class="verdict verdict--lose">Atlas loses</span></td>
+            <td><b>15 minutes</b>Zapier and Make both poll every 15 minutes on their free plans.</td>
+          </tr>
+          <tr>
+            <th scope="row">Free monthly run allowance</th>
+            <td><b>40 runs</b>The smallest free allowance in the category. That is not a typo.<span class="verdict verdict--lose">Atlas loses</span></td>
+            <td><b>Larger</b>Every one of them hands you more free runs a month than Atlas does.</td>
+          </tr>
+          <tr>
+            <th scope="row">Plain-English setup</th>
+            <td><b>Yes</b>One sentence with the schedule inside it. There is nothing else to configure.<span class="verdict verdict--draw">A draw</span></td>
+            <td><b>Yes</b>Zapier Copilot ships it free. This stopped being a difference a while ago.</td>
+          </tr>
+          <tr>
+            <th scope="row">Grades every run, and pauses tasks that keep failing</th>
+            <td><b>Yes</b>Six quality tags on every answer. Three flagged runs in a row and the task pauses itself.<span class="verdict verdict--win">Atlas only</span></td>
+            <td><b>No</b>They check that a step ran. Whether the answer was any good is left to you.</td>
+          </tr>
+          <tr>
+            <th scope="row">Visual flow editor</th>
+            <td><b>No</b>There is no canvas at all. If you want to see the shape of a flow, you want theirs.<span class="verdict verdict--lose">Atlas loses</span></td>
+            <td><b>Yes</b>Drag the nodes, branch them, retry them, inspect every step in place.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="absent">
+      <div>
+        <h3 class="beat__h">Not on any plan</h3>
+        <p class="beat__p">None of this exists, and none of it is a promise. If you need one of them, one of the three above will serve you better today.</p>
+      </div>
+      <ul>
+        <li>A public API</li><li>A mobile app</li><li>SSO</li><li>A monthly schedule</li><li>A visual flow editor</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 08 — PRICING -->
+<section class="band" id="pricing" aria-labelledby="priceH">
+  <div class="wrap">
+    <div class="band__head">
+      <p class="band__idx"><b>08</b> Pricing <span aria-hidden="true"></span></p>
+      <h2 class="band__h" id="priceH">Free is genuinely free.</h2>
+      <p class="band__sub">No card, no trial clock, nothing that quietly stops working on day fifteen. Forty AI runs a month is a small allowance — the smallest in the category — and grading runs on every one of them. When forty is not enough, Pro is nine dollars.</p>
+      <div class="bill" role="group" aria-label="Billing period">
+        <button type="button" id="billM" aria-pressed="true">Monthly</button>
+        <button type="button" id="billY" aria-pressed="false">Yearly</button>
+      </div>
+    </div>
+
+    <div class="plans">
+      <article class="plan plan--free">
+        <p class="plan__n">Free</p>
+        <p class="plan__price"><b>$0</b><span>/ mo</span></p>
+        <p class="plan__save">&nbsp;</p>
+        <p class="plan__note">No card. Nothing expires.</p>
+        <ul class="plan__list">
+          <li>40 AI runs a month</li><li>Up to 40 saved tasks</li><li>7-day run history</li>
+          <li>Daily email digest, at an hour you pick</li><li>Browser push</li><li>Anomaly alerts</li>
+          <li>Grading on every run</li><li>1,481 task templates</li><li>Bring your own API key</li>
+        </ul>
+        <p class="plan__glass">Thin · nearly clear</p>
+        <a class="btn btn--ghost" href="#close">Join waitlist</a>
+      </article>
+
+      <article class="plan plan--pro">
+        <p class="plan__n">Pro</p>
+        <p class="plan__price"><b id="proPrice">$9</b><span id="proPer">/ mo</span></p>
+        <p class="plan__save" id="proSave">&nbsp;</p>
+        <p class="plan__note">14-day money-back on a first payment.</p>
+        <ul class="plan__list">
+          <li>Everything in Free, and:</li><li>Unlimited tasks and runs</li>
+          <li>Sub-daily schedules — 30m, 1h, 2h, 4h, 6h, 12h</li><li>Multi-step workflows</li>
+          <li>Webhooks — Discord, Slack, Telegram, JSON</li><li>Google Sheets</li>
+          <li>Full run history</li><li>Analytics, with CSV and PDF export</li>
+          <li>Per-run emails, with reply-to-refine</li><li>Personal analyst briefings</li>
+        </ul>
+        <p class="plan__glass">Thick · tinted · full transmission</p>
+        <a class="btn btn--primary" href="#close">Join waitlist</a>
+      </article>
+
+      <article class="plan plan--teams">
+        <p class="plan__n">Teams</p>
+        <p class="plan__price"><b>Not priced</b></p>
+        <p class="plan__save">&nbsp;</p>
+        <p class="plan__note">Coming.</p>
+        <ul class="plan__list">
+          <li>There is no price yet, and no feature list I would stand behind until there is one.</li>
+          <li>This is a piece of stock that has not been figured.</li>
+        </ul>
+        <p class="plan__glass">Blank · uncoated · not figured</p>
+        <a class="btn btn--ghost" href="#close">Join waitlist</a>
+      </article>
+    </div>
+
+    <div class="plan__foot">
+      <p class="note">Public launch is 2026-08-27 — until then there is nothing to buy, and every button on this page joins the waitlist instead.</p>
+      <p class="note">Free schedules: daily, weekdays, weekly, once. Pro adds 30m, 1h, 2h, 4h, 6h and 12h. There is no monthly schedule on any plan.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 09 — CLOSE + FOOTER -->
+<section class="close" id="close" aria-labelledby="closeH">
+  <div class="close__fallback" aria-hidden="true"></div>
+  <canvas class="close__canvas" id="closeCanvas" aria-hidden="true"></canvas>
+  <div class="close__inner wrap" id="closeContent">
+    <p class="eyebrow close__eyebrow">09 — Close</p>
+    <h2 class="close__h" id="closeH">That was one task. <em>Start yours.</em></h2>
+    <form class="close__form" id="waitForm" novalidate>
+      <div class="close__field">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
+      </div>
+      <button class="btn btn--onDeep close__submit" type="submit">Join waitlist</button>
+    </form>
+    <p class="close__msg" id="waitMsg" role="status" aria-live="polite"></p>
+    <p class="close__trust">Free · No signup to try · No credit card</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__top">
+      <div class="foot__brand">
+        <p class="foot__word">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 3.4 21 19.6H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M12 8.2l4.6 8.2H7.4z" fill="url(#mk)"/>
+          </svg>
+          Atlas
+        </p>
+        <p class="foot__def"><i>at·las</i> /ˈat·ləs/ n. — one who carries the weight so others don't have to.</p>
+      </div>
+      <div class="foot__col">
+        <h3>The page</h3>
+        <ul>
+          <li><a href="#top">Hero</a></li><li><a href="#ask">The ask</a></li>
+          <li><a href="#how">How it works</a></li><li><a href="#check">The check</a></li>
+        </ul>
+      </div>
+      <div class="foot__col">
+        <h3>More</h3>
+        <ul>
+          <li><a href="#proof">Proof</a></li><li><a href="#compare">Comparison</a></li>
+          <li><a href="#pricing">Pricing</a></li><li><a href="#close">Join waitlist</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot__bot">
+      <p>Atlas is one person's project. There is no team behind it, and this page does not pretend otherwise. Private beta — public launch 2026-08-27.</p>
+      <p class="mono" style="letter-spacing:.1em; text-transform:uppercase">Free · No signup to try</p>
+    </div>
+  </div>
+</footer>
+
+<script id="vsrc" type="x-shader/x-vertex">
+attribute vec2 aPos;
+void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }
+</script>
+
+<script id="fsrc" type="x-shader/x-fragment">
+precision highp float;
+
+/* ───────────────────────────────────────────────────────────────────────────
+   ONE RENDERED FORM.
+   A stack of four smooth folds — a dune, or a fold of cloth — under a pale
+   gradient sky. Not raymarched: raymarching a noise field costs thousands of
+   ops per pixel and this has to survive a software rasteriser. Instead each
+   fold is an analytic crest curve whose surface normal rolls from facing the
+   sky at the ridge to facing the viewer down the slope, so the shading is a
+   real lighting model over a real normal field. Matte diffuse, a low key
+   light, sky ambient, aerial perspective, contact shadow in each crease —
+   and a thin-film spectral sheen along the grazing edges. That sheen is the
+   prism: white light hitting a smooth surface and coming back separated.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+uniform vec2  uRes;
+uniform float uAsp;
+uniform float uHorizon;   /* 0 top .. 1 bottom: where the far crest sits      */
+uniform vec3  uSkyTop;    /* linear                                           */
+uniform vec3  uSkyHaze;   /* linear                                           */
+uniform vec3  uBase;      /* linear albedo of the form                        */
+uniform vec3  uKey;       /* linear key-light colour                          */
+uniform vec2  uSun;       /* sun position in (X, Y) screen units              */
+uniform float uIrid;      /* strength of the spectral sheen                   */
+uniform float uAmb;       /* sky ambient strength                             */
+
+/* cheap organic field: two domain-warped sines. No hashing — hashing is the
+   expensive part of value noise and this only needs to be smooth, not random. */
+float org(vec2 p){
+  return sin(p.x*1.70 + sin(p.y*1.13)*2.10) * sin(p.y*1.31 - sin(p.x*0.91)*1.70);
+}
+float org2(vec2 p){ return 0.62*org(p) + 0.38*org(p*2.17 + 4.3); }
+
+vec3 skyAt(float X, float Y){
+  float t = clamp(Y/(uHorizon + 0.16), 0.0, 1.0);
+  vec3 c = mix(uSkyTop, uSkyHaze, pow(t, 0.78));
+  float r = length(vec2((X - uSun.x)*0.85, (Y - uSun.y)*1.55));
+  c += uKey*(0.17*exp(-r*2.1) + 0.15*exp(-r*6.5));
+  return c;
+}
+
+void main(){
+  vec2 fc = gl_FragCoord.xy / uRes;
+  float X = (fc.x - 0.5) * uAsp;
+  float Y = 1.0 - fc.y;
+  float e = 1.35 / uRes.y;
+  float span = 1.0 - uHorizon;
+
+  vec3 col = skyAt(X, Y);
+  float nz = org2(vec2(X*2.2, Y*3.4));
+  float broad = 0.86 + 0.30*org2(vec2(X*0.85, Y*1.30));   /* cloud-shadow scale */
+
+  vec3 L  = normalize(vec3(-0.58, 0.56, 0.59));
+  vec3 V  = vec3(0.0, 0.0, 1.0);
+  vec3 Hh = normalize(L + V);
+
+  /* three folds, back to front. The last one is the big near mass. */
+  for(int i = 0; i < 3; i++){
+    float fi = float(i);
+    float k0 = step(0.5, fi), k1 = step(1.5, fi);
+
+    float off  = 0.30*k0 + 0.42*k1;              /* 0 , .30 , .72  of the span */
+    float amp  = 0.100 + 0.060*k0 + 0.100*k1;    /* .10, .16 , .26            */
+    float freq = 2.40 + 0.90*k0 - 1.60*k1;       /* 2.4, 3.3 , 1.7            */
+    float rlen = 0.12 + 0.04*k0 + 0.10*k1;
+    float ph   = fi*9.7;
+
+    float H  = uHorizon + span*off;
+    float A  = span*amp;
+    float Yc = H - A*(0.60*sin(X*freq + ph)
+                    + 0.27*sin(X*freq*2.07 - ph*1.6 + 1.1)
+                    + 0.13*sin(X*freq*3.91 + ph*2.2 + 2.4));
+    float dY = -A*(0.60*freq*cos(X*freq + ph)
+                 + 0.27*freq*2.07*cos(X*freq*2.07 - ph*1.6 + 1.1)
+                 + 0.13*freq*3.91*cos(X*freq*3.91 + ph*2.2 + 2.4));
+
+    /* contact shadow this fold throws up onto the one behind it */
+    float ao = mix(0.42, 1.0, clamp((Yc - Y)/(span*0.22), 0.0, 1.0));
+    col *= mix(1.0, ao, k0);
+
+    /* the surface rolls over the ridge: sky-facing at the crest,
+       viewer-facing down the slope */
+    float d    = max(Y - Yc, 0.0);
+    float roll = 1.0 - exp(-d/(span*rlen));
+    float phi  = mix(1.20, 0.14, roll);
+    vec2  t2   = normalize(vec2(1.0, dY));
+    vec2  nm   = vec2(t2.y, -t2.x);
+    vec3  n    = vec3(nm.x*sin(phi), -nm.y*sin(phi), cos(phi));
+    n = normalize(n + vec3(nz*0.13, org2(vec2(X*3.1 + fi*5.0, Y*5.2))*0.10, 0.0));
+
+    float dif = max(dot(n, L), 0.0);
+    float amb = 0.5 + 0.5*n.y;
+    float spe = pow(max(dot(n, Hh), 0.0), 34.0);
+    float fre = pow(1.0 - max(dot(n, V), 0.0), 6.0);
+
+    /* dispersion: hue sweeps across the width, so each ridge carries a
+       continuous spectrum rather than a repeated rainbow */
+    float band = 0.55*X + 0.20*nz + 0.24*fre + fi*0.20;
+    vec3 irid = 0.5 + 0.5*cos(6.28318*(vec3(band) + vec3(0.0, 0.32, 0.66)));
+
+    /* matte, deep, lighter where it turns to face the sky */
+    vec3 alb = uBase*(0.86 + 0.30*roll)*(1.0 - 0.05*fi);
+    vec3 lin = alb*(dif*uKey*1.45 + amb*mix(uSkyTop, uSkyHaze, 0.35)*uAmb)
+             + irid*fre*uIrid
+             + uKey*spe*0.14;
+
+    lin *= broad*mix(1.0, 0.70, smoothstep(uHorizon, 1.02, Y));
+    vec3 hz = skyAt(X, Yc)*mix(vec3(1.0), vec3(0.82,0.78,0.94), 0.55);
+    lin = mix(lin, hz, 0.085*(1.0 - k0) + 0.030*(k0 - k1));
+
+    col = mix(col, lin, smoothstep(-e, e, Y - Yc));
+  }
+
+  col = clamp(col, 0.0, 1.0);
+  col = pow(col, vec3(0.4545));
+  float dth = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233)))*43758.545);
+  col += (dth - 0.5)*0.0045;
+  gl_FragColor = vec4(col, 1.0);
+}
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var root = document.documentElement;
+
+  /* ══════════ 1 · NAV ISLAND ══════════
+     One class. Every dimension of the change is interpolated in CSS from the
+     token pair, so the bar reads as one object contracting, not two bars.
+     Hysteresis on the threshold so a trackpad nudge can't make it flicker. */
+  var nav = document.getElementById('nav'), detached = false, queued = false;
+  function readScroll(){
+    queued = false;
+    var y = window.pageYOffset || root.scrollTop || 0;
+    if(!detached && y > 28){ detached = true; nav.classList.add('is-detached'); }
+    else if(detached && y < 8){ detached = false; nav.classList.remove('is-detached'); }
+  }
+  window.addEventListener('scroll', function(){
+    if(!queued){ queued = true; window.requestAnimationFrame(readScroll); }
+  }, {passive:true});
+  readScroll();
+
+  /* ══════════ 2 · THEME ══════════ */
+  var themeBtn = document.getElementById('themeBtn');
+  var themeLabel = themeBtn.querySelector('.sr-only');
+  function syncTheme(){
+    var dusk = root.getAttribute('data-theme') === 'dusk';
+    themeBtn.setAttribute('aria-pressed', dusk ? 'true' : 'false');
+    themeLabel.textContent = dusk ? 'Switch to daylight' : 'Switch to dusk';
+    themeBtn.setAttribute('aria-label', themeLabel.textContent);
+  }
+  themeBtn.addEventListener('click', function(){
+    var dusk = root.getAttribute('data-theme') === 'dusk';
+    if(dusk) root.removeAttribute('data-theme'); else root.setAttribute('data-theme','dusk');
+    try{ localStorage.setItem('atlas-theme', dusk ? 'day' : 'dusk'); }catch(e){}
+    syncTheme(); paintAll();
+  });
+  syncTheme();
+
+  /* ══════════ 3 · PRICING PERIOD ══════════ */
+  var bm = document.getElementById('billM'), by = document.getElementById('billY');
+  var pPrice = document.getElementById('proPrice'), pPer = document.getElementById('proPer'), pSave = document.getElementById('proSave');
+  function bill(yearly){
+    bm.setAttribute('aria-pressed', yearly ? 'false':'true');
+    by.setAttribute('aria-pressed', yearly ? 'true':'false');
+    pPrice.textContent = yearly ? '$90' : '$9';
+    pPer.textContent   = yearly ? '/ yr' : '/ mo';
+    pSave.innerHTML    = yearly ? 'Two months free' : '&nbsp;';
+  }
+  bm.addEventListener('click', function(){ bill(false); });
+  by.addEventListener('click', function(){ bill(true); });
+
+  /* ══════════ 4 · WAITLIST ══════════ */
+  var form = document.getElementById('waitForm'), msg = document.getElementById('waitMsg');
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var v = document.getElementById('email').value.trim();
+    msg.textContent = (v && v.indexOf('@') > 0)
+      ? 'On the list. One email when it opens on 2026-08-27, and nothing else.'
+      : 'That address does not look complete — check it and try again.';
+  });
+
+  /* ══════════ 5 · THE RENDERED FORM ══════════
+     One program, two canvases. Rendered once each and left alone: no rAF loop,
+     nothing tied to scroll, so it cannot cost a frame. Re-rendered only on a
+     debounced resize and on a theme change. If WebGL is missing or the context
+     is lost, the canvas is removed and the CSS gradient underneath stands in. */
+
+  function srgbToLinear(h){
+    var n = parseInt(h.slice(1), 16);
+    var o = [((n>>16)&255)/255, ((n>>8)&255)/255, (n&255)/255];
+    return o.map(function(c){ return c <= 0.04045 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); });
+  }
+  var SCENES = {
+    day: {
+      hero:  { skyTop:'#CBD3E8', skyHaze:'#F7F6F6', base:'#221C46', key:'#FFE2BC', sun:[-0.40,0.28], irid:0.62, amb:0.20 },
+      close: { skyTop:'#0B0819', skyHaze:'#3E2447', base:'#1E1740', key:'#FFA989', sun:[ 0.34,0.44], irid:0.58, amb:0.20 }
+    },
+    dusk: {
+      hero:  { skyTop:'#161030', skyHaze:'#4A2C60', base:'#140E30', key:'#FF9EC0', sun:[-0.34,0.32], irid:0.60, amb:0.20 },
+      close: { skyTop:'#090614', skyHaze:'#341D3A', base:'#1A1338', key:'#FF9E62', sun:[ 0.34,0.44], irid:0.46, amb:0.20 }
+    }
+  };
+
+  function Field(canvasId, contentId, sceneKey, minH, maxH){
+    this.cv = document.getElementById(canvasId);
+    this.content = document.getElementById(contentId);
+    this.sceneKey = sceneKey; this.minH = minH; this.maxH = maxH;
+    this.gl = null; this.dead = false;
+    if(!this.cv) { this.dead = true; return; }
+    try{
+      this.gl = this.cv.getContext('webgl', {antialias:false, alpha:false, depth:false,
+        stencil:false, preserveDrawingBuffer:false, powerPreference:'low-power'})
+        || this.cv.getContext('experimental-webgl');
+    }catch(e){ this.gl = null; }
+    if(!this.gl){ this.fail(); return; }
+    var self = this;
+    this.cv.addEventListener('webglcontextlost', function(ev){ ev.preventDefault(); self.fail(); });
+    if(!this.build()) this.fail();
+  }
+  Field.prototype.fail = function(){
+    this.dead = true;
+    if(this.cv && this.cv.parentNode) this.cv.parentNode.removeChild(this.cv);
+  };
+  Field.prototype.build = function(){
+    var gl = this.gl;
+    function sh(type, src){
+      var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+    }
+    var vs = sh(gl.VERTEX_SHADER, document.getElementById('vsrc').textContent);
+    var fs = sh(gl.FRAGMENT_SHADER, document.getElementById('fsrc').textContent);
+    if(!vs || !fs) return false;
+    var p = gl.createProgram();
+    gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p);
+    if(!gl.getProgramParameter(p, gl.LINK_STATUS)) return false;
+    gl.useProgram(p);
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(p, 'aPos');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    this.u = {};
+    ['uRes','uAsp','uHorizon','uSkyTop','uSkyHaze','uBase','uKey','uSun','uIrid','uAmb']
+      .forEach(function(k){ this.u[k] = gl.getUniformLocation(p, k); }, this);
+    return true;
+  };
+  Field.prototype.paint = function(){
+    if(this.dead || !this.gl) return;
+    var gl = this.gl, cv = this.cv;
+    var w = cv.clientWidth, h = cv.clientHeight;
+    if(w < 2 || h < 2) return;
+
+    /* The shader is cheap but this may be running on a software rasteriser, so
+       cap the buffer. The image is smooth; upscaling it costs almost nothing
+       visually and softens the ridge in a way that reads as depth of field. */
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var scale = Math.min(dpr, 1180 / Math.max(w, 1));
+    var cap = Math.sqrt(760000 / Math.max(w*h, 1));
+    scale = Math.max(0.5, Math.min(scale, cap));
+    var bw = Math.max(2, Math.round(w*scale)), bh = Math.max(2, Math.round(h*scale));
+    if(cv.width !== bw || cv.height !== bh){ cv.width = bw; cv.height = bh; }
+    gl.viewport(0, 0, bw, bh);
+
+    /* Put the crest just under the text block, at every width, so the copy
+       always sits on sky and the form always fills the space beneath it. */
+    var hz = (this.minH + this.maxH)/2;
+    if(this.content){
+      var cb = this.content.getBoundingClientRect().bottom;
+      var pb = cv.getBoundingClientRect().top;
+      hz = (cb - pb + 30) / h;
+    }
+    hz = Math.max(this.minH, Math.min(this.maxH, hz));
+
+    var theme = root.getAttribute('data-theme') === 'dusk' ? 'dusk' : 'day';
+    var s = SCENES[theme][this.sceneKey];
+    gl.uniform2f(this.u.uRes, bw, bh);
+    gl.uniform1f(this.u.uAsp, bw/bh);
+    gl.uniform1f(this.u.uHorizon, hz);
+    gl.uniform3fv(this.u.uSkyTop,  srgbToLinear(s.skyTop));
+    gl.uniform3fv(this.u.uSkyHaze, srgbToLinear(s.skyHaze));
+    gl.uniform3fv(this.u.uBase,    srgbToLinear(s.base));
+    gl.uniform3fv(this.u.uKey,     srgbToLinear(s.key));
+    gl.uniform2f(this.u.uSun, s.sun[0], s.sun[1]);
+    gl.uniform1f(this.u.uIrid, s.irid);
+    gl.uniform1f(this.u.uAmb, s.amb);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  };
+
+  var fields = [
+    new Field('heroCanvas', 'heroContent', 'hero', 0.44, 0.84),
+    new Field('closeCanvas', 'closeContent', 'close', 0.38, 0.66)
+  ];
+  function paintAll(){ for(var i=0;i<fields.length;i++) fields[i].paint(); }
+
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(paintAll).catch(function(){});
+  }
+  window.requestAnimationFrame(paintAll);
+  window.addEventListener('load', paintAll);
+
+  var rt = 0, lastW = window.innerWidth;
+  window.addEventListener('resize', function(){
+    if(Math.abs(window.innerWidth - lastW) < 2 && rt) return;
+    lastW = window.innerWidth;
+    clearTimeout(rt);
+    rt = setTimeout(function(){ rt = 0; paintAll(); }, 180);
+  });
+})();
+</script>
+</body>
+</html>

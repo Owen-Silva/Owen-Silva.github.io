@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects — Owen Silva</title>
+<meta name="description" content="The other 22 projects since March 2026: markets tools, Atlas work, side projects, tools I use, hockey and school.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0F14'/><circle cx='23.5' cy='7' r='1.4' fill='%23ECE5D7'/><circle cx='8' cy='10' r='1' fill='%23ECE5D7'/><rect x='2' y='19.2' width='28' height='1.2' fill='%23F0603A'/><path d='M2 20.4 L9 12 L14 17.4 L21 8.6 L30 20.4 Z' fill='%23ECE5D7'/></svg>">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('ink-theme');
+      if (t !== 'auto') document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+    } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..800&family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400..700&display=swap">
+<link rel="stylesheet" href="css/ink.css">
+<style>
+/* ============================================================
+   projects.html — page-only layout. Every rule is scoped under
+   .p-projects so nothing here reaches another page. The shared
+   type, colour and de-boxing systems live in css/ink.css; this
+   block only does what is true of THIS place in the night:
+
+   the arc field is the whole viewport, and the title sits on it.
+   ============================================================ */
+
+/* ---- 1. the field is the viewport ------------------------- */
+.p-projects .band-hero { overflow: clip; }
+/* the scene fills the hero edge to edge — it is not a panel beside the words */
+.p-projects .band-hero > .pane {
+  position: absolute; inset: 0; left: 0; right: 0; height: auto;
+  border: 0; border-radius: 0; background: transparent;
+}
+
+/* ---- 2. the words, over the field, on a scrim -------------- */
+.p-projects .band-hero__text {
+  position: absolute; z-index: 4;
+  left: var(--gutter); right: var(--gutter); top: clamp(96px, 13.5vh, 146px);
+  max-width: min(46ch, 54%);
+}
+.p-projects .band-hero__text h1 {
+  font-size: var(--t-title);
+  max-width: min(74vw, 22ch);
+}
+.p-projects .band-hero__text .lede { max-width: 34ch; }
+/* atmosphere, not a card: a soft ellipse of ink under the type */
+.p-projects .band-hero__text::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  left: calc(var(--gutter) * -1.4); right: -28%;
+  top: calc(var(--s-8) * -1); bottom: calc(var(--s-8) * -1);
+  background-image: radial-gradient(84% 74% at 16% 46%,
+    color-mix(in srgb, var(--ground) 93%, transparent) 0%,
+    color-mix(in srgb, var(--ground) 74%, transparent) 44%,
+    transparent 78%);
+}
+
+/* The readout is the field's live caption, so it keeps to the field's own
+   half of the screen: a narrow column at the top right, on a hairline, where
+   the arcs are thinnest. It used to ride under the lede — at the title's full
+   size that column reaches the project names, and the caption sat on them. */
+.p-projects .band-hero__tools {
+  position: absolute; z-index: 5; left: auto; right: var(--gutter);
+  top: clamp(178px, 24vh, 252px); bottom: auto;
+  width: min(370px, 31vw); max-width: none;
+  margin: 0; padding-top: 13px;
+  border-top: 1px solid var(--rule-strong);
+  background-image: none;
+}
+/* the same soft ellipse of ink the title stands on, at this size */
+.p-projects .band-hero__tools::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  left: -14%; right: -16%; top: calc(var(--s-6) * -1); bottom: calc(var(--s-7) * -1);
+  background-image: radial-gradient(76% 72% at 50% 42%,
+    color-mix(in srgb, var(--ground) 90%, transparent) 0%,
+    color-mix(in srgb, var(--ground) 66%, transparent) 46%,
+    transparent 78%);
+}
+.p-projects .band-hero__tools .readout { margin-top: 10px; min-height: 0; }
+.p-projects .band-hero__tools .readout p { max-width: 42ch; }
+.p-projects .band-hero .scene-note {
+  position: static; max-width: 42ch; margin-top: 10px; text-align: left;
+}
+/* Both status lines are empty on a page that draws, so they take no room
+   until one of them has something to say. */
+.p-projects .band-hero .scene-note:empty { margin-top: 0; }
+
+/* ---- 2b. the title, on the site's display scale ------------
+   183.6 px was the smallest opening on the site bar portal's, against index's
+   448 and atlas's 742 (QA-4 D16 / ranked change 7). The size is a share of
+   the width, and the two lines "Twenty- / two more" breaks into are the
+   picture. Two things bound it and both are measured, not guessed: the
+   deeper line is 3.49 times the size in ink, and it has to stop before the
+   readout column (which gives up 22 px of its own width here to make the
+   room); and 240 px is where a second line of it would reach past the
+   bottom axis into the project names on a 900 px screen. Below 1224 px
+   there is not enough width for either, so that range keeps --t-title. */
+@media (min-width: 1224px) {
+  .p-projects .band-hero__tools { width: min(348px, 28vw); }
+  .p-projects .band-hero__text h1 {
+    font-size: min(clamp(216px, 17.6vw, 240px),
+                   (100vw - 2 * var(--gutter) - min(348px, 28vw) - 20px) / 3.5);
+    /* the whole name is 6.45 em of ink on one line and the deeper of the two
+       is 3.49; 3.9 em is the box that can only be the second of those, so a
+       wide window cannot straighten it out into one line across the readout */
+    max-width: 3.9em;
+    /* .95 is leading for a 110 px title. At this size two lines of it put the
+       lede 47 px past the bottom axis and into the project names on a 1280 x
+       800 window; .84 is what the bottom axis leaves, and what type this big
+       wants anyway. */
+    line-height: .84;
+  }
+}
+/* A short window puts the bottom axis up under the type: at 1366 x 768 two
+   lines at the size above would sit the lede on the first project names.
+   Below 860 px of height the title takes the smaller share of the width the
+   axis leaves — the measured widths (1280 x 900 and up) are untouched. */
+@media (min-width: 1224px) and (max-height: 860px) {
+  .p-projects .band-hero__text h1 {
+    font-size: min(clamp(176px, 15.4vw, 208px),
+                   (100vw - 2 * var(--gutter) - min(348px, 28vw) - 20px) / 3.5);
+  }
+}
+
+/* ---- 3. phone: the type first, the field whole under it ----
+   A phone is too narrow to lay 22 names and 43 ticks BEHIND a paragraph:
+   the arcs ran straight through the lede and the readout. So the layering
+   comes apart here. The words take the top of the screen on clean ink, and
+   the field is its own band edge to edge underneath — the picture, entire,
+   with nothing written over it. */
+@media (max-width: 900px) {
+  .p-projects .band-hero {
+    display: flex; flex-direction: column;
+    height: auto; min-height: 0; max-height: none; padding-bottom: 0;
+  }
+  .p-projects .band-hero__text {
+    order: 1; position: relative; z-index: 4;
+    left: auto; right: auto; top: auto; bottom: auto;
+    max-width: none; padding: clamp(26px, 6vw, 46px) var(--gutter) 20px;
+  }
+  /* the field is the picture: full bleed, its own height, no type on it */
+  .p-projects .band-hero > .pane {
+    order: 2; position: relative; inset: auto;
+    width: auto; height: clamp(360px, 48svh, 440px); border-top: 0;
+  }
+  /* no arcs behind the words any more, so no ink ellipse to hold them off */
+  .p-projects .band-hero__text::before,
+  .p-projects .band-hero__tools::before { display: none; }
+  .p-projects .band-hero__text .lede { max-width: 34ch; }
+  /* and the readout is the picture's caption, under it, where a caption goes */
+  .p-projects .band-hero__tools {
+    order: 3; position: static; width: auto;
+    margin: var(--s-4) var(--gutter) 0; padding-top: 12px;
+  }
+  .p-projects .band-hero .scene-note { position: static; padding: 0; }
+}
+/* a small phone gives the field more of the screen, so the column tightens
+   rather than pushing the field off the bottom */
+@media (max-width: 480px) {
+  .p-projects .band-hero__text .eyebrow { margin-bottom: .5rem; }
+  .p-projects .band-hero__text .lede {
+    font-size: 1.02rem; line-height: 1.4; max-width: 30ch;
+  }
+  .p-projects .band-hero__tools { margin-top: var(--s-3); padding-top: 10px; }
+  .p-projects .band-hero__tools .readout { margin-top: 6px; }
+  .p-projects .band-hero__tools .readout .k { font-size: .7rem; } /* phone floor: .66rem was 10.56 px */
+  .p-projects .band-hero__tools .readout b { font-size: var(--t-small); margin: 2px 0 3px; }
+  .p-projects .band-hero__tools .readout p { line-height: 1.42; }
+  .p-projects .band-hero__tools .readout p,
+  .p-projects .band-hero .scene-note { max-width: none; }
+  .p-projects .band-hero .scene-note { margin-top: 7px; }
+}
+@media (max-width: 360px) {
+  .p-projects .band-hero__text .lede { font-size: .97rem; }
+}
+
+/* ---- 4. the register: hairlines, no chips in boxes --------- */
+.p-projects .reg-head {
+  font-size: var(--t-h2); line-height: var(--lh-head);
+  letter-spacing: var(--track-head);
+  font-variation-settings: "opsz" 96, "SOFT" 8, "WONK" 1;
+  max-width: 18ch; margin-bottom: var(--s-6); scroll-margin-top: 86px;
+}
+.p-projects .reg-rail {
+  border-top: 1px solid var(--rule);
+  padding-top: var(--s-4); margin-bottom: var(--s-6);
+}
+.p-projects .reg-rail .reg-tools { margin-bottom: 8px; gap: 2px 0; }
+.p-projects .reg-rail .reg-tools:last-child { margin-bottom: 0; }
+/* a filter is a word you can press, not a pill in a frame — the stylesheet
+   draws it that way now, so all this row needs is the air between words */
+.p-projects .reg-tools .chip { margin-right: clamp(14px, 2vw, 26px); }
+.p-projects .reg-tools .chip:focus-visible { outline-offset: 3px; }
+.p-projects #reg-count { margin-left: auto; padding: 7px 0 6px; }
+
+/* The "built with" line is the smallest thing in the register. It was left at
+   .62rem / .58rem — 9.92 and 9.28 px at 1280, the only type on the page under
+   ten. It belongs to the same micro scale as the date, the state and the group
+   count beside it, so it is set from the token rather than a loose rem. */
+.p-projects .entry__stack { font-size: var(--t-micro); line-height: 1.62; }
+.p-projects .entry__stack em { font-size: var(--t-micro); margin-bottom: 2px; }
+</style>
+<script defer src="js/site.js"></script>
+<script defer src="js/scene.js"></script>
+<script defer src="js/palette.js"></script>
+<script defer src="js/wash.js"></script>
+<script defer src="js/page.js"></script>
+<script defer src="js/projects.js"></script>
+</head>
+<body class="ink-ground p-projects">
+
+<canvas class="page-wash" id="page-wash" aria-hidden="true"></canvas>
+<a class="skip" href="#main">Skip to content</a>
+
+<nav class="nav" aria-label="Pages">
+  <a class="nav__mark" href="index.html">Owen Silva</a>
+  <button class="pal-btn" id="pal-btn" type="button" aria-label="Open the go-to palette. Keyboard shortcut Control or Command K.">Go to <kbd>⌘K</kbd></button>
+  <button class="theme-btn" id="theme-btn" type="button">Ink</button>
+  <div class="nav__links">
+    <a href="index.html">Index</a>
+    <a href="atlas.html">Atlas</a>
+    <a href="browser.html">Browser</a>
+    <a href="portal.html">Portal</a>
+    <a href="projects.html" aria-current="page">Projects</a>
+    <a href="lab.html">Lab</a>
+    <a href="about.html">About</a>
+  </div>
+</nav>
+
+<main id="main">
+  <section class="band-hero" aria-labelledby="h-title">
+    <div class="pane" id="graph-pane">
+      <canvas class="pane__cv" id="graph-cv" aria-hidden="true"></canvas>
+      <svg class="pane__svg ink-svg" id="graph-svg" role="group" aria-label="An arc diagram: 43 technologies along the top, 22 projects along the bottom in the order they started, and one arc for every line in a project’s built-with list. Each is a button; the full list follows below."></svg>
+    </div>
+    <div class="band-hero__text">
+      <p class="eyebrow" data-enter="fade">Everything else</p>
+      <h1 id="h-title" data-enter="rise" data-delay="80">Twenty-two more</h1>
+      <p class="lede" data-enter="rise" data-delay="170">The projects without a page of their own, and what each one is made of.</p>
+    </div>
+    <div class="band-hero__tools" data-enter="rise" data-delay="280">
+      <h2 class="vh" id="h-graph">The technology graph</h2>
+      <div class="readout" id="graph-read" role="status" aria-live="polite"></div>
+      <!-- The night behind the page reports on the FIRST of the shared status
+           ids it finds (js/page.js, js/scene.js). This page carried two of
+           them and the first was #reg-state, a screen and a half below the
+           fold, so the one page on the site that could lose WebGL and say
+           nothing about it beside the picture was this one. #wash-state is
+           first in both lists: the night's condition and its reason land
+           here now, and #graph-state keeps the field's own. -->
+      <p class="scene-note" id="wash-state" role="status"></p>
+      <p class="scene-note" id="graph-state" role="status"></p>
+    </div>
+  </section>
+
+  <div class="wrap">
+
+    <section class="band band--flush" aria-labelledby="h-all">
+      <p class="eyebrow">01 — The register</p>
+      <h2 class="reg-head" id="h-all">All twenty-two projects</h2>
+
+      <div class="reg-rail" data-enter="fade" data-delay="90">
+        <div class="reg-tools" id="reg-tools" role="group" aria-label="Filter by state">
+          <button class="chip" type="button" data-filter="all" aria-pressed="true">All 22</button>
+          <button class="chip" type="button" data-filter="run" aria-pressed="false">Running now</button>
+          <button class="chip" type="button" data-filter="done" aria-pressed="false">Finished</button>
+          <button class="chip" type="button" data-filter="off" aria-pressed="false">Paused or shelved</button>
+          <span class="mono" id="reg-count" role="status" style="color:var(--ink-faint);letter-spacing:.05em;text-transform:none">22 of 22 projects shown</span>
+        </div>
+
+        <div class="reg-tools" id="group-tools" role="group" aria-label="Filter by group"></div>
+      </div>
+
+      <div id="register"></div>
+      <p class="scene-note" id="reg-state" role="status"></p>
+    </section>
+
+    <footer class="colophon">
+      <div>
+        <h2>About these numbers</h2>
+        <p>Measured on 16 September 2026 from git history, file counts and the live sites. Where a
+           project has no git history, its dates come from its files.</p>
+      </div>
+      <div>
+        <h2>Where they run</h2>
+        <p>Most of these are tools I run for myself rather than services with users. The playable ones
+           are in <a href="lab.html">the lab</a>.</p>
+      </div>
+      <div>
+        <h2>Next</h2>
+        <p><a href="index.html">The index and its commit river</a> &middot;
+           <a href="about.html">How I work</a></p>
+      </div>
+    </footer>
+
+  </div>
+</main>
+</body>
+</html>

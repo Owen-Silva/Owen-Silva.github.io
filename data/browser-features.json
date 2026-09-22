@@ -1,0 +1,527 @@
+{
+  "_source": {
+    "path": "C:\\Users\\owens\\browser\\README.md",
+    "read": "2026-09-16, read-only",
+    "readme_lines": 1401,
+    "features_section_lines": "143–1119",
+    "readme_sections": [
+      {
+        "title": "Running it",
+        "line": 11
+      },
+      {
+        "title": "Keyboard shortcuts",
+        "line": 67
+      },
+      {
+        "title": "Features",
+        "line": 143
+      },
+      {
+        "title": "Security notes",
+        "line": 1120
+      },
+      {
+        "title": "Performance",
+        "line": 1183
+      },
+      {
+        "title": "Files",
+        "line": 1233
+      },
+      {
+        "title": "Design rules worth keeping",
+        "line": 1293
+      },
+      {
+        "title": "Development",
+        "line": 1367
+      }
+    ],
+    "note": "The README has nine top-level sections. Everything below is from `## Features` only; that section has no sub-headings, so every entry carries the same section name."
+  },
+  "counting_rule": {
+    "rule": "One feature = one paragraph inside `## Features` that opens with a bold lead, i.e. a line matching /^\\*\\*/. The bold lead is the feature name; the sentence after it is the description.",
+    "shell_equivalent": "sed -n '/^## Features/,/^## Security notes/p' README.md | grep -c '^\\*\\*'",
+    "count": 67,
+    "claimed_in_writeup": 67,
+    "reproduces": true,
+    "caveats": [
+      "This is the DOCUMENTED count, not the built count. The README has not changed since 13 Sep (byte-identical), while four user-facing features landed 14–15 Sep: phone sound routing (computer / phone / both), the Claude-tab terminal fixes, the School pane filling its pane, and the phone workspace keeping exactly one phone tab. None of those four are in the 67.",
+      "The rule matters: the whole README carries 70 bold-lead paragraphs, and three of them sit outside `## Features`, in sections that use the same style for things that are not features. Counting only inside `## Features` is what gives 67.",
+      "A few paragraphs open with more than one bold run — e.g. \"**Trading** … and **Phone** …\" — so `name` is the FIRST bold run only, and `lead_raw` carries the whole opening line as the README writes it."
+    ]
+  },
+  "feature_count": 67,
+  "features": [
+    {
+      "index": 1,
+      "section": "Features",
+      "name": "Tabs",
+      "description": "Drag to reorder (pointer-driven, body.tab-dragging), right-click menu, middle-click close.",
+      "lead_raw": "Tabs. Drag to reorder (pointer-driven, body.tab-dragging), right-click menu, middle-click"
+    },
+    {
+      "index": 2,
+      "section": "Features",
+      "name": "Popups and target=_blank",
+      "description": "Links become tabs; sign-in popups stay windows.",
+      "lead_raw": "Popups and target=_blank. Links become tabs; sign-in popups stay windows. Guests carry"
+    },
+    {
+      "index": 3,
+      "section": "Features",
+      "name": "Workspaces",
+      "description": "One window, several named strips.",
+      "lead_raw": "Workspaces. One window, several named strips. Every tab belongs to a workspace, and the strip"
+    },
+    {
+      "index": 4,
+      "section": "Features",
+      "name": "Trading",
+      "description": "(ember, robinhood-agent) and Phone (midnight, no folder, and it opens into the phone rather than a new tab page).",
+      "lead_raw": "Trading (ember, robinhood-agent) and Phone (midnight, no folder, and it opens into the"
+    },
+    {
+      "index": 5,
+      "section": "Features",
+      "name": "Sleep",
+      "description": "A workspace you are not looking at stops paying for itself.",
+      "lead_raw": "Sleep. A workspace you are not looking at stops paying for itself. Seven new-tab pages across"
+    },
+    {
+      "index": 6,
+      "section": "Features",
+      "name": "Side pane",
+      "description": "A workspace may own a column beside the tab well (never over it): 380px by default, 280 to 60% of the window, a 6px drag handle, width remembered. app.js shows it for the current workspace's pane kind and tells the tenant with a sidepane event; hosted apps…",
+      "lead_raw": "Side pane. A workspace may own a column beside the tab well (never over it): 380px by default,"
+    },
+    {
+      "index": 7,
+      "section": "Features",
+      "name": "School pane",
+      "description": "The pane School owns: a chip per notebook in Documents\\school plus Auto, a status strip that prints the reader's mode and reason, the helper's state and reason and the matched section, and the notebook itself, which scrolls to the matched section with a…",
+      "lead_raw": "School pane. The pane School owns: a chip per notebook in Documents\\school plus Auto, a"
+    },
+    {
+      "index": 8,
+      "section": "Features",
+      "name": "Phone workspace",
+      "description": "Owen's phone on the screen, in a tab: a Moto G (2025) on Android 16, reached over Tailscale at [removed] — never a cable, never the open internet, so the phone's Tailscale has to be on before anything below can work and every failure without it is a…",
+      "lead_raw": "Phone workspace. Owen's phone on the screen, in a tab: a Moto G (2025) on Android 16, reached"
+    },
+    {
+      "index": 9,
+      "section": "Features",
+      "name": "The tools",
+      "description": "are adb and the scrcpy v4.1 server, and nothing else is bundled.",
+      "lead_raw": "The tools are adb and the scrcpy v4.1 server, and nothing else is bundled. The first time a"
+    },
+    {
+      "index": 10,
+      "section": "Features",
+      "name": "Pairing is once",
+      "description": "On the phone, Wireless debugging → \"Pair device with pairing code\" gives a host, a port and six digits; Settings → Phone takes them.",
+      "lead_raw": "Pairing is once. On the phone, Wireless debugging → \"Pair device with pairing code\" gives a"
+    },
+    {
+      "index": 11,
+      "section": "Features",
+      "name": "Input",
+      "description": "The mouse is a finger: move, press and drag are touch events, the wheel scrolls, right-click is Back and middle-click is Home.",
+      "lead_raw": "Input. The mouse is a finger: move, press and drag are touch events, the wheel scrolls,"
+    },
+    {
+      "index": 12,
+      "section": "Features",
+      "name": "Readouts",
+      "description": ", down the same rail: device, battery, phone rtt, browser rtt, fps, kbps, decoder, decode time, decode queue, dropped, key frames asked, frame age, profile · bitrate, audio and keys.",
+      "lead_raw": "Readouts, down the same rail: device, battery, phone rtt, browser rtt, fps, kbps, decoder,"
+    },
+    {
+      "index": 13,
+      "section": "Features",
+      "name": "Quality",
+      "description": "lives in Settings → Phone: a profile (At home, Away, Auto), a bitrate for each of the first two, longest side, frame rate, phone audio, turning the phone's screen off while mirroring, and connecting on its own when the browser starts.",
+      "lead_raw": "Quality lives in Settings → Phone: a profile (At home, Away, Auto), a bitrate for each of the"
+    },
+    {
+      "index": 14,
+      "section": "Features",
+      "name": "Phone link",
+      "description": "switch: off stops the stream, disconnects the phone and kills the adb server, and nothing reconnects, downloads or spawns adb again until it is back on.",
+      "lead_raw": "Phone link switch: off stops the stream, disconnects the phone and kills the adb server, and"
+    },
+    {
+      "index": 15,
+      "section": "Features",
+      "name": "None of it fails silently",
+      "description": "Every state names itself, its reason and the one action that moves it on — download the tools, open Settings → Phone, connect, start, retry — and a refused command prints its reason under the button that sent it.",
+      "lead_raw": "None of it fails silently. Every state names itself, its reason and the one action that moves"
+    },
+    {
+      "index": 16,
+      "section": "Features",
+      "name": "Budget pill",
+      "description": "The one titlebar readout: it reads the JSON that Claude Code's statusline hook writes (5-hour and week percentages, amber from 80%, red from 95%; the card has the countdowns, today's spend across the sessions that ran today — counted from a per-day…",
+      "lead_raw": "Budget pill. The one titlebar readout: it reads the JSON that Claude Code's statusline hook"
+    },
+    {
+      "index": 17,
+      "section": "Features",
+      "name": "Tab search",
+      "description": "Ctrl+Shift+A, or the list glyph in the titlebar, opens one glass pane over the page: every open tab — title, host or Claude folder, tags for current / pinned / muted / playing / sleeping, its own close button — filtered as you type (every word has to land…",
+      "lead_raw": "Tab search. Ctrl+Shift+A, or the list glyph in the titlebar, opens one glass pane over the"
+    },
+    {
+      "index": 18,
+      "section": "Features",
+      "name": "Command palette",
+      "description": "The same pane, one character later.",
+      "lead_raw": "Command palette. The same pane, one character later. Type > into tab search — or press"
+    },
+    {
+      "index": 19,
+      "section": "Features",
+      "name": "Split view",
+      "description": "Two tabs side by side in one well — two pages, a page and a Claude chamber, or two chambers.",
+      "lead_raw": "Split view. Two tabs side by side in one well — two pages, a page and a Claude chamber, or"
+    },
+    {
+      "index": 20,
+      "section": "Features",
+      "name": "Claude beside a page",
+      "description": "The pairing the whole browser exists for, on one key.",
+      "lead_raw": "Claude beside a page. The pairing the whole browser exists for, on one key. Ctrl+Shift+\\"
+    },
+    {
+      "index": 21,
+      "section": "Features",
+      "name": "Claude needs you",
+      "description": "A session that wants you goes quiet, so quiet is the signal. terminal.js watches the data pump and raises two events on top of the plain activity one: idle, once per burst, 1200ms after the last byte and only when at least 200 bytes have arrived since the…",
+      "lead_raw": "Claude needs you. A session that wants you goes quiet, so quiet is the signal. terminal.js"
+    },
+    {
+      "index": 22,
+      "section": "Features",
+      "name": "Ask Claude about this",
+      "description": "The gesture the whole browser is built around: one move takes what is on screen and puts it in front of a session standing beside it.",
+      "lead_raw": "Ask Claude about this. The gesture the whole browser is built around: one move takes what is"
+    },
+    {
+      "index": 23,
+      "section": "Features",
+      "name": "Show Claude this page",
+      "description": "The same gesture one sense further along: Claude Code opens an image file when it is handed the path, so a screenshot plus a line of text is a real multimodal hand-off — the layout, the chart, the error dialog, the bit with no text to quote.",
+      "lead_raw": "Show Claude this page. The same gesture one sense further along: Claude Code opens an image"
+    },
+    {
+      "index": 24,
+      "section": "Features",
+      "name": "Ask Claude about this article",
+      "description": "Ask hands over a link and Show hands over a picture; this hands over the WORDS, so a session that cannot browse can still answer from the page.",
+      "lead_raw": "Ask Claude about this article. Ask hands over a link and Show hands over a picture; this hands"
+    },
+    {
+      "index": 25,
+      "section": "Features",
+      "name": "Session",
+      "description": "The strip is snapshotted (debounced 500ms, suppressed while restoring) to two places: localStorage['session'] and, over IPC, session.json in the profile, which main writes synchronously to a .tmp and renames, so a kill mid-write can only destroy the temp file.",
+      "lead_raw": "Session. The strip is snapshotted (debounced 500ms, suppressed while restoring) to two places:"
+    },
+    {
+      "index": 26,
+      "section": "Features",
+      "name": "Blocking",
+      "description": "Ghostery's @ghostery/adblocker-electron engine owns the webRequest hooks on session.defaultSession, so one engine filters every guest with nothing per-tab to wire up.",
+      "lead_raw": "Blocking. Ghostery's @ghostery/adblocker-electron engine owns the webRequest hooks on"
+    },
+    {
+      "index": 27,
+      "section": "Features",
+      "name": "YouTube and scriptlets",
+      "description": "Clicking a video on YouTube is a same-document navigation, so the player is built from a fetch, not from a fresh document — which is why a reload always appeared to fix a player that would not start.",
+      "lead_raw": "YouTube and scriptlets. Clicking a video on YouTube is a same-document navigation, so the player"
+    },
+    {
+      "index": 28,
+      "section": "Features",
+      "name": "Tab audio and pinning",
+      "description": "A chip grows a speaker button the first time its guest plays something; clicking it mutes the tab without raising it, and the mute rides in the session entry and is re-applied on dom-ready, since a fresh guest is born unmuted.",
+      "lead_raw": "Tab audio and pinning. A chip grows a speaker button the first time its guest plays"
+    },
+    {
+      "index": 29,
+      "section": "Features",
+      "name": "Collapsing a chip",
+      "description": "Every chip carries a small minus button before its close button — .tab-collapse, built in buildChip() for a page, a catalogue app, a terminal, a Claude chamber and a hosted native app window alike, because setTabCollapsed() is a chip-size flag and nothing…",
+      "lead_raw": "Collapsing a chip. Every chip carries a small minus button before its close button —"
+    },
+    {
+      "index": 30,
+      "section": "Features",
+      "name": "Tab sleeping",
+      "description": "A background page tab that has sat untouched past the configured idle time (default 30 minutes, 0 = never, swept once a minute) gives its renderer back: the <webview> is removed from #views, which is what destroys the guest, and a hidden placeholder <div>…",
+      "lead_raw": "Tab sleeping. A background page tab that has sat untouched past the configured idle time"
+    },
+    {
+      "index": 31,
+      "section": "Features",
+      "name": "Site styles and scripts",
+      "description": "sitestyles.js keeps { css, dark, js } per host in localStorage['sitestyles'], plus one global force-dark switch.",
+      "lead_raw": "Site styles and scripts. sitestyles.js keeps { css, dark, js } per host in"
+    },
+    {
+      "index": 32,
+      "section": "Features",
+      "name": "Reader view",
+      "description": "Ctrl+Shift+R (or the nav-row button, hidden until the page probes as readable) runs @mozilla/readability over the active page and opens the article in the bundled reader.html, next to the tab it came from.",
+      "lead_raw": "Reader view. Ctrl+Shift+R (or the nav-row button, hidden until the page probes as readable)"
+    },
+    {
+      "index": 33,
+      "section": "Features",
+      "name": "Address bar",
+      "description": "A recognised, allow-listed scheme navigates as typed; a localhost or IPv4 host gets http://; any other bare domain gets https://; everything else is a search through the configured engine. #omni-suggest hangs under the capsule and mirrors its geometry:…",
+      "lead_raw": "Address bar. A recognised, allow-listed scheme navigates as typed; a localhost or IPv4 host"
+    },
+    {
+      "index": 34,
+      "section": "Features",
+      "name": "History page",
+      "description": "Ctrl+H opens the whole store as a page, not the recent dropdown — the dropdown is still what an empty omnibox focus shows.",
+      "lead_raw": "History page. Ctrl+H opens the whole store as a page, not the recent dropdown — the dropdown"
+    },
+    {
+      "index": 35,
+      "section": "Features",
+      "name": "Files tab",
+      "description": "Ctrl+Alt+E, or the \"Files\" row in the command palette, opens the bundled files.html as a tab with a blank omnibox — Ctrl+Shift+E was left where it was, on Workspaces.",
+      "lead_raw": "Files tab. Ctrl+Alt+E, or the \"Files\" row in the command palette, opens the bundled"
+    },
+    {
+      "index": 36,
+      "section": "Features",
+      "name": "Site info",
+      "description": "A lock rides inside the left end of the omnibox capsule and opens a popover saying what this origin is, what it may do and what it has stored.",
+      "lead_raw": "Site info. A lock rides inside the left end of the omnibox capsule and opens a popover saying"
+    },
+    {
+      "index": 37,
+      "section": "Features",
+      "name": "Find in page",
+      "description": "A right-aligned instrument under the nav row driving the active webview's findInPage / stopFindInPage, re-running at most every 60ms while typing.",
+      "lead_raw": "Find in page. A right-aligned instrument under the nav row driving the active webview's"
+    },
+    {
+      "index": 38,
+      "section": "Features",
+      "name": "Picture in picture",
+      "description": "Alt+P, or the nav-row button that appears once a page proves it has a video, lifts that video out of the page and floats it over everything else; pressing again puts it back.",
+      "lead_raw": "Picture in picture. Alt+P, or the nav-row button that appears once a page proves it has a"
+    },
+    {
+      "index": 39,
+      "section": "Features",
+      "name": "Page screenshots",
+      "description": "Ctrl+Shift+S writes a PNG of whatever page is on screen to <Downloads>\\Screenshot <host> <YYYY-MM-DD HH-mm-ss>.png, flashes the window white for one stepped frame and says so in a toast, which is the whole output. capturePage() lives on the guest's…",
+      "lead_raw": "Page screenshots. Ctrl+Shift+S writes a PNG of whatever page is on screen to"
+    },
+    {
+      "index": 40,
+      "section": "Features",
+      "name": "Bookmarks bar",
+      "description": "Ctrl+Shift+B, or the switch in Look, shows a bar of the new-tab chips under the address bar.",
+      "lead_raw": "Bookmarks bar. Ctrl+Shift+B, or the switch in Look, shows a bar of the new-tab chips under"
+    },
+    {
+      "index": 41,
+      "section": "Features",
+      "name": "Downloads",
+      "description": "will-download picks a unique path in the real Downloads folder and calls setSavePath up front, which is exactly what suppresses the save dialog.",
+      "lead_raw": "Downloads. will-download picks a unique path in the real Downloads folder and calls"
+    },
+    {
+      "index": 42,
+      "section": "Features",
+      "name": "Spotify auto-pause",
+      "description": "The auto-pause tool already installed at ~/spotify-autopause is a local PowerShell HTTP bridge (127.0.0.1, the first free of ports [removed] to 8790) held up by a scheduled task, with an Opera GX extension speaking to it. autopause.js is that same client…",
+      "lead_raw": "Spotify auto-pause. The auto-pause tool already installed at ~/spotify-autopause is a local"
+    },
+    {
+      "index": 43,
+      "section": "Features",
+      "name": "DRM sites",
+      "description": "Spotify and Netflix cannot play inside a tab.",
+      "lead_raw": "DRM sites. Spotify and Netflix cannot play inside a tab. Electron ships Chromium without"
+    },
+    {
+      "index": 44,
+      "section": "Features",
+      "name": "Idle music",
+      "description": "Settings → Idle music, between New tab and Privacy: Enabled, Source (Built-in ambient, or My tracks with its count, Choose files… and Clear), Where it plays, Volume, and the hint \"Plays while nothing else is playing\".",
+      "lead_raw": "Idle music. Settings → Idle music, between New tab and Privacy: Enabled, Source (Built-in"
+    },
+    {
+      "index": 45,
+      "section": "Features",
+      "name": "Media keys, and why they moved",
+      "description": "The player used to veto its own sound: Chromium registers the chrome's own <audio> element with the Windows media session, so the now-playing route reported the idle music as \"playing\", the player paused for it, the session went Paused, and it resumed — a…",
+      "lead_raw": "Media keys, and why they moved. The player used to veto its own sound: Chromium registers the"
+    },
+    {
+      "index": 46,
+      "section": "Features",
+      "name": "Now playing",
+      "description": "A third module on the new tab, seated at the bottom-left margin on its own \"flank\" placement, outside the arithmetic that positions the clock and the readout, so neither of them moves for it.",
+      "lead_raw": "Now playing. A third module on the new tab, seated at the bottom-left margin on its own \"flank\""
+    },
+    {
+      "index": 47,
+      "section": "Features",
+      "name": "Palette presets",
+      "description": "Six colour worlds, picked as painted swatches in Look: Aurora (the original), Ember, Forest, Ocean, Midnight and Mono. data-palette on <html> overrides the same ten tokens every time, each authored twice, dark and light, and matched on any descendant as…",
+      "lead_raw": "Palette presets. Six colour worlds, picked as painted swatches in Look: Aurora (the"
+    },
+    {
+      "index": 48,
+      "section": "Features",
+      "name": "Settings",
+      "description": "A gear beside the theme toggle opens a popover with fourteen sections, every one of them collapsed: the pane opens as a list of headings and you unfold the ones you came for.",
+      "lead_raw": "Settings. A gear beside the theme toggle opens a popover with fourteen sections, every one of"
+    },
+    {
+      "index": 49,
+      "section": "Features",
+      "name": "Browser style",
+      "description": "Site styles paint web pages across an async boundary; this paints the chrome — titlebar, tabs, omnibox, panels — the document the script is already running in, so there is no IPC and nothing to wait for. userstyle.js owns one string in…",
+      "lead_raw": "Browser style. Site styles paint web pages across an async boundary; this paints the chrome —"
+    },
+    {
+      "index": 50,
+      "section": "Features",
+      "name": "Find a setting",
+      "description": "A filter box sits in the settings head, above the sections. indexFields() writes one lowercased string per .set-field into data-search, read off the rendered text — labels, hints, option names, keycaps, plus the section's heading and any hint outside the…",
+      "lead_raw": "Find a setting. A filter box sits in the settings head, above the sections. indexFields()"
+    },
+    {
+      "index": 51,
+      "section": "Features",
+      "name": "New tab page",
+      "description": "A plain file:// page inside a guest — no preload, no window.api.",
+      "lead_raw": "New tab page. A plain file:// page inside a guest — no preload, no window.api. The"
+    },
+    {
+      "index": 52,
+      "section": "Features",
+      "name": "Apps dock",
+      "description": "In the same capsule, above the web chips, the apps you have pinned are drawn as 56px tiles: a 32px icon, the name under it, and a dot at the icon's corner while the app is running.",
+      "lead_raw": "Apps dock. In the same capsule, above the web chips, the apps you have pinned are drawn as 56px"
+    },
+    {
+      "index": 53,
+      "section": "Features",
+      "name": "System stats",
+      "description": "Inside the capsule, where the search field used to be, is a strip of live system stats — the field is gone because Owen searches from the address bar.",
+      "lead_raw": "System stats. Inside the capsule, where the search field used to be, is a strip of live system"
+    },
+    {
+      "index": 54,
+      "section": "Features",
+      "name": "Processes",
+      "description": "Under the strip is a \"Processes\" expander — a chevron at the strip's right edge, and the strip itself is the toggle.",
+      "lead_raw": "Processes. Under the strip is a \"Processes\" expander — a chevron at the strip's right edge, and"
+    },
+    {
+      "index": 55,
+      "section": "Features",
+      "name": "Markets",
+      "description": "Live stock prices in the new tab's bottom-right corner, and the one module the board does not seat — newtab-bg.js's MODULE_SPEC names three ids and this is not one of them, so it keeps the corner CSS gives it.",
+      "lead_raw": "Markets. Live stock prices in the new tab's bottom-right corner, and the one module the board"
+    },
+    {
+      "index": 56,
+      "section": "Features",
+      "name": "Where the prices come from, and where the key lives",
+      "description": "stocks.js in MAIN owns every part of it, and the key never comes out of that process.",
+      "lead_raw": "Where the prices come from, and where the key lives. stocks.js in MAIN owns every part of it,"
+    },
+    {
+      "index": 57,
+      "section": "Features",
+      "name": "And what it costs",
+      "description": "Nothing while you are not looking at it.",
+      "lead_raw": "And what it costs. Nothing while you are not looking at it. The page subscribes on"
+    },
+    {
+      "index": 58,
+      "section": "Features",
+      "name": "New tab backgrounds",
+      "description": "Four of them, picked in Settings → New tab. *Circuit board* is the page's own default. *Aurora only* hides the canvas and the packet layer and stops newtab-bg.js drawing at all, on the same data-bg attribute the CSS reads, so nothing hidden still costs…",
+      "lead_raw": "New tab backgrounds. Four of them, picked in Settings → New tab. *Circuit board* is the"
+    },
+    {
+      "index": 59,
+      "section": "Features",
+      "name": "Board pause",
+      "description": "A pane with a backdrop-filter over the new tab page re-blurs everything under it on every painted frame — about eleven points of CPU on top of the overlay's own.",
+      "lead_raw": "Board pause. A pane with a backdrop-filter over the new tab page re-blurs everything under"
+    },
+    {
+      "index": 60,
+      "section": "Features",
+      "name": "Claude tabs",
+      "description": "pty.js spawns C:\\Users\\owens\\.local\\bin\\claude.exe under a real ConPTY, wired to xterm.js.",
+      "lead_raw": "Claude tabs. pty.js spawns C:\\Users\\owens\\.local\\bin\\claude.exe under a real ConPTY, wired"
+    },
+    {
+      "index": 61,
+      "section": "Features",
+      "name": "Other programs in a chamber",
+      "description": "pty.js is no longer claude-only.",
+      "lead_raw": "Other programs in a chamber. pty.js is no longer claude-only. A static PROGRAMS table names"
+    },
+    {
+      "index": 62,
+      "section": "Features",
+      "name": "Terminal tabs",
+      "description": "The picker that table was the layer under.",
+      "lead_raw": "Terminal tabs. The picker that table was the layer under. Any program pty.js has available opens"
+    },
+    {
+      "index": 63,
+      "section": "Features",
+      "name": "Web apps and app tabs",
+      "description": "webapps.js is a catalogue of 30 web apps — Discord, WhatsApp, Telegram, Slack, Notion, Gmail, Calendar, Drive, Docs, YouTube, YouTube Music, Twitch, Reddit, X, GitHub, ChatGPT, Claude, VS Code, Figma, Canva, Microsoft 365, Outlook, Teams, Steam, Roblox,…",
+      "lead_raw": "Web apps and app tabs. webapps.js is a catalogue of 30 web apps — Discord, WhatsApp, Telegram,"
+    },
+    {
+      "index": 64,
+      "section": "Features",
+      "name": "Native app tabs",
+      "description": "The answer to \"is there a way where I can start the apps in a tab but it's running the app so that literally everything is just in a tab?\" — a real desktop app running inside a tab, engine and tab both. embed.js reaches Win32 through koffi (Node-API, so it…",
+      "lead_raw": "Native app tabs. The answer to \"is there a way where I can start the apps in a tab but it's"
+    },
+    {
+      "index": 65,
+      "section": "Features",
+      "name": "Resuming a conversation",
+      "description": "Four ways in, all the same door: right-click bare strip → \"Resume a Claude conversation…\", a Claude chip's menu → \"Resume another conversation here\", Ctrl+click the Claude button in the titlebar, or the palette's \"Resume a Claude conversation…\" row.",
+      "lead_raw": "Resuming a conversation. Four ways in, all the same door: right-click bare strip → \"Resume a"
+    },
+    {
+      "index": 66,
+      "section": "Features",
+      "name": "Permissions",
+      "description": "Electron grants everything by default, which would make this the most generous browser on the machine, so the handler is explicit: a short silent-allow list, a prompted list, and deny for everything else.",
+      "lead_raw": "Permissions. Electron grants everything by default, which would make this the most generous"
+    },
+    {
+      "index": 67,
+      "section": "Features",
+      "name": "Context menus",
+      "description": "A <webview> has no menu of its own and the built-in role: entries act on the window, so every item calls the guest's own webContents method: navigation, link, image, selection, the four Claude hand-offs, editing and inspect.",
+      "lead_raw": "Context menus. A <webview> has no menu of its own and the built-in role: entries act on"
+    }
+  ]
+}

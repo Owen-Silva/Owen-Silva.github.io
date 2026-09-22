@@ -1,0 +1,153 @@
+{
+  "_source": "measured 2026-09-14 census, recorded in BRIEF-2",
+  "_source_detail": {
+    "recorded_in": "C:\\Users\\owens\\portfolio-site\\_explore\\BRIEF-2.md, section \"Real data you may use\"",
+    "brief_wording": "Lines of code census (16 Sep, already measured): 408,364 code lines in 1,355 files.",
+    "measured": "2026-09-14 census (the 16 Sep brief carries the same figures)",
+    "recount": "NOT recounted. Every figure below is transcribed from the brief exactly as written; only the residuals and percentages are arithmetic on those figures.",
+    "rounding": "The brief gives per-project and per-language figures to one decimal place in thousands. They are expanded here to whole lines for charting, so each carries up to ±50 lines of rounding error and the buckets do not add to the total exactly — see residuals."
+  },
+  "totals": {
+    "code_lines": 408364,
+    "files": 1355,
+    "lines_per_file_mean": 301
+  },
+  "by_project": [
+    {
+      "id": "atlas",
+      "name": "Atlas",
+      "lines": 228500,
+      "display": "228.5k",
+      "breakdown": {
+        "tests": 136000,
+        "tests_display": "about 136k",
+        "rest": 92500,
+        "rest_display": "about 92.5k"
+      },
+      "note": "The single biggest body of code, and roughly three fifths of it is tests.",
+      "share_pct": 56
+    },
+    {
+      "id": "browser",
+      "name": "Browser",
+      "lines": 51300,
+      "display": "51.3k",
+      "note": "An Electron browser written in six days.",
+      "share_pct": 12.6
+    },
+    {
+      "id": "design+site",
+      "name": "Design explorations + site rebuild",
+      "lines": 43000,
+      "display": "43k",
+      "note": "Seven standalone visual directions for Atlas plus the 16-page site rebuild.",
+      "share_pct": 10.5
+    },
+    {
+      "id": "portal",
+      "name": "TVHA portal",
+      "lines": 26000,
+      "display": "26k",
+      "note": "The youth-hockey family and staff portal.",
+      "share_pct": 6.4
+    },
+    {
+      "id": "trading",
+      "name": "Trading tools",
+      "lines": 14400,
+      "display": "14.4k",
+      "note": "Stock Coach, the Robinhood bot, the backtesting lab and Lens Trade.",
+      "share_pct": 3.5
+    },
+    {
+      "id": "prototypes",
+      "name": "One-off prototypes",
+      "lines": 13300,
+      "display": "13.3k",
+      "note": "Single-sitting builds: the Star Wars game, the dashboard prototype and the rest.",
+      "share_pct": 3.3
+    },
+    {
+      "id": "mission-control",
+      "name": "Mission Control",
+      "lines": 12100,
+      "display": "12.1k",
+      "note": "The local live dashboard of agents and infrastructure.",
+      "share_pct": 3
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify Auto-Pause",
+      "lines": 8700,
+      "display": "8.7k",
+      "note": "Pauses music when a video starts talking.",
+      "share_pct": 2.1
+    }
+  ],
+  "by_language": [
+    {
+      "language": "JavaScript",
+      "lines": 275000,
+      "display": "275k",
+      "share_pct": 67.3
+    },
+    {
+      "language": "HTML",
+      "lines": 76000,
+      "display": "76k",
+      "share_pct": 18.6
+    },
+    {
+      "language": "TypeScript",
+      "lines": 19000,
+      "display": "19k",
+      "share_pct": 4.7
+    },
+    {
+      "language": "CSS",
+      "lines": 18000,
+      "display": "18k",
+      "share_pct": 4.4
+    },
+    {
+      "language": "Python",
+      "lines": 11000,
+      "display": "11k",
+      "share_pct": 2.7
+    },
+    {
+      "language": "PowerShell",
+      "lines": 8000,
+      "display": "8k",
+      "share_pct": 2
+    }
+  ],
+  "residuals": {
+    "by_project_sum": 397300,
+    "by_project_unattributed": 11064,
+    "by_project_unattributed_note": "The eight named projects account for 397,300 of 408,364 lines. The remaining 11,064 sit in projects the brief does not break out individually (the smaller side projects and tools). Label any leftover slice \"everything else\", never zero it.",
+    "by_language_sum": 407000,
+    "by_language_unattributed": 1364,
+    "by_language_unattributed_note": "The six named languages account for 407,000 lines; the remaining 1,364 are other languages the brief does not list."
+  },
+  "conflicts_with_other_measurements": [
+    {
+      "subject": "Browser",
+      "census_says": "51.3k lines",
+      "other_measurement_says": "63,029 JavaScript lines + 13,218 CSS lines = 76,247 (CONTENT-UPDATE.md §1, `git ls-files | xargs wc -l`)",
+      "why": "Different rules. The census counts CODE lines; `wc -l` counts every line including blanks and comments, and `git ls-files` sweeps a different file set. Neither figure is wrong; they are not interchangeable. Do not add them together or present them side by side without saying which rule each used."
+    },
+    {
+      "subject": "TVHA portal",
+      "census_says": "26k lines",
+      "other_measurement_says": "35,088 TypeScript lines (CONTENT-UPDATE.md §3, `git ls-files '*.ts' '*.tsx' | xargs wc -l`)",
+      "why": "Same reason as above: code lines vs. raw line count over a different file set."
+    },
+    {
+      "subject": "Atlas",
+      "census_says": "228.5k lines, about 136k of it tests",
+      "other_measurement_says": "~140k app lines and ~212k test lines (the figures on the baseline write-up, listed there as NOT remeasured)",
+      "why": "The two were measured with different rules and do not reconcile: 140k + 212k = 352k against the census’s 228.5k. The census is the 16 Sep measurement and is the one to publish. The ~140k/~212k pair is explicitly flagged unverified in CONTENT-UPDATE.md and should not be shown beside the census figure."
+    }
+  ]
+}

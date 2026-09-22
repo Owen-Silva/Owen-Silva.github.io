@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Star Wars: Strategic Battle</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: 'Courier New', monospace; }
+    canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+    #overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.88); z-index: 10;
+    }
+    #faction-select { text-align: center; color: #ffe81f; }
+    #faction-select h1 { font-size: 2.6em; margin-bottom: 6px; text-shadow: 0 0 24px #ffe81f; letter-spacing: 6px; }
+    #faction-select .sub { color: #888; margin-bottom: 20px; font-size: 0.85em; letter-spacing: 2px; }
+    #test-toggle {
+      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px;
+      cursor: pointer; user-select: none; font-size: 0.72em; letter-spacing: 1px; color: #666;
+    }
+    #test-toggle input { display: none; }
+    #test-toggle .pill {
+      width: 34px; height: 18px; border-radius: 9px; background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2); position: relative; transition: background 0.2s;
+    }
+    #test-toggle .pill::after {
+      content:''; position: absolute; top: 2px; left: 2px;
+      width: 12px; height: 12px; border-radius: 50%; background: #555; transition: all 0.2s;
+    }
+    #test-toggle input:checked ~ .pill { background: rgba(255,232,31,0.3); border-color: #ffe81f; }
+    #test-toggle input:checked ~ .pill::after { left: 18px; background: #ffe81f; }
+    #test-toggle input:checked ~ span { color: #ffe81f; }
+    .faction-cards { display: flex; gap: 28px; }
+    .faction-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px; padding: 28px 22px; width: 210px; cursor: pointer; transition: all 0.2s;
+    }
+    .faction-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-4px); }
+    .faction-card.rebel:hover { border-color: #ff4444; box-shadow: 0 0 24px rgba(255,68,68,0.25); }
+    .faction-card.empire:hover { border-color: #22ff44; box-shadow: 0 0 24px rgba(34,255,68,0.2); }
+    .faction-card h2 { font-size: 1.1em; margin-bottom: 10px; }
+    .faction-card.rebel h2 { color: #ff7777; }
+    .faction-card.empire h2 { color: #77ff99; }
+    .faction-card p { color: #999; font-size: 0.72em; line-height: 1.6; }
+    .faction-card .goal { margin-top: 12px; font-size: 0.78em; font-weight: bold; }
+    .faction-card.rebel .goal { color: #ff8888; }
+    .faction-card.empire .goal { color: #88ffaa; }
+
+    #hud { position: absolute; top: 0; left: 0; width: 100%; z-index: 7; display: none; pointer-events: none; }
+    #hud-bar {
+      background: rgba(0,0,0,0.75); border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 7px 14px; display: flex; align-items: center; gap: 18px; pointer-events: all;
+    }
+    #leave-btn {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15);
+      color: #888; font-family: 'Courier New', monospace; font-size: 0.65em;
+      letter-spacing: 1px; padding: 4px 10px; border-radius: 3px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    #leave-btn:hover { background: rgba(255,60,60,0.15); border-color: #ff4444; color: #ff6666; }
+    .hud-sec { display: flex; align-items: center; gap: 7px; }
+    .hud-lbl { color: #666; font-size: 0.65em; text-transform: uppercase; letter-spacing: 1px; }
+    .hud-val { color: #ffe81f; font-size: 0.85em; font-weight: bold; }
+    .hp-bar { width: 110px; height: 7px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+    .hp-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+    .hp-fill.red { background: linear-gradient(90deg,#ff3322,#ff6644); }
+    .hp-fill.green { background: linear-gradient(90deg,#22ff44,#88ff44); }
+
+    #side-panel {
+      position: absolute; right: 0; top: 38px; bottom: 0; width: 190px;
+      background: rgba(0,0,0,0.82); border-left: 1px solid rgba(255,255,255,0.08);
+      z-index: 5; display: none; flex-direction: column; padding: 8px; overflow-y: auto;
+    }
+    #side-panel h3 {
+      color: #ffe81f; font-size: 0.68em; text-transform: uppercase; letter-spacing: 2px;
+      margin: 8px 0 5px; border-bottom: 1px solid rgba(255,232,31,0.15); padding-bottom: 3px;
+    }
+    .deploy-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; cursor: pointer;
+      color: #ccc; font-size: 0.7em; font-family: 'Courier New', monospace;
+      transition: all 0.12s; width: 100%; text-align: left;
+    }
+    .deploy-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); color: #fff; }
+    .deploy-btn:disabled { opacity: 0.32; cursor: not-allowed; }
+    .deploy-btn .cost { color: #ffe81f; font-weight: bold; }
+    .deploy-btn .tag { color: #666; font-size: 0.82em; }
+    .upgrade-btn {
+      display: flex; flex-direction: column; background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 6px 8px;
+      margin-bottom: 4px; cursor: pointer; color: #ccc; font-size: 0.68em;
+      font-family: 'Courier New', monospace; transition: all 0.12s; width: 100%; text-align: left;
+    }
+    .upgrade-btn:hover:not(:disabled) { background: rgba(255,255,255,0.08); border-color: rgba(255,232,31,0.35); }
+    .upgrade-btn:disabled { opacity: 0.32; cursor: not-allowed; }
+    .upg-row { display: flex; justify-content: space-between; }
+    .upg-name { color: #eee; font-weight: bold; }
+    .upg-cost { color: #ffe81f; }
+    .upg-desc { color: #777; margin-top: 2px; }
+    .dots { display: inline-flex; gap: 2px; margin-left: 3px; vertical-align: middle; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+    .dot.on { background: #ffe81f; }
+
+    #result-screen {
+      display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      align-items: center; justify-content: center; background: rgba(0,0,0,0.88);
+      z-index: 20; flex-direction: column; text-align: center;
+    }
+    #result-screen h1 { font-size: 3em; margin-bottom: 14px; letter-spacing: 5px; }
+    #result-screen p { color: #999; margin-bottom: 28px; font-size: 0.9em; }
+    .result-btns { display: flex; gap: 14px; justify-content: center; }
+    #result-screen button {
+      background: rgba(255,232,31,0.12); border: 1px solid #ffe81f; color: #ffe81f;
+      padding: 11px 28px; font-family: 'Courier New', monospace; font-size: 0.95em;
+      cursor: pointer; letter-spacing: 2px; border-radius: 4px;
+    }
+    #result-screen button:hover { background: rgba(255,232,31,0.28); }
+    #result-screen button.menu-btn {
+      background: rgba(255,255,255,0.08); border-color: #aaa; color: #ddd;
+    }
+    #result-screen button.menu-btn:hover { background: rgba(255,255,255,0.18); border-color: #fff; color: #fff; }
+    .win-txt { color: #ffe81f; text-shadow: 0 0 30px #ffe81f; }
+    .lose-txt { color: #ff4444; text-shadow: 0 0 30px #ff4444; }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="overlay">
+  <div id="faction-select">
+    <h1>STAR WARS</h1>
+    <p class="sub">Strategic Space Battle</p>
+    <label id="test-toggle">
+      <input type="checkbox" id="test-mode-chk">
+      <div class="pill"></div>
+      <span>TEST MODE (infinite credits)</span>
+    </label>
+    <div class="faction-cards">
+      <div class="faction-card rebel" onclick="startGame('rebel')">
+        <h2>REBEL ALLIANCE</h2>
+        <p>Deploy X-wings and B-wings to assault the Death Star. Destroy enemy fighters to earn credits and upgrade your fleet.</p>
+        <p class="goal">GOAL: Destroy the Death Star</p>
+      </div>
+      <div class="faction-card empire" onclick="startGame('empire')">
+        <h2>GALACTIC EMPIRE</h2>
+        <p>Launch TIE Fighters and Interceptors to defend the Death Star. Crush the Rebel Cruiser before it destroys you.</p>
+        <p class="goal">GOAL: Destroy the Rebel Cruiser</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="hud">
+  <div id="hud-bar">
+    <div class="hud-sec">
+      <span class="hud-lbl">Credits</span>
+      <span class="hud-val" id="hud-credits">150</span>
+    </div>
+    <div class="hud-sec">
+      <span class="hud-lbl" id="hud-target-lbl">Target HP</span>
+      <div class="hp-bar"><div class="hp-fill red" id="hud-target-fill" style="width:100%"></div></div>
+      <span class="hud-val" id="hud-target-pct">100%</span>
+    </div>
+    <div class="hud-sec" style="margin-left:auto">
+      <span class="hud-lbl">Wave</span>
+      <span class="hud-val" id="hud-wave">1</span>
+    </div>
+    <button id="leave-btn" onclick="leaveGame()">&#8592; MENU</button>
+  </div>
+</div>
+
+<div id="side-panel">
+  <h3>Deploy</h3>
+  <div id="deploy-btns"></div>
+  <h3>Upgrades</h3>
+  <div id="upgrade-btns"></div>
+</div>
+
+<div id="result-screen">
+  <h1 id="result-title"></h1>
+  <p id="result-sub"></p>
+  <div class="result-btns">
+    <button onclick="restartGame()">PLAY AGAIN</button>
+    <button class="menu-btn" onclick="leaveGame()">&#8592; MENU</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, frame = 0;
+let gameStarted = false, gameOver = false;
+let faction = null;
+let credits = 150, wave = 1, waveTimer = 0, testMode = false;
+
+let stars = [], xwings = [], bwings = [], ties = [], tieInts = [], sds = [], lasers = [], explosions = [];
+let ds = null, rebelCruiser = null;
+let dsHP = 100, dsMaxHP = 100;
+let rcHP = 100, rcMaxHP = 100;
+let tieCooldown = 80, xwCooldown = 120, sdCooldown = 400;
+
+const DS_R = 90, XS = 9, TS = 6;
+const COSTS = { xwing: 40, bwing: 80, tie: 30, interceptor: 60, sd: 150 };
+
+// ── Upgrades ──
+const UPGRADES = {
+  rebel: [
+    { id:'xdmg',  name:'Laser Power',  desc:'X/B-wing damage',   level:0, max:3, base:80  },
+    { id:'xhp',   name:'Hull Plating', desc:'X/B-wing hull',     level:0, max:3, base:60  },
+    { id:'xspd',  name:'Engine Boost', desc:'X-wing speed',      level:0, max:3, base:70  },
+    { id:'bwing', name:'B-wing',       desc:'Unlock B-wings',    level:0, max:1, base:120 },
+  ],
+  empire: [
+    { id:'tdmg',  name:'Ion Cannons',  desc:'TIE damage',        level:0, max:3, base:80  },
+    { id:'thp',   name:'Armor Pod',    desc:'TIE hull',          level:0, max:3, base:60  },
+    { id:'tspd',  name:'Twin Engines', desc:'TIE speed',         level:0, max:3, base:70  },
+    { id:'tint',  name:'Interceptor',  desc:'Unlock Interceptors',level:0, max:1, base:120},
+  ],
+};
+
+function upg(id) {
+  for (const arr of Object.values(UPGRADES)) {
+    const u = arr.find(u => u.id === id);
+    if (u) return u.level;
+  }
+  return 0;
+}
+
+// ── Ship stats ──
+function xwHP()  { return 3 + upg('xhp') * 2; }
+function xwDmg() { return 1 + upg('xdmg'); }
+function xwSpd() { return 1.8 + upg('xspd') * 0.4; }
+function bwHP()  { return 6 + upg('xhp') * 2; }
+function tHP()   { return 2 + upg('thp'); }
+function tDmg()  { return 1 + upg('tdmg'); }
+function tSpd()  { return 2.4 + upg('tspd') * 0.4; }
+
+// ── Resize / Init ──
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  initStars();
+  if (gameStarted) repositionAnchors();
+}
+
+function initStars() {
+  stars = Array.from({length:180}, () => ({
+    x: Math.random()*W, y: Math.random()*H,
+    r: Math.random()*1.4+0.2, op: Math.random()*0.5+0.2, tw: Math.random()*Math.PI*2,
+  }));
+}
+
+function repositionAnchors() {
+  if (ds) {
+    ds.x=W*0.82; ds.y=H*0.5;
+    ds.dishX=ds.x-DS_R*0.28; ds.dishY=ds.y-DS_R*0.32;
+  }
+  if (rebelCruiser) { rebelCruiser.x=W*0.18; rebelCruiser.y=H*0.5; }
+}
+
+function initWorld() {
+  initStars();
+  const dx=W*0.82, dy=H*0.5;
+  ds = {
+    x:dx, y:dy, r:DS_R,
+    dishX:dx-DS_R*0.28, dishY:dy-DS_R*0.32, dishR:DS_R*0.2,
+    hangars:[{a:Math.PI+0.3},{a:Math.PI-0.3},{a:Math.PI*1.5}],
+    charge:0, chargeCooldown:10, firing:null,
+  };
+  rebelCruiser = { x:W*0.18, y:H*0.5, w:120, h:30, hp:rcMaxHP, vx:0, vy:0 };
+  xwings=[]; bwings=[]; ties=[]; tieInts=[]; sds=[]; lasers=[]; explosions=[];
+  tieCooldown=80; xwCooldown=120; sdCooldown=400; waveTimer=0;
+
+  if (faction==='rebel') {
+    // Imperial fleet starts with TIEs patrolling + 2 SDs flanking DS
+    for (let i=0;i<4;i++) spawnAITIE();
+    spawnAISD(); spawnAISD();
+  } else {
+    // Rebel fleet launches X-wings from their cruiser side
+    for (let i=0;i<5;i++) spawnAIXwing();
+  }
+}
+
+// ── Spawn helpers ──
+function mkXwing(playerOwned) {
+  // X-wings always launch from the Rebel Cruiser side (left)
+  const rc = rebelCruiser;
+  const spawnX = rc ? rc.x + 20 + Math.random()*30 : W*0.18;
+  const spawnY = rc ? rc.y + (Math.random()-0.5)*60 : H*0.5;
+  return {
+    x: spawnX, y: spawnY,
+    vx: xwSpd(), vy: (Math.random()-0.5)*0.6,
+    angle: 0,
+    hp:xwHP(), maxHp:xwHP(),
+    orbitA:Math.random()*Math.PI*2,
+    orbitSpd:(Math.random()*0.010+0.005)*(Math.random()<0.5?1:-1),
+    orbitR:DS_R*(1.6+Math.random()*0.7),
+    arrived:false, shootCD:Math.random()*60,
+    dead:false, player:playerOwned,
+    engageCD: 0,
+  };
+}
+function spawnAIXwing() { xwings.push(mkXwing(false)); }
+function deployXwing()  {
+  if (!testMode && credits<COSTS.xwing) return;
+  if (!testMode) credits-=COSTS.xwing;
+  xwings.push(mkXwing(true));
+  updateUI();
+}
+function deployBwing() {
+  if (upg('bwing')<1) return;
+  if (!testMode && credits<COSTS.bwing) return;
+  if (!testMode) credits-=COSTS.bwing;
+  const rc=rebelCruiser;
+  bwings.push({
+    x: rc?rc.x+20+Math.random()*20:W*0.18, y: rc?rc.y+(Math.random()-0.5)*50:H*0.5,
+    vx:1.4, vy:(Math.random()-0.5)*0.4,
+    angle:0, hp:bwHP(), maxHp:bwHP(),
+    orbitA:Math.random()*Math.PI*2,
+    orbitSpd:(Math.random()*0.008+0.004)*(Math.random()<0.5?1:-1),
+    orbitR:DS_R*(1.4+Math.random()*0.5),
+    arrived:false, shootCD:40, dead:false, player:true, engageCD:0,
+  });
+  updateUI();
+}
+
+function mkTIE(playerOwned, speed) {
+  // TIEs launch from DS hangars toward the left (rebel side)
+  const h = ds.hangars[Math.floor(Math.random()*ds.hangars.length)];
+  const hx=ds.x+Math.cos(h.a)*ds.r, hy=ds.y+Math.sin(h.a)*ds.r;
+  return {
+    x:hx, y:hy, vx:-1.5, vy:(Math.random()-0.5)*0.8,
+    angle:Math.PI, hp:tHP(), maxHp:tHP(),
+    shootCD:80+Math.random()*60, warmup:40,
+    dead:false, player:playerOwned, speed: speed||tSpd(),
+  };
+}
+function spawnAITIE() { ties.push(mkTIE(false, 2.2)); }
+function deployTIE()  {
+  if (!testMode && credits<COSTS.tie) return;
+  if (!testMode) credits-=COSTS.tie;
+  ties.push(mkTIE(true));
+  updateUI();
+}
+function deployInterceptor() {
+  if (upg('tint')<1) return;
+  if (!testMode && credits<COSTS.interceptor) return;
+  if (!testMode) credits-=COSTS.interceptor;
+  const h = ds.hangars[Math.floor(Math.random()*ds.hangars.length)];
+  const hx=ds.x+Math.cos(h.a)*ds.r, hy=ds.y+Math.sin(h.a)*ds.r;
+  tieInts.push({
+    x:hx, y:hy, vx:-2.5, vy:(Math.random()-0.5)*0.6,
+    angle:Math.PI, hp:tHP()+1, maxHp:tHP()+1,
+    shootCD:45+Math.random()*30, warmup:20,
+    dead:false, player:true, speed:3.2+upg('tspd')*0.3,
+  });
+  updateUI();
+}
+function deploySD() {
+  if (!testMode && credits<COSTS.sd) return;
+  if (!testMode) credits-=COSTS.sd;
+  // Player SDs deploy on the right side near the DS
+  sds.push({
+    x:W*0.95, y:H*(0.2+Math.random()*0.6),
+    vx:-0.3, vy:(Math.random()-0.5)*0.08,
+    angle:Math.PI, size:140+Math.random()*30,
+    shootCD:55+Math.random()*70, dead:false, player:true, driftT:Math.random()*100,
+  });
+  updateUI();
+}
+function spawnAISD() {
+  // AI SDs flank the DS on the right side
+  sds.push({
+    x:W*(0.72+Math.random()*0.15), y:H*(0.15+Math.random()*0.7),
+    vx:(Math.random()-0.5)*0.15, vy:(Math.random()-0.5)*0.08,
+    angle:Math.PI, size:130+Math.random()*40,
+    shootCD:80+Math.random()*120, dead:false, player:false, driftT:Math.random()*100,
+  });
+}
+
+// ── Drawing ──
+function drawStars() {
+  stars.forEach(s => {
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${s.op*(0.6+0.4*Math.sin(frame*0.04+s.tw))})`;
+    ctx.fill();
+  });
+}
+
+function drawDS() {
+  const {x,y,r,dishX,dishY,dishR}=ds;
+  const atm=ctx.createRadialGradient(x,y,r*0.8,x,y,r*1.8);
+  atm.addColorStop(0,'rgba(80,80,100,0.2)'); atm.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath(); ctx.arc(x,y,r*1.8,0,Math.PI*2); ctx.fillStyle=atm; ctx.fill();
+  const g=ctx.createRadialGradient(x-r*0.35,y-r*0.35,r*0.05,x,y,r);
+  g.addColorStop(0,'#9c9ca8'); g.addColorStop(0.45,'#6a6a78'); g.addColorStop(1,'#22222e');
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.clip();
+  ctx.strokeStyle='rgba(0,0,0,0.22)'; ctx.lineWidth=0.8;
+  for (let i=-6;i<=6;i++) {
+    const ly=y+i*r/6, hw=Math.sqrt(Math.max(0,r*r-(i*r/6)**2));
+    ctx.beginPath(); ctx.moveTo(x-hw,ly); ctx.lineTo(x+hw,ly); ctx.stroke();
+  }
+  for (let i=-6;i<=6;i++) {
+    ctx.beginPath(); ctx.moveTo(x+i*r/6,y-r); ctx.lineTo(x+i*r/6,y+r); ctx.stroke();
+  }
+  ctx.strokeStyle='rgba(0,0,0,0.7)'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(x-r,y+r*0.06); ctx.lineTo(x+r,y+r*0.06); ctx.stroke();
+  ctx.restore();
+  // DS HP bar
+  const pct=dsHP/dsMaxHP, bw=r*2, bh=6, bx=x-r, by=y+r+10;
+  ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(bx,by,bw,bh);
+  ctx.fillStyle=pct>0.5?'#22ff44':pct>0.25?'#ffaa00':'#ff3322';
+  ctx.fillRect(bx,by,bw*pct,bh);
+  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=0.5; ctx.strokeRect(bx,by,bw,bh);
+  // Dish
+  ctx.beginPath(); ctx.arc(dishX,dishY,dishR,0,Math.PI*2);
+  ctx.fillStyle='#10101c'; ctx.fill(); ctx.strokeStyle='#4a4a5a'; ctx.lineWidth=1.5; ctx.stroke();
+  if (ds.charge>0) {
+    const dg=ctx.createRadialGradient(dishX,dishY,0,dishX,dishY,dishR);
+    dg.addColorStop(0,`rgba(0,255,80,${ds.charge})`); dg.addColorStop(1,'rgba(0,255,80,0)');
+    ctx.beginPath(); ctx.arc(dishX,dishY,dishR,0,Math.PI*2); ctx.fillStyle=dg; ctx.fill();
+    const og=ctx.createRadialGradient(dishX,dishY,0,dishX,dishY,dishR*3);
+    og.addColorStop(0,`rgba(0,255,80,${ds.charge*0.3})`); og.addColorStop(1,'rgba(0,255,80,0)');
+    ctx.beginPath(); ctx.arc(dishX,dishY,dishR*3,0,Math.PI*2); ctx.fillStyle=og; ctx.fill();
+  }
+  ds.hangars.forEach(h=>{
+    const hx=x+Math.cos(h.a)*(r-3),hy=y+Math.sin(h.a)*(r-3);
+    ctx.beginPath(); ctx.arc(hx,hy,4,0,Math.PI*2);
+    ctx.fillStyle='#05050f'; ctx.fill(); ctx.strokeStyle='#33335a'; ctx.lineWidth=1; ctx.stroke();
+    const hg=ctx.createRadialGradient(hx,hy,0,hx,hy,7);
+    hg.addColorStop(0,'rgba(100,100,255,0.4)'); hg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath(); ctx.arc(hx,hy,7,0,Math.PI*2); ctx.fillStyle=hg; ctx.fill();
+  });
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(160,160,180,0.25)'; ctx.lineWidth=1.5; ctx.stroke();
+}
+
+function drawRebelCruiser() {
+  if (!rebelCruiser) return;
+  const {x,y,w,h}=rebelCruiser;
+  ctx.save(); ctx.translate(x,y);
+  const hg=ctx.createLinearGradient(-w/2,0,w/2,0);
+  hg.addColorStop(0,'#8a8aaa'); hg.addColorStop(0.5,'#6a6a88'); hg.addColorStop(1,'#3a3a52');
+  ctx.beginPath();
+  ctx.moveTo(w/2,0); ctx.lineTo(-w/2,-h/2); ctx.lineTo(-w*0.3,0); ctx.lineTo(-w/2,h/2);
+  ctx.closePath(); ctx.fillStyle=hg; ctx.fill();
+  ctx.strokeStyle='rgba(200,200,255,0.2)'; ctx.lineWidth=0.8; ctx.stroke();
+  const eg=ctx.createRadialGradient(-w/2,0,0,-w/2,0,h*0.6);
+  eg.addColorStop(0,'rgba(100,150,255,0.9)'); eg.addColorStop(1,'rgba(0,50,255,0)');
+  ctx.beginPath(); ctx.arc(-w/2,0,h*0.4,0,Math.PI*2); ctx.fillStyle=eg; ctx.fill();
+  // HP bar
+  const pct=rebelCruiser.hp/rcMaxHP;
+  ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(-w/2,h/2+5,w,5);
+  ctx.fillStyle=pct>0.5?'#44aaff':pct>0.25?'#ffaa00':'#ff3322';
+  ctx.fillRect(-w/2,h/2+5,w*pct,5);
+  ctx.fillStyle='rgba(150,180,255,0.6)';
+  ctx.font='8px Courier New'; ctx.fillText('REBEL CRUISER',-w/2,h/2+22);
+  ctx.restore();
+}
+
+function drawXwing(xw) {
+  const s=XS;
+  ctx.save(); ctx.translate(xw.x,xw.y); ctx.rotate(xw.angle);
+  if (xw.hp<xw.maxHp) {
+    ctx.fillStyle=xw.hp/xw.maxHp>0.5?'#44ff44':'#ff4444';
+    ctx.fillRect(-s,-s*2.3,s*2*(xw.hp/xw.maxHp),2);
+    ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=0.4; ctx.strokeRect(-s,-s*2.3,s*2,2);
+  }
+  const eg=ctx.createRadialGradient(-s*1.1,0,0,-s*1.1,0,s);
+  eg.addColorStop(0,'rgba(120,180,255,0.95)'); eg.addColorStop(1,'rgba(0,80,255,0)');
+  ctx.beginPath(); ctx.arc(-s*1.1,0,s,0,Math.PI*2); ctx.fillStyle=eg; ctx.fill();
+  ctx.fillStyle='#b0b0c0';
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-s*0.9,-s*1.5); ctx.lineTo(s*0.7,-s*0.35); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-s*0.9,s*1.5); ctx.lineTo(s*0.7,s*0.35); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#909098';
+  ctx.beginPath(); ctx.moveTo(s*0.3,0); ctx.lineTo(s*1.3,-s*0.9); ctx.lineTo(s*0.9,-s*0.2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(s*0.3,0); ctx.lineTo(s*1.3,s*0.9); ctx.lineTo(s*0.9,s*0.2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#d0d0e0'; ctx.fillRect(-s*1.1,-s*0.2,s*2.4,s*0.4);
+  ctx.beginPath(); ctx.ellipse(s*0.5,-s*0.08,s*0.32,s*0.22,0,0,Math.PI*2);
+  ctx.fillStyle='#5a8aaa'; ctx.fill();
+  ctx.fillStyle='#cc2222'; ctx.fillRect(-s*0.15,-s*0.28,s*0.18,s*0.1); ctx.fillRect(-s*0.15,s*0.18,s*0.18,s*0.1);
+  ctx.restore();
+}
+
+function drawBwing(bw) {
+  const s=11;
+  ctx.save(); ctx.translate(bw.x,bw.y); ctx.rotate(bw.angle);
+  const eg=ctx.createRadialGradient(-s*0.8,0,0,-s*0.8,0,s*0.8);
+  eg.addColorStop(0,'rgba(80,160,255,0.9)'); eg.addColorStop(1,'rgba(0,50,255,0)');
+  ctx.beginPath(); ctx.arc(-s*0.8,0,s*0.8,0,Math.PI*2); ctx.fillStyle=eg; ctx.fill();
+  ctx.fillStyle='#8080a0';
+  ctx.fillRect(-s*0.15,-s*1.8,s*0.3,s*3.6);
+  ctx.fillRect(-s*1.1,-s*0.2,s*2.2,s*0.4);
+  ctx.beginPath(); ctx.ellipse(s*0.4,0,s*0.35,s*0.25,0,0,Math.PI*2);
+  ctx.fillStyle='#5a8aaa'; ctx.fill();
+  ctx.fillStyle='#606080';
+  ctx.fillRect(-s*0.3,-s*2.0,s*0.6,s*0.4); ctx.fillRect(-s*0.3,s*1.6,s*0.6,s*0.4);
+  ctx.fillStyle='#cc4400'; ctx.fillRect(s*0.8,-s*0.08,s*0.5,s*0.16);
+  ctx.restore();
+}
+
+function drawTIE(tie) {
+  const s=TS;
+  ctx.save(); ctx.translate(tie.x,tie.y); ctx.rotate(tie.angle);
+  ctx.strokeStyle='#4a4a5a'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(-s,0); ctx.lineTo(-s*3.2,0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s,0); ctx.lineTo(s*3.2,0); ctx.stroke();
+  [-1,1].forEach(dir=>{
+    const wx=dir*s*3.2, wy=s*2.4;
+    ctx.beginPath();
+    ctx.moveTo(wx,-wy); ctx.lineTo(wx+dir*s*0.8,-wy*0.6);
+    ctx.lineTo(wx+dir*s*0.8,wy*0.6); ctx.lineTo(wx,wy);
+    ctx.lineTo(wx-dir*s*0.8,wy*0.6); ctx.lineTo(wx-dir*s*0.8,-wy*0.6);
+    ctx.closePath(); ctx.fillStyle='#1a301a'; ctx.fill();
+    ctx.strokeStyle='#2a5a2a'; ctx.lineWidth=0.8; ctx.stroke();
+  });
+  const cg=ctx.createRadialGradient(-s*0.2,-s*0.2,0,0,0,s);
+  cg.addColorStop(0,'#606070'); cg.addColorStop(1,'#181828');
+  ctx.beginPath(); ctx.arc(0,0,s,0,Math.PI*2); ctx.fillStyle=cg; ctx.fill();
+  ctx.strokeStyle='#4a4a6a'; ctx.lineWidth=0.8; ctx.stroke();
+  ctx.restore();
+}
+
+function drawInterceptor(ti) {
+  const s=TS*0.9;
+  ctx.save(); ctx.translate(ti.x,ti.y); ctx.rotate(ti.angle);
+  ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(-s,0); ctx.lineTo(-s*3.5,0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s,0); ctx.lineTo(s*3.5,0); ctx.stroke();
+  [-1,1].forEach(dir=>{
+    const wx=dir*s*3.5;
+    ctx.beginPath();
+    ctx.moveTo(wx,0); ctx.lineTo(wx+dir*s*0.5,-s*2.8);
+    ctx.lineTo(wx+dir*s*1.2,-s*2.2); ctx.lineTo(wx+dir*s*1.6,0);
+    ctx.lineTo(wx+dir*s*1.2,s*2.2); ctx.lineTo(wx+dir*s*0.5,s*2.8);
+    ctx.closePath(); ctx.fillStyle='#2a1a0a'; ctx.fill();
+    ctx.strokeStyle='#6a4a1a'; ctx.lineWidth=0.8; ctx.stroke();
+  });
+  const cg=ctx.createRadialGradient(-s*0.2,-s*0.2,0,0,0,s);
+  cg.addColorStop(0,'#705040'); cg.addColorStop(1,'#1a1010');
+  ctx.beginPath(); ctx.arc(0,0,s,0,Math.PI*2); ctx.fillStyle=cg; ctx.fill();
+  const eg=ctx.createRadialGradient(s,0,0,s,0,s*0.7);
+  eg.addColorStop(0,'rgba(255,100,0,0.9)'); eg.addColorStop(1,'rgba(255,50,0,0)');
+  ctx.beginPath(); ctx.arc(s,0,s*0.5,0,Math.PI*2); ctx.fillStyle=eg; ctx.fill();
+  ctx.restore();
+}
+
+function drawSD(sd) {
+  const L=sd.size, W2=sd.size*0.42;
+  ctx.save(); ctx.translate(sd.x,sd.y); ctx.rotate(sd.angle);
+  const sg=ctx.createRadialGradient(0,0,L*0.1,0,0,L*0.8);
+  sg.addColorStop(0,'rgba(80,80,120,0.15)'); sg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath(); ctx.ellipse(0,0,L*0.8,W2*0.9,0,0,Math.PI*2); ctx.fillStyle=sg; ctx.fill();
+  const hg=ctx.createLinearGradient(-L/2,0,L/2,0);
+  hg.addColorStop(0,'#28283a'); hg.addColorStop(0.6,'#52526a'); hg.addColorStop(1,'#8a8aaa');
+  ctx.beginPath();
+  ctx.moveTo(L/2,0); ctx.lineTo(-L/2,-W2/2); ctx.lineTo(-L*0.35,0); ctx.lineTo(-L/2,W2/2);
+  ctx.closePath(); ctx.fillStyle=hg; ctx.fill();
+  ctx.strokeStyle='rgba(160,160,200,0.2)'; ctx.lineWidth=0.8; ctx.stroke();
+  // centre seam
+  ctx.beginPath(); ctx.moveTo(L/2,0); ctx.lineTo(-L/2,0);
+  ctx.strokeStyle='rgba(180,180,220,0.25)'; ctx.lineWidth=1; ctx.stroke();
+  // hull detail lines
+  ctx.strokeStyle='rgba(0,0,0,0.3)'; ctx.lineWidth=0.6;
+  [-0.18,-0.36,-0.54].forEach(t=>{
+    const px=t*L, halfW=W2/2*(1-Math.abs(t)/0.6);
+    ctx.beginPath(); ctx.moveTo(px,-halfW); ctx.lineTo(px,halfW); ctx.stroke();
+  });
+  // bridge tower
+  ctx.beginPath(); ctx.rect(-L*0.12,-W2*0.18,L*0.18,-W2*0.22);
+  ctx.fillStyle='#3a3a52'; ctx.fill();
+  ctx.strokeStyle='rgba(150,150,200,0.3)'; ctx.lineWidth=0.6; ctx.stroke();
+  // sensor dot
+  ctx.beginPath(); ctx.arc(-L*0.03,-W2*0.4,2,0,Math.PI*2);
+  ctx.fillStyle='rgba(150,200,255,0.8)'; ctx.fill();
+  // engine glows
+  [-0.28,-0.14,0,0.14,0.28].forEach((oy,i)=>{
+    if(i%2===0){
+      const eg=ctx.createRadialGradient(-L/2,oy*W2,0,-L/2,oy*W2,W2*0.09);
+      eg.addColorStop(0,'rgba(120,160,255,0.95)'); eg.addColorStop(1,'rgba(20,60,255,0)');
+      ctx.beginPath(); ctx.arc(-L/2,oy*W2,W2*0.09,0,Math.PI*2); ctx.fillStyle=eg; ctx.fill();
+    }
+  });
+  ctx.restore();
+}
+
+function drawLasers() {
+  lasers.forEach(l=>{
+    const trail=14;
+    const g=ctx.createLinearGradient(l.x,l.y,l.x-l.nx*trail,l.y-l.ny*trail);
+    g.addColorStop(0,l.col); g.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.beginPath(); ctx.moveTo(l.x,l.y); ctx.lineTo(l.x-l.nx*trail,l.y-l.ny*trail);
+    ctx.strokeStyle=g; ctx.lineWidth=2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(l.x,l.y,1.5,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  });
+}
+
+function drawExplosions() {
+  explosions.forEach(e=>{
+    e.parts.forEach(p=>{
+      ctx.globalAlpha=p.life*0.9;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2); ctx.fillStyle=p.col; ctx.fill();
+    });
+  });
+  ctx.globalAlpha=1;
+}
+
+function drawSuperlaser() {
+  if (!ds.firing) return;
+  const f=ds.firing;
+  ctx.globalAlpha=f.life;
+  ctx.beginPath(); ctx.moveTo(ds.dishX,ds.dishY); ctx.lineTo(f.tx,f.ty);
+  ctx.strokeStyle='#00ff55'; ctx.lineWidth=3; ctx.stroke();
+  ctx.strokeStyle='rgba(0,255,80,0.15)'; ctx.lineWidth=20; ctx.stroke();
+  ctx.globalAlpha=1;
+}
+
+// ── Logic helpers ──
+function fire(from,tx,ty,col,spd,owner,dmg) {
+  const dx=tx-from.x, dy=ty-from.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  lasers.push({x:from.x,y:from.y,vx:(dx/d)*spd,vy:(dy/d)*spd,nx:dx/d,ny:dy/d,col,owner,life:1,dmg:dmg||1});
+}
+function boom(x,y,c1,c2,n) {
+  const parts=Array.from({length:n},()=>{
+    const a=Math.random()*Math.PI*2, spd=1+Math.random()*3.5;
+    return {x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,life:1,size:Math.random()*3+0.8,col:Math.random()<0.5?c1:c2};
+  });
+  explosions.push({parts,life:1});
+}
+function dist(a,b) { return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
+
+// ── Update ──
+function update() {
+  frame++;
+  waveTimer++;
+
+  // Passive credit income
+  if (frame%180===0) { credits+=5+wave*2; updateUI(); }
+
+  // Wave escalation
+  if (waveTimer>1800) {
+    wave++; waveTimer=0;
+    if (faction==='rebel') {
+      for (let i=0;i<Math.min(wave,4);i++) spawnAITIE();
+      if (wave%2===0) spawnAISD();
+    } else {
+      for (let i=0;i<Math.min(wave,3);i++) spawnAIXwing();
+    }
+    document.getElementById('hud-wave').textContent=wave;
+    credits += 30 + wave*10; updateUI();
+  }
+
+  // ── helper: smooth angle ──
+  function smoothAngle(ship, ta, rate) {
+    let da=ta-ship.angle; while(da>Math.PI)da-=Math.PI*2; while(da<-Math.PI)da+=Math.PI*2;
+    ship.angle+=da*rate;
+  }
+
+  // ── X-wings: advance, engage TIEs mid-field, then orbit DS ──
+  xwings.forEach(xw=>{
+    if (xw.dead) return;
+    xw.engageCD=Math.max(0,(xw.engageCD||0)-1);
+
+    // Find nearest enemy (TIE/interceptor first, then DS)
+    let nearTIE=null, nearTIED=Infinity;
+    [...ties,...tieInts].forEach(t=>{
+      if(t.dead)return; const d=dist(t,xw); if(d<nearTIED){nearTIED=d;nearTIE=t;}
+    });
+
+    const spd=xwSpd();
+
+    if (!xw.arrived) {
+      if (nearTIE && nearTIED<200 && xw.engageCD<=0) {
+        // Intercept nearby TIE — lead target
+        const predX=nearTIE.x+(nearTIE.vx||0)*10, predY=nearTIE.y+(nearTIE.vy||0)*10;
+        const dx=predX-xw.x, dy=predY-xw.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+        xw.vx+=(dx/d)*0.18; xw.vy+=(dy/d)*0.18;
+      } else {
+        // Advance toward DS with slight vertical spread
+        const dx=ds.x-xw.x, dy=ds.y-xw.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+        xw.vx+=(dx/d)*0.14; xw.vy+=(dy/d)*0.06;
+      }
+      const s=Math.sqrt(xw.vx**2+xw.vy**2);
+      if(s>spd*1.5){xw.vx=(xw.vx/s)*spd*1.5;xw.vy=(xw.vy/s)*spd*1.5;}
+      xw.x+=xw.vx; xw.y+=xw.vy;
+      smoothAngle(xw, Math.atan2(xw.vy,xw.vx), 0.14);
+      if(dist(xw,ds)<xw.orbitR+30) xw.arrived=true;
+    } else {
+      // Orbit DS and attack dish
+      xw.orbitA+=xw.orbitSpd;
+      const rPulse=xw.orbitR+Math.sin(frame*0.03+xw.orbitA*3)*18;
+      const tx=ds.x+Math.cos(xw.orbitA)*rPulse, ty=ds.y+Math.sin(xw.orbitA)*rPulse;
+      const dx=tx-xw.x, dy=ty-xw.y;
+      xw.vx+=dx*0.06; xw.vy+=dy*0.06;
+      xw.vx*=0.82; xw.vy*=0.82;
+      xw.x+=xw.vx; xw.y+=xw.vy;
+      smoothAngle(xw, Math.atan2(dy,dx), 0.12);
+      xw.shootCD--;
+      if(xw.shootCD<=0){
+        fire(xw,ds.dishX,ds.dishY,'#ff4444',7,'rebel_ds',xwDmg());
+        xw.shootCD=70+Math.random()*60;
+      }
+    }
+    // Always dogfight TIEs in range
+    if(nearTIE && nearTIED<180){
+      xw.shootCD--;
+      if(xw.shootCD<=0){
+        fire(xw,nearTIE.x,nearTIE.y,'#ff6600',8,'rebel_tie',xwDmg());
+        xw.shootCD=55+Math.random()*40;
+        xw.engageCD=30;
+      }
+    }
+    // Keep on screen vertically
+    if(xw.y<20) xw.vy+=0.1; if(xw.y>H-20) xw.vy-=0.1;
+  });
+
+  // ── B-wings: slower advance, heavy DS bombardment ──
+  bwings.forEach(bw=>{
+    if (bw.dead) return;
+    bw.engageCD=Math.max(0,(bw.engageCD||0)-1);
+    if (!bw.arrived) {
+      const dx=ds.x-bw.x, dy=ds.y-bw.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+      bw.vx+=(dx/d)*0.09; bw.vy+=(dy/d)*0.05;
+      const s=Math.sqrt(bw.vx**2+bw.vy**2);
+      if(s>2.0){bw.vx=(bw.vx/s)*2.0;bw.vy=(bw.vy/s)*2.0;}
+      bw.x+=bw.vx; bw.y+=bw.vy;
+      smoothAngle(bw, Math.atan2(bw.vy,bw.vx), 0.10);
+      if(dist(bw,ds)<bw.orbitR+30) bw.arrived=true;
+    } else {
+      bw.orbitA+=bw.orbitSpd;
+      const rPulse=bw.orbitR+Math.sin(frame*0.025+bw.orbitA*2)*12;
+      const tx=ds.x+Math.cos(bw.orbitA)*rPulse, ty=ds.y+Math.sin(bw.orbitA)*rPulse;
+      const dx=tx-bw.x, dy=ty-bw.y;
+      bw.vx+=dx*0.05; bw.vy+=dy*0.05;
+      bw.vx*=0.80; bw.vy*=0.80;
+      bw.x+=bw.vx; bw.y+=bw.vy;
+      smoothAngle(bw, Math.atan2(dy,dx), 0.10);
+      bw.shootCD--;
+      if(bw.shootCD<=0){
+        fire(bw,ds.dishX,ds.dishY,'#ff8800',6,'rebel_ds',2+upg('xdmg'));
+        bw.shootCD=50+Math.random()*35;
+      }
+    }
+    if(bw.y<20) bw.vy+=0.1; if(bw.y>H-20) bw.vy-=0.1;
+  });
+
+  // Clean dead X/B-wings, earn credits for player Empire
+  xwings.forEach(xw=>{ if(xw.dead){boom(xw.x,xw.y,'#ff8800','#ffee00',18); if(!xw.player&&faction==='empire'){credits+=25;updateUI();}} });
+  bwings.forEach(bw=>{ if(bw.dead){boom(bw.x,bw.y,'#ff8800','#ff6600',22); if(!bw.player&&faction==='empire'){credits+=40;updateUI();}} });
+  xwings=xwings.filter(x=>!x.dead);
+  bwings=bwings.filter(x=>!x.dead);
+
+  // AI replenish X-wings for Empire
+  if (faction==='empire') {
+    xwCooldown--;
+    if (xwCooldown<=0&&xwings.length<5+wave) { spawnAIXwing(); xwCooldown=120+Math.random()*60; }
+  }
+
+  // ── TIEs ──
+  if (faction==='rebel') {
+    tieCooldown--;
+    if (tieCooldown<=0&&ties.filter(t=>!t.dead).length<6+wave) {
+      spawnAITIE(); tieCooldown=100+Math.random()*80;
+    }
+  }
+
+  [...ties,...tieInts].forEach(tie=>{
+    if (tie.dead||(tie.warmup-->0)) return;
+    const sp=tie.speed||tSpd();
+
+    // Find nearest rebel ship
+    let nearest=null, nearD=Infinity;
+    [...xwings,...bwings].forEach(xw=>{
+      if(xw.dead)return; const d=dist(xw,tie); if(d<nearD){nearD=d;nearest=xw;}
+    });
+    // Also target rebel cruiser if player empire and nothing closer
+    if(tie.player&&faction==='empire'&&rebelCruiser){
+      const d=dist(rebelCruiser,tie);
+      if(d<nearD){nearD=d;nearest={...rebelCruiser,isCruiser:true,vx:0,vy:0};}
+    }
+
+    if(nearest){
+      // Lead targeting
+      const predX=nearest.x+(nearest.vx||0)*14, predY=nearest.y+(nearest.vy||0)*14;
+      const dx=predX-tie.x, dy=predY-tie.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+      // Separation to avoid clumping
+      let sepX=0,sepY=0;
+      [...ties,...tieInts].forEach(o=>{
+        if(o===tie||o.dead)return;
+        const od=dist(o,tie); if(od<44&&od>0){sepX+=(tie.x-o.x)/od;sepY+=(tie.y-o.y)/od;}
+      });
+      tie.vx+=(dx/d)*0.20+sepX*0.35;
+      tie.vy+=(dy/d)*0.20+sepY*0.35;
+      const s=Math.sqrt(tie.vx**2+tie.vy**2);
+      if(s>sp){tie.vx=(tie.vx/s)*sp;tie.vy=(tie.vy/s)*sp;}
+      tie.vx*=0.95; tie.vy*=0.95;
+      smoothAngle(tie, Math.atan2(tie.vy,tie.vx), 0.13);
+      tie.shootCD--;
+      if(tie.shootCD<=0&&nearD<280){
+        if(nearest.isCruiser){
+          fire(tie,rebelCruiser.x,rebelCruiser.y,'#ff2200',6,'empire_rc',tDmg());
+        } else {
+          fire(tie,nearest.x,nearest.y,'#ff2200',7,'empire',tDmg());
+        }
+        tie.shootCD=55+Math.random()*70;
+      }
+    } else {
+      // No target: patrol leftward from DS
+      tie.vx+=(W*0.5-tie.x)*0.001;
+      tie.vy+=Math.sin(frame*0.02+tie.x)*0.04;
+      const s=Math.sqrt(tie.vx**2+tie.vy**2);
+      if(s>sp*0.6){tie.vx=(tie.vx/s)*sp*0.6;tie.vy=(tie.vy/s)*sp*0.6;}
+      smoothAngle(tie, Math.atan2(tie.vy,tie.vx), 0.08);
+    }
+    // Keep on screen vertically
+    if(tie.y<20) tie.vy+=0.12; if(tie.y>H-20) tie.vy-=0.12;
+    tie.x+=tie.vx; tie.y+=tie.vy;
+    if(tie.x<-80||tie.x>W+80||tie.y<-80||tie.y>H+80) tie.dead=true;
+  });
+
+  ties.forEach(t=>{ if(t.dead){boom(t.x,t.y,'#88ff44','#ffff00',12); if(!t.player&&faction==='rebel'){credits+=20;updateUI();}} });
+  tieInts.forEach(t=>{ if(t.dead){boom(t.x,t.y,'#ffaa22','#ffff00',14); if(!t.player&&faction==='rebel'){credits+=35;updateUI();}} });
+  ties=ties.filter(t=>!t.dead);
+  tieInts=tieInts.filter(t=>!t.dead);
+
+  // ── Star Destroyers ──
+  sds.forEach(sd=>{
+    if (sd.dead) return;
+    // Hold position on right flank — drift slowly, face left toward rebels
+    sd.driftT=(sd.driftT||Math.random()*100)+0.006;
+    // Gravitate toward right-side anchor zone
+    const anchorX = W*0.75;
+    sd.vx += (anchorX - sd.x) * 0.0008;
+    const targetVy = Math.sin(sd.driftT) * 0.35;
+    sd.vy += (targetVy - sd.vy) * 0.025;
+    if(sd.y<H*0.08) sd.vy+=0.05; if(sd.y>H*0.88) sd.vy-=0.05;
+    sd.vx*=0.97; sd.vy*=0.97;
+    sd.x+=sd.vx; sd.y+=sd.vy;
+    // Always face left (toward rebels)
+    const targetAngle = Math.PI + sd.vy*0.3;
+    let da=targetAngle-sd.angle; while(da>Math.PI)da-=Math.PI*2; while(da<-Math.PI)da+=Math.PI*2;
+    sd.angle+=da*0.02;
+    sd.shootCD--;
+    if (sd.shootCD<=0) {
+      if (sd.player&&faction==='empire'&&rebelCruiser) {
+        fire(sd,rebelCruiser.x,rebelCruiser.y,'#22ff44',7,'empire_rc',2);
+        fire(sd,rebelCruiser.x+4,rebelCruiser.y+4,'#22ff44',7,'empire_rc',2);
+      } else {
+        let nearest=null,nearD=Infinity;
+        [...xwings,...bwings].forEach(xw=>{if(xw.dead)return;const d=dist(xw,sd);if(d<nearD){nearD=d;nearest=xw;}});
+        if(nearest){
+          fire(sd,nearest.x,nearest.y,'#22ff44',6,'empire',1);
+          fire(sd,nearest.x+4,nearest.y+4,'#22ff44',6,'empire',1);
+        }
+      }
+      sd.shootCD=90+Math.random()*100;
+    }
+    // Only cull if somehow far off the left edge (shouldn't happen with anchor)
+    if(sd.x<-300) sd.dead=true;
+  });
+  sds.forEach(sd=>{ if(sd.dead&&!sd.player&&faction==='rebel'){credits+=60;updateUI();} });
+  sds=sds.filter(sd=>!sd.dead);
+
+  if (faction==='rebel') {
+    sdCooldown--;
+    if(sdCooldown<=0&&sds.filter(s=>!s.player).length<2){spawnAISD();sdCooldown=350+Math.random()*200;}
+  }
+
+  // ── Laser collisions ──
+  lasers.forEach(l=>{
+    l.x+=l.vx; l.y+=l.vy; l.life-=0.007;
+    // Hit rebel ships
+    if(l.owner==='empire'||l.owner==='empire_cruiser') {
+      [...xwings,...bwings].forEach(xw=>{
+        if(xw.dead)return;
+        if(dist(l,xw)<14){xw.hp-=l.dmg;l.life=0;if(xw.hp<=0)xw.dead=true;}
+      });
+    }
+    // Hit TIEs
+    if(l.owner==='rebel_tie') {
+      [...ties,...tieInts].forEach(t=>{
+        if(t.dead)return;
+        if(dist(l,t)<11){t.hp-=l.dmg;l.life=0;if(t.hp<=0)t.dead=true;}
+      });
+    }
+    // Hit Death Star dish
+    if(l.owner==='rebel_ds') {
+      if(Math.sqrt((l.x-ds.dishX)**2+(l.y-ds.dishY)**2)<ds.dishR*1.5){
+        dsHP=Math.max(0,dsHP-l.dmg); l.life=0;
+        boom(l.x,l.y,'#00ff88','#00ffff',8);
+        updateHUDHP();
+        if(dsHP<=0) triggerWin();
+      }
+    }
+    // Hit Rebel Cruiser
+    if(l.owner==='empire_rc'&&faction==='empire'&&rebelCruiser) {
+      if(dist(l,rebelCruiser)<42){
+        rebelCruiser.hp=Math.max(0,rebelCruiser.hp-l.dmg); l.life=0;
+        boom(l.x,l.y,'#4488ff','#8888ff',8);
+        updateHUDHP();
+        if(rebelCruiser.hp<=0) triggerWin();
+      }
+    }
+  });
+  lasers=lasers.filter(l=>l.life>0&&l.x>-30&&l.x<W+30&&l.y>-30&&l.y<H+30);
+
+  // ── Rebel Cruiser return fire ──
+  if(rebelCruiser&&!rebelCruiser.shootCD) rebelCruiser.shootCD=0;
+  rebelCruiser.shootCD=(rebelCruiser.shootCD||0)-1;
+  if(rebelCruiser.shootCD<=0){
+    // Target nearest TIE or SD
+    let target=null,nearD=Infinity;
+    [...ties,...tieInts].forEach(t=>{ if(t.dead)return; const d=dist(t,rebelCruiser); if(d<nearD){nearD=d;target=t;} });
+    sds.forEach(sd=>{ if(sd.dead)return; const d=dist(sd,rebelCruiser); if(d<nearD){nearD=d;target=sd;} });
+    if(target){
+      fire(rebelCruiser,target.x,target.y,'#4488ff',7,'rebel_tie',1);
+      fire(rebelCruiser,target.x,target.y+6,'#4488ff',7,'rebel_tie',1);
+    }
+    rebelCruiser.shootCD=70+Math.random()*50;
+  }
+
+  // ── Superlaser — fires toward rebel side ──
+  ds.chargeCooldown-=0.016;
+  if(ds.chargeCooldown<=0){
+    ds.charge=Math.min(1,ds.charge+0.018);
+    if(ds.charge>=1){
+      // Target rebel cruiser or closest xwing
+      const pool=[...xwings,...bwings].filter(x=>!x.dead);
+      let target=null;
+      if(rebelCruiser&&Math.random()<0.35){ target={x:rebelCruiser.x,y:rebelCruiser.y,isCruiser:true}; }
+      else { target=pool[Math.floor(Math.random()*pool.length)]||{x:W*0.18,y:ds.y}; }
+      ds.firing={tx:target.x,ty:target.y,life:1};
+      // Zap anything in the beam path
+      pool.forEach(xw=>{
+        const bxv=target.x-ds.dishX,byv=target.y-ds.dishY,bl=Math.sqrt(bxv**2+byv**2)||1;
+        const px=xw.x-ds.dishX,py=xw.y-ds.dishY;
+        const dot=(px*bxv+py*byv)/bl;
+        const perpX=ds.dishX+bxv/bl*dot,perpY=ds.dishY+byv/bl*dot;
+        if(Math.sqrt((xw.x-perpX)**2+(xw.y-perpY)**2)<22&&dot>0) xw.dead=true;
+      });
+      // Also hit rebel cruiser if targeted
+      if(target.isCruiser&&rebelCruiser){
+        rebelCruiser.hp=Math.max(0,rebelCruiser.hp-8);
+        boom(rebelCruiser.x,rebelCruiser.y,'#00ff88','#ffffff',20);
+        updateHUDHP();
+        if(rebelCruiser.hp<=0) triggerWin();
+      }
+      ds.charge=0; ds.chargeCooldown=12+Math.random()*8;
+    }
+  }
+  if(ds.firing){ds.firing.life-=0.035;if(ds.firing.life<=0)ds.firing=null;}
+
+  // ── Lose condition ──
+  const playerShipsR=[...xwings,...bwings].filter(x=>x.player);
+  const playerShipsE=[...ties,...tieInts].filter(t=>t.player);
+  const playerSDsE=sds.filter(s=>s.player);
+  if (!testMode) {
+    if (faction==='rebel'&&playerShipsR.length===0&&credits<COSTS.xwing&&frame>300) triggerLose();
+    if (faction==='empire'&&playerShipsE.length===0&&playerSDsE.length===0&&credits<COSTS.tie&&frame>300) triggerLose();
+  }
+
+  // ── Explosions ──
+  explosions.forEach(e=>{
+    e.parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=0.96;p.vy*=0.96;p.life-=0.018;});
+    e.life-=0.018;
+  });
+  explosions=explosions.filter(e=>e.life>0);
+}
+
+// ── Game flow ──
+function triggerWin() {
+  if(gameOver)return; gameOver=true;
+  document.getElementById('result-title').textContent='VICTORY';
+  document.getElementById('result-title').className='win-txt';
+  document.getElementById('result-sub').textContent=faction==='rebel'
+    ?'The Death Star has been destroyed. The galaxy is free!'
+    :'The Rebel Cruiser is no more. Long live the Empire!';
+  document.getElementById('result-screen').style.display='flex';
+}
+function triggerLose() {
+  if(gameOver)return; gameOver=true;
+  document.getElementById('result-title').textContent='DEFEATED';
+  document.getElementById('result-title').className='lose-txt';
+  document.getElementById('result-sub').textContent=faction==='rebel'
+    ?'Your fleet has been wiped out. The Empire reigns!'
+    :'Your forces were destroyed. The Rebellion lives on!';
+  document.getElementById('result-screen').style.display='flex';
+}
+
+function leaveGame() {
+  gameStarted=false; gameOver=false; faction=null;
+  document.getElementById('overlay').style.display='flex';
+  document.getElementById('hud').style.display='none';
+  document.getElementById('side-panel').style.display='none';
+  document.getElementById('result-screen').style.display='none';
+}
+
+function startGame(f) {
+  faction=f; gameStarted=true; gameOver=false;
+  testMode=document.getElementById('test-mode-chk').checked;
+  credits=testMode?999999:150; wave=1; dsHP=dsMaxHP; frame=0;
+  // Reset upgrades
+  Object.values(UPGRADES).forEach(arr=>arr.forEach(u=>u.level=0));
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('hud').style.display='block';
+  document.getElementById('side-panel').style.display='flex';
+  document.getElementById('result-screen').style.display='none';
+  initWorld();
+  buildUI();
+  updateUI();
+  updateHUDHP();
+}
+function restartGame() { startGame(faction); }
+
+// ── UI ──
+function buildUI() {
+  const deployDiv=document.getElementById('deploy-btns');
+  const upgradeDiv=document.getElementById('upgrade-btns');
+  deployDiv.innerHTML='';
+  upgradeDiv.innerHTML='';
+
+  if (faction==='rebel') {
+    deployDiv.innerHTML=`
+      <button class="deploy-btn" id="btn-xwing" onclick="deployXwing()">
+        <span>X-wing</span><span class="cost">${COSTS.xwing}cr</span>
+      </button>
+      <button class="deploy-btn" id="btn-bwing" onclick="deployBwing()">
+        <span>B-wing <span class="tag">[locked]</span></span><span class="cost">${COSTS.bwing}cr</span>
+      </button>`;
+    UPGRADES.rebel.forEach(u=>{
+      const btn=document.createElement('button');
+      btn.className='upgrade-btn'; btn.id=`upg-${u.id}`;
+      btn.onclick=()=>buyUpgrade(u.id);
+      upgradeDiv.appendChild(btn);
+    });
+    document.getElementById('hud-target-lbl').textContent='Death Star HP';
+    document.getElementById('hud-target-fill').className='hp-fill red';
+  } else {
+    deployDiv.innerHTML=`
+      <button class="deploy-btn" id="btn-tie" onclick="deployTIE()">
+        <span>TIE Fighter</span><span class="cost">${COSTS.tie}cr</span>
+      </button>
+      <button class="deploy-btn" id="btn-interceptor" onclick="deployInterceptor()">
+        <span>Interceptor <span class="tag">[locked]</span></span><span class="cost">${COSTS.interceptor}cr</span>
+      </button>
+      <button class="deploy-btn" id="btn-sd" onclick="deploySD()">
+        <span>Star Destroyer</span><span class="cost">${COSTS.sd}cr</span>
+      </button>`;
+    UPGRADES.empire.forEach(u=>{
+      const btn=document.createElement('button');
+      btn.className='upgrade-btn'; btn.id=`upg-${u.id}`;
+      btn.onclick=()=>buyUpgrade(u.id);
+      upgradeDiv.appendChild(btn);
+    });
+    document.getElementById('hud-target-lbl').textContent='Rebel Cruiser HP';
+    document.getElementById('hud-target-fill').className='hp-fill green';
+  }
+}
+
+function buyUpgrade(id) {
+  const arr=[...UPGRADES.rebel,...UPGRADES.empire];
+  const u=arr.find(u=>u.id===id);
+  if(!u||u.level>=u.max)return;
+  const cost=u.base*(u.level+1);
+  if(!testMode && credits<cost)return;
+  if(!testMode) credits-=cost; u.level++;
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById('hud-credits').textContent=testMode?'∞':credits;
+  const fUpgrades=UPGRADES[faction]||[];
+  fUpgrades.forEach(u=>{
+    const btn=document.getElementById(`upg-${u.id}`);
+    if(!btn)return;
+    const maxed=u.level>=u.max;
+    const cost=maxed?null:u.base*(u.level+1);
+    const dots=Array.from({length:u.max},(_,i)=>`<span class="dot${i<u.level?' on':''}"></span>`).join('');
+    btn.innerHTML=`
+      <div class="upg-row">
+        <span class="upg-name">${u.name}</span>
+        <span class="upg-cost">${maxed?'MAX':cost+'cr'}</span>
+      </div>
+      <div class="upg-desc">${u.desc} <span class="dots">${dots}</span></div>`;
+    btn.disabled=maxed||(!testMode&&credits<(cost||0));
+  });
+
+  if (faction==='rebel') {
+    const bBtn=document.getElementById('btn-bwing');
+    if(bBtn){
+      const unlocked=upg('bwing')>=1;
+      bBtn.innerHTML=`<span>B-wing${!unlocked?' <span class="tag">[locked]</span>':''}</span><span class="cost">${COSTS.bwing}cr</span>`;
+      bBtn.disabled=!unlocked||(!testMode&&credits<COSTS.bwing);
+    }
+    const xBtn=document.getElementById('btn-xwing');
+    if(xBtn) xBtn.disabled=!testMode&&credits<COSTS.xwing;
+  } else {
+    const iBtn=document.getElementById('btn-interceptor');
+    if(iBtn){
+      const unlocked=upg('tint')>=1;
+      iBtn.innerHTML=`<span>Interceptor${!unlocked?' <span class="tag">[locked]</span>':''}</span><span class="cost">${COSTS.interceptor}cr</span>`;
+      iBtn.disabled=!unlocked||(!testMode&&credits<COSTS.interceptor);
+    }
+    const tBtn=document.getElementById('btn-tie'); if(tBtn) tBtn.disabled=!testMode&&credits<COSTS.tie;
+    const sBtn=document.getElementById('btn-sd'); if(sBtn) sBtn.disabled=!testMode&&credits<COSTS.sd;
+  }
+}
+
+function updateHUDHP() {
+  const pct=faction==='rebel'?(dsHP/dsMaxHP):(rebelCruiser?rebelCruiser.hp/rcMaxHP:0);
+  document.getElementById('hud-target-fill').style.width=(pct*100)+'%';
+  document.getElementById('hud-target-pct').textContent=Math.ceil(pct*100)+'%';
+}
+
+// ── Main loop ──
+function animate() {
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+  frame++;
+  drawStars();
+  if (gameStarted) {
+    if (!gameOver) update();
+    drawSuperlaser();
+    drawLasers();
+    sds.forEach(drawSD);
+    if (faction==='empire') drawRebelCruiser();
+    xwings.forEach(drawXwing);
+    bwings.forEach(drawBwing);
+    ties.forEach(drawTIE);
+    tieInts.forEach(drawInterceptor);
+    drawDS();
+    drawExplosions();
+  }
+  requestAnimationFrame(animate);
+}
+
+window.addEventListener('resize', resize);
+resize();
+animate();
+</script>
+</body>
+</html>
