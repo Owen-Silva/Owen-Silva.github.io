@@ -1,6 +1,6 @@
 {
   "_source": {
-    "derived_from": "C:\\Users\\owens\\mission-control\\lib\\atlas.js (1,835 lines, read-only, static read — the live scanner was never run)",
+    "derived_from": "~/mission-control/lib/atlas.js (1,835 lines, read-only, static read — the live scanner was never run)",
     "read": "2026-09-16",
     "method": "Transcribed from the static definitions in that file: HEALTH_SERVICES, APP_SUBSYSTEMS, WIRED_DEPS, CRON_JOBS, INTERVAL_JOBS, TIERS, the six build*Tier() functions and buildEdges(). Roles were rewritten in plain English from the comments and sub-labels beside each node.",
     "caution": "This is the SHAPE of the system, not its live state. The dashboard’s per-node state (up / degraded / armed / hold …) is a probe result and is deliberately not included here."

@@ -1,44 +1,59 @@
 {
   "_source": {
-    "path": "C:\\Users\\owens\\browser\\README.md",
-    "read": "2026-09-16, read-only",
-    "readme_lines": 1401,
-    "features_section_lines": "143–1119",
+    "path": "~/browser/README.md",
+    "read": "2026-10-12, read-only (first read 2026-09-16)",
+    "readme_lines": 1467,
+    "features_section_lines": "202–1183",
     "readme_sections": [
       {
         "title": "Running it",
-        "line": 11
+        "line": 29
+      },
+      {
+        "title": "Default browser",
+        "line": 99
       },
       {
         "title": "Keyboard shortcuts",
-        "line": 67
+        "line": 126
       },
       {
         "title": "Features",
-        "line": 143
+        "line": 202
       },
       {
         "title": "Security notes",
-        "line": 1120
+        "line": 1184
       },
       {
         "title": "Performance",
-        "line": 1183
+        "line": 1247
       },
       {
         "title": "Files",
-        "line": 1233
+        "line": 1297
       },
       {
         "title": "Design rules worth keeping",
-        "line": 1293
+        "line": 1360
       },
       {
         "title": "Development",
-        "line": 1367
+        "line": 1434
       }
     ],
-    "note": "The README has nine top-level sections. Everything below is from `## Features` only; that section has no sub-headings, so every entry carries the same section name."
+    "note": "The README has nine top-level sections (a new one, Default browser, since 16 Sep). Everything below is from `## Features` only; that section has no sub-headings, so every entry carries the same section name. Re-parsed 12 Oct with the same rule and the same first-sentence / 256-character cut; the parser reproduces the 16 Sep file entry for entry from the 16 Sep README (ec1bb86^), and the 12 Oct parse returns the same 67 names, descriptions and lead lines.",
+    "readme_commit": "fed3fbf, 2026-10-10 (last README change before the 2026-10-12T00:00-07:00 cutoff)",
+    "redactions": "A Tailscale IP (feature 8) and a port range (feature 42; the 16 Sep copy had left one end of it in) are [removed].",
+    "history": [
+      {
+        "read": "2026-09-16",
+        "readme_lines": 1401,
+        "features_section_lines": "143–1119",
+        "count": 67,
+        "commits_then": 162
+      }
+    ]
   },
   "counting_rule": {
     "rule": "One feature = one paragraph inside `## Features` that opens with a bold lead, i.e. a line matching /^\\*\\*/. The bold lead is the feature name; the sentence after it is the description.",
@@ -47,7 +62,8 @@
     "claimed_in_writeup": 67,
     "reproduces": true,
     "caveats": [
-      "This is the DOCUMENTED count, not the built count. The README has not changed since 13 Sep (byte-identical), while four user-facing features landed 14–15 Sep: phone sound routing (computer / phone / both), the Claude-tab terminal fixes, the School pane filling its pane, and the phone workspace keeping exactly one phone tab. None of those four are in the 67.",
+      "This is the DOCUMENTED count, not the built count. Since 16 Sep the README changed in six commits (the name Quartz, the app id and profile move, Quartz.exe, Default browser, the Saved row) but gained no new bold-lead paragraph inside `## Features`, so the count is still 67. Work since then that the README does not give a paragraph of its own — the address bar searching tabs, Saved, notes and folders, keyword shortcuts, autocorrect, the movable Home, the shared look with Helm and Mantle — is not in the 67.",
+      "Four of the 67 describe things removed from the code on 8 Oct and still documented: Budget pill, Ask Claude about this article, Claude tabs, Resuming a conversation. Each carries a `removed` key with its commit. They stay in the list because the list is the README's.",
       "The rule matters: the whole README carries 70 bold-lead paragraphs, and three of them sit outside `## Features`, in sections that use the same style for things that are not features. Counting only inside `## Features` is what gives 67.",
       "A few paragraphs open with more than one bold run — e.g. \"**Trading** … and **Phone** …\" — so `name` is the FIRST bold run only, and `lead_raw` carries the whole opening line as the README writes it."
     ]
@@ -164,7 +180,8 @@
       "section": "Features",
       "name": "Budget pill",
       "description": "The one titlebar readout: it reads the JSON that Claude Code's statusline hook writes (5-hour and week percentages, amber from 80%, red from 95%; the card has the countdowns, today's spend across the sessions that ran today — counted from a per-day…",
-      "lead_raw": "Budget pill. The one titlebar readout: it reads the JSON that Claude Code's statusline hook"
+      "lead_raw": "Budget pill. The one titlebar readout: it reads the JSON that Claude Code's statusline hook",
+      "removed": "2026-10-08, commit 934850f (\"Budget: the titlebar pill and the new tab's Claude 5H / week feed are gone\")"
     },
     {
       "index": 17,
@@ -220,7 +237,8 @@
       "section": "Features",
       "name": "Ask Claude about this article",
       "description": "Ask hands over a link and Show hands over a picture; this hands over the WORDS, so a session that cannot browse can still answer from the page.",
-      "lead_raw": "Ask Claude about this article. Ask hands over a link and Show hands over a picture; this hands"
+      "lead_raw": "Ask Claude about this article. Ask hands over a link and Show hands over a picture; this hands",
+      "removed": "2026-10-08, commits 4428a8f and 8825790 (\"Removed: \\\"Ask Claude about this article\\\"\")"
     },
     {
       "index": 25,
@@ -345,7 +363,7 @@
       "index": 42,
       "section": "Features",
       "name": "Spotify auto-pause",
-      "description": "The auto-pause tool already installed at ~/spotify-autopause is a local PowerShell HTTP bridge (127.0.0.1, the first free of ports [removed] to 8790) held up by a scheduled task, with an Opera GX extension speaking to it. autopause.js is that same client…",
+      "description": "The auto-pause tool already installed at ~/spotify-autopause is a local PowerShell HTTP bridge (127.0.0.1, the first free of ports [removed]) held up by a scheduled task, with an Opera GX extension speaking to it. autopause.js is that same client…",
       "lead_raw": "Spotify auto-pause. The auto-pause tool already installed at ~/spotify-autopause is a local"
     },
     {
@@ -471,8 +489,9 @@
       "index": 60,
       "section": "Features",
       "name": "Claude tabs",
-      "description": "pty.js spawns C:\\Users\\owens\\.local\\bin\\claude.exe under a real ConPTY, wired to xterm.js.",
-      "lead_raw": "Claude tabs. pty.js spawns C:\\Users\\owens\\.local\\bin\\claude.exe under a real ConPTY, wired"
+      "description": "pty.js spawns ~/.local/bin/claude.exe under a real ConPTY, wired to xterm.js.",
+      "lead_raw": "Claude tabs. pty.js spawns ~/.local/bin/claude.exe under a real ConPTY, wired",
+      "removed": "2026-10-08, commit 8825790 (\"Claude: only the pane beside a page is left, no more Claude tabs\")"
     },
     {
       "index": 61,
@@ -507,7 +526,8 @@
       "section": "Features",
       "name": "Resuming a conversation",
       "description": "Four ways in, all the same door: right-click bare strip → \"Resume a Claude conversation…\", a Claude chip's menu → \"Resume another conversation here\", Ctrl+click the Claude button in the titlebar, or the palette's \"Resume a Claude conversation…\" row.",
-      "lead_raw": "Resuming a conversation. Four ways in, all the same door: right-click bare strip → \"Resume a"
+      "lead_raw": "Resuming a conversation. Four ways in, all the same door: right-click bare strip → \"Resume a",
+      "removed": "2026-10-08, commit 8825790 (removes \"Resume a Claude conversation\" and \"Resume another conversation here\")"
     },
     {
       "index": 66,

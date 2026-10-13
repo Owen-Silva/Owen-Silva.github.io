@@ -1,8 +1,8 @@
 /* ============================================================
    atlas.js — two scenes for the Atlas page.
 
-   1. The release history: 10 public releases as ink marks along a
-      line, over a current made of the 2,636 Atlas commits.
+   1. The release history: the public releases (13 on 12 Oct 2026) as
+      ink marks along a line, over a current made of the Atlas commits.
    2. The 50-node public-safe system map, drawn as an ink diagram
       whose 61 strokes draw in as the page scrolls.
 
@@ -106,7 +106,7 @@
     }
 
     var W = 0, H = 0, dpr = 1, baseY = 0;
-    var D0 = di('03-28'), D1 = di('09-20');
+    var D0 = di('03-28'), D1 = di('10-14');
     function X(d) { return 16 + (d - D0) / (D1 - D0) * (W - 32); }
 
     function layout() {
@@ -155,7 +155,7 @@
     var ran = false, stats = { frames: 0, total: 0, max: 0 };
     function run() {
       if (ran || !ok) return; ran = true;
-      if (REDUCED) { snap(); colours(); paint(0.8); state('2,636 Atlas commits · still frame (reduced motion)', false, 'current'); mark('current'); return; }
+      if (REDUCED) { snap(); colours(); paint(0.8); state(N.toLocaleString('en-US') + ' Atlas commits · still frame (reduced motion)', false, 'current'); mark('current'); return; }
       for (var i = 0; i < N; i++) { px[i * 2] = tx[i * 2]; px[i * 2 + 1] = baseY + 14; }
       colours();
       var t0 = performance.now();
@@ -172,7 +172,7 @@
         stats.frames++; stats.total += c; if (c > stats.max) stats.max = c;
         if (p < 1) requestAnimationFrame(step);
         else {
-          state('2,636 Atlas commits, one dot each, by the day they landed', false, 'current');
+          state(N.toLocaleString('en-US') + ' Atlas commits, one dot each, by the day they landed', false, 'current');
           window.__currentStats = { frames: stats.frames, avgMs: +(stats.total / stats.frames).toFixed(3), maxMs: +stats.max.toFixed(3), particles: N };
           mark('current');
         }
@@ -209,7 +209,7 @@
 
       // the 337 internal releases: a bracket under the axis, not
       // invented dates. It hangs below the line so the whole band
-      // above it belongs to the names of the ten public releases.
+      // above it belongs to the names of the public releases.
       var a = g.X(di('04-01')), b = g.X(di('08-26'));
       var br = el('path', { 'class': 'rel-axis', d: 'M' + a + ' ' + (lineY + 4) + ' v6 H' + b + ' v-6', fill: 'none', opacity: .55 });
       svg.appendChild(br);
@@ -226,7 +226,7 @@
       svg.appendChild(bt);
 
       // month ticks
-      for (var m = 3; m <= 8; m++) {
+      for (var m = 3; m <= 9; m++) {
         var x = g.X(di((m + 1 < 10 ? '0' : '') + (m + 1) + '-01'));
         var t = el('text', { x: x, y: g.H - 10, 'text-anchor': 'middle', 'font-size': 10, fill: 'var(--scene-ink)', 'letter-spacing': '.14em' });
         t.textContent = MON[m].toUpperCase();
@@ -234,12 +234,12 @@
       }
       svg.appendChild(el('line', { 'class': 'rel-axis', x1: 16, y1: g.H - 26, x2: g.W - 16, y2: g.H - 26, opacity: .5 }));
 
-      // ---- the ten public releases ----------------------------
-      // Nine of the ten land in one week at the right-hand end of a
-      // five-month axis, so their names cannot sit over their own
+      // ---- the public releases --------------------------------
+      // Nine of the thirteen land in one September week, three more on
+      // 2-4 October, at the right of a six-month axis: their names cannot sit over their own
       // marks: stacked there they collided in 9 px mono. The names get
       // a rail of their own across the whole band, and a lens joins
-      // that rail to the week it magnifies. Date order on the rail is
+      // that rail to the stretch it magnifies. Date order on the rail is
       // date order on the axis, and the tie to a single mark appears
       // only on hover or focus — so nothing crosses at rest.
       // oldest first; within a day, oldest version first (the file is newest-first)
@@ -278,7 +278,7 @@
       var railY = Math.min(18 + lanes * rowH + 9, lineY - 28);
       var markTop = lineY + 6;
 
-      // the lens: the rail's full width is this one week on the axis
+      // the lens: the rail's full width is the stretch of the axis the releases span
       var firstX = g.X(di(rel[0].date)), lastX = g.X(di(rel[n - 1].date));
       var lensL = Math.max(pad, firstX - 12), lensR = Math.min(g.W - pad, lastX + 12);
       svg.appendChild(el('path', {
@@ -341,7 +341,7 @@
         /* the markup's placeholder is not a state: say what is true right
            now and why nothing has moved yet, so a load that never reaches
            this band still reads as waiting rather than as broken */
-        state('2,636 Atlas commits — they gather when this band reaches the screen', false, 'current');
+        state(cur.N.toLocaleString('en-US') + ' Atlas commits — they gather when this band reaches the screen', false, 'current');
         var io = new IntersectionObserver(function (es) {
           if (es[0].isIntersecting) { cur.run(); io.disconnect(); }
         }, { threshold: 0.15 });
@@ -356,7 +356,7 @@
     document.addEventListener('inkthemechange', function () { cur.colours(); cur.snap(); cur.paint(0.8); });
   }
 
-  /* ---- the release list (all 10, every bullet lead) --------- */
+  /* ---- the release list (every release, every bullet lead) --------- */
   function releaseList(data) {
     var host = document.getElementById('rel-list');
     if (!host) return;
@@ -386,8 +386,11 @@
     });
     var tot = data.releases.reduce(function (a, r) { return a + r.bullet_count; }, 0);
     var note = document.getElementById('rel-total');
+    // the newest release and its date come from the data (the file is newest-first)
+    var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var last = data.releases[0], lp = last.date.split('-').map(Number);
     if (note) note.textContent = data.public_release_count + ' public releases, ' + tot + ' entries between them, from v1.0.0 on ' +
-      '27 August to ' + data.latest_version + ' on 10 September 2026.';
+      '27 August to ' + data.latest_version + ' on ' + lp[2] + ' ' + MONTHS[lp[1] - 1] + ' ' + lp[0] + '.';
   }
 
   /* ============================================================

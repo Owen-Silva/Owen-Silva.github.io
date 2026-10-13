@@ -1,10 +1,10 @@
 /* ============================================================
-   river.js — 2,986 particles, one per real commit.
+   river.js — 3,176 particles, one per real commit.
 
    Every particle carries a date and a repository, expanded from
    the per-day counts in data/commits.json. They assemble into the
    name, hold, then release and flow into a river whose x axis is
-   the calendar: March -> September 2026.
+   the calendar: March -> 12 October 2026.
 
    The field is the whole picture. It used to share its rectangle
    with a 25-row gantt of project names, state words, dotted
@@ -22,10 +22,10 @@
   /* ---- dates ------------------------------------------------ */
   var YEAR = 2026;
   var START = Date.UTC(YEAR, 2, 1);      // 1 Mar 2026
-  var END = Date.UTC(YEAR, 9, 1);        // 1 Oct 2026
-  var TODAY = Date.UTC(YEAR, 8, 16);     // 16 Sep 2026
+  var END = Date.UTC(YEAR, 9, 13);       // 13 Oct 2026: the day after the last commit bucketed in the data (12 Oct UTC)
+  var TODAY = Date.UTC(YEAR, 9, 12);     // 12 Oct 2026, the measurement date
   var DAY = 864e5;
-  var SPAN_DAYS = (END - START) / DAY;   // 214
+  var SPAN_DAYS = (END - START) / DAY;   // 226
 
   function dayIndex(s) {                 // 'YYYY-MM-DD' or 'MM-DD'
     var p = s.split('-').map(Number);
@@ -100,7 +100,7 @@
     var REPO = [
       { key: 'atlas', pid: 'atlas', name: 'Atlas' },
       { key: 'portal', pid: 'tvha', name: 'TVHA portal' },
-      { key: 'browser', pid: 'browser', name: 'Browser' }
+      { key: 'browser', pid: 'browser', name: 'Quartz' }
     ];
     var rec = [];   // {d: dayIndex, r: repoIdx, i: index within day, n: that day's count}
     var perRepo = [0, 0, 0];
@@ -169,7 +169,7 @@
         panel.innerHTML = '';
         var b = document.createElement('b'); b.textContent = 'The commit river could not draw';
         var p1 = document.createElement('p');
-        p1.textContent = 'All 23 projects, their dates and their state are written out in the register below — nothing is missing, only the picture.';
+        p1.textContent = 'All 34 projects, their dates and their state are written out in the register below — nothing is missing, only the picture.';
         var c = document.createElement('code'); c.textContent = 'Reason: ' + glErr;
         var a = document.createElement('a'); a.className = 'more'; a.href = '#h-reg';
         a.textContent = 'Go to the register';
@@ -183,7 +183,7 @@
         var s = document.createElement('b'); s.textContent = 'The commit river above could not draw. ';
         note.appendChild(s);
         note.appendChild(document.createTextNode(
-          'This register is the same data: all 23 projects with their dates and state. Reason: ' + glErr + '.'));
+          'This register is the same data: all 34 projects with their dates and state. Reason: ' + glErr + '.'));
         note.hidden = false;
       }
       reveal();
@@ -236,7 +236,7 @@
     function X(d) { return padL + (d / SPAN_DAYS) * (W - padL - padR); }
 
     /* Three currents share the band. The depth of each is its share of
-       the commits, softened (a raw 2,636 : 188 : 162 split would leave
+       the commits, softened (a raw 2,720 : 210 : 246 split would leave
        the two small repositories a few pixels deep and unreadable), with
        a gap of still water between them so the three read as three. */
     function layoutRows() {
@@ -380,7 +380,7 @@
     function drawAxis() {
       if (!o.axis) return;
       o.axis.innerHTML = '';
-      for (var m = 2; m <= 8; m++) {
+      for (var m = 2; m <= 9; m++) {
         var d = (Date.UTC(YEAR, m, 1) - START) / DAY;
         var pc = X(d) / W * 100;
         var s = document.createElement('span');
@@ -601,7 +601,7 @@
       if (!hit) return null;
       return { row: row, repo: ROPE[ri], n: hit.n, iso: hit.iso, x: X(d), y: row.cy };
     }
-    var ROPE = ['Atlas', 'The academy portal', 'The browser'];
+    var ROPE = ['Atlas', 'The academy portal', 'Quartz'];
 
     function showDay(info, cx) {
       if (!o.tip) return;

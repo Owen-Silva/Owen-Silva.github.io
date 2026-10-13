@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Family &amp; staff portal — Owen Silva</title>
-<meta name="description" content="A portal a youth hockey academy runs on: attendance, coach notes, messages, roster import and a draft board. 188 commits over nine weeks.">
+<meta name="description" content="A portal a youth hockey academy runs on: attendance, coach notes, messages, roster import, a draft board and on-ice work. 210 commits over twelve weeks.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0F14'/><circle cx='23.5' cy='7' r='1.4' fill='%23ECE5D7'/><circle cx='8' cy='10' r='1' fill='%23ECE5D7'/><rect x='2' y='19.2' width='28' height='1.2' fill='%23F0603A'/><path d='M2 20.4 L9 12 L14 17.4 L21 8.6 L30 20.4 Z' fill='%23ECE5D7'/></svg>">
 <script>
   (function () {
@@ -319,7 +319,7 @@
   <div class="nav__links">
     <a href="index.html">Index</a>
     <a href="atlas.html">Atlas</a>
-    <a href="browser.html">Browser</a>
+    <a href="browser.html">Quartz</a>
     <a href="portal.html" aria-current="page">Portal</a>
     <a href="projects.html">Projects</a>
     <a href="lab.html">Lab</a>
@@ -371,44 +371,51 @@
         <li class="pt-band" style="--k:.78;--o:.82" data-enter="rise" data-delay="110">
           <div class="pt-band__id">
             <h3>Staff</h3>
-            <p class="pt-band__n">Six reaches</p>
+            <p class="pt-band__n">Seven reaches</p>
           </div>
           <p class="pt-band__note">The whole academy: attendance across families, the notes they write,
-            the roster import, the draft board and the on-ice work released to staff first.</p>
+            the roster import, the draft board, the on-ice work and the tasks it hands out.</p>
           <ul class="pt-band__list">
             <li>Every family’s attendance</li>
             <li>Coach notes on a skill</li>
             <li>Messages, read-tracked</li>
             <li>Roster import</li>
             <li>Draft board</li>
-            <li>On-ice work (staff first)</li>
+            <li>On-ice work</li>
+            <li>Tasks for players and parents</li>
           </ul>
         </li>
 
         <li class="pt-band" style="--k:.88;--o:.92" data-enter="rise" data-delay="220">
           <div class="pt-band__id">
             <h3>Student</h3>
-            <p class="pt-band__n">Two reaches</p>
+            <p class="pt-band__n">Four reaches</p>
           </div>
           <p class="pt-band__note">Their own view of the same material — the attendance that concerns
-            them and the notes written about their skills.</p>
+            them, the notes written about their skills, what they should be drilling on the ice and the
+            tasks set for them.</p>
           <ul class="pt-band__list">
             <li>Their own attendance</li>
             <li>Coach notes on a skill</li>
+            <li>Their on-ice work</li>
+            <li>Their own tasks</li>
           </ul>
         </li>
 
         <li class="pt-band pt-band--near" style="--k:1;--o:1" data-enter="rise" data-delay="330">
           <div class="pt-band__id">
             <h3>Parent</h3>
-            <p class="pt-band__n">Three reaches</p>
+            <p class="pt-band__n">Five reaches</p>
           </div>
           <p class="pt-band__note">Sees their own family. Marks a skater absent for a date, reads the
-            coach’s note on a skill and can reply with a question.</p>
+            coach’s note on a skill and can reply with a question, follows the on-ice work and ticks off
+            their skater’s tasks.</p>
           <ul class="pt-band__list">
             <li>Their own attendance</li>
             <li>Coach notes on a skill</li>
             <li>Messages, read-tracked</li>
+            <li>Their skater’s on-ice work</li>
+            <li>Their skater’s tasks</li>
           </ul>
         </li>
 
@@ -436,11 +443,13 @@
           <ul class="ticks">
             <li>Separate views for parents, students, staff and a maintainer.</li>
             <li>Attendance with recurring absences and locked past dates, on one calendar with academy events.</li>
-            <li>Coach notes on skills, with video compressed in the browser before upload. Families can reply with a question.</li>
-            <li>Messages with read tracking, plus notifications and task lists.</li>
+            <li>Coach notes on skills, with video compressed in the browser before upload; if a clip cannot be shrunk, the original is sent instead. Families can reply with a question.</li>
+            <li>Messages with read tracking and PDF or other file attachments, a full message history for parents, plus notifications.</li>
+            <li>Tasks written once for players, parents or both, with an optional due date, sent to everyone, a group or picked players. Whoever has to do it gets the email and the bell.</li>
             <li>Roster import from the office spreadsheet, and invite emails one at a time or all at once.</li>
-            <li>A draft board that splits the night&rsquo;s skaters into two teams by drag and drop.</li>
-            <li>On-ice work: what each skater should be drilling, released to staff first.</li>
+            <li>A draft board that splits the night&rsquo;s skaters into two teams by drag and drop, or by Randomize, a new random split each press.</li>
+            <li>On-ice work: what each skater should be drilling, with clips. Parents and players each see only their own skater&rsquo;s, and a new item emails the family.</li>
+            <li>A card under the sign-in box counts up the hours on the ice this season, worked out from the academy calendar: each academy day adds 2.5 hours, days off excluded.</li>
           </ul>
         </div>
         <div>
@@ -452,19 +461,21 @@
             <li>Migrations on every deploy, after the migration history was rebuilt from a clean baseline.</li>
             <li>Email that lands. SPF and DKIM both pass, sent from a branded subdomain.</li>
             <li>A maintainer console that logs failed sign-ins, dead reset links and server errors.</li>
+            <li>Notices scoped to the person. Each login keeps its own newest 50, so a task sent to the whole academy cannot push another family&rsquo;s notices out, and a parent-only task never rings the player&rsquo;s login.</li>
+            <li>A frosted-glass restyle of every screen, written as a separate CSS layer with no behaviour changes, and the browser&rsquo;s own pop-ups replaced with the portal&rsquo;s.</li>
           </ul>
         </div>
       </div>
 
-      <p class="note">An on-ice work module &mdash; what each skater should be drilling &mdash; shipped
-        admin-only on 16 September 2026. The parent and student views exist in that release, but
-        families are not switched on.</p>
+      <p class="note">The on-ice work module &mdash; what each skater should be drilling &mdash; shipped
+        admin-only on 16 September 2026. It was switched on for parents and players on 22 September,
+        and families have been emailed about new items since 27 September.</p>
 
       <dl class="facts" data-enter="fade" data-delay="80">
-        <div><dt>Built</dt><dd>16 Jul &ndash; 16 Sep 2026, 9 weeks</dd></div>
-        <div><dt>Commits</dt><dd>188</dd></div>
-        <div><dt>Code</dt><dd>~35k lines of TypeScript, 22 SQL migrations</dd></div>
-        <div><dt>Shape</dt><dd>22 data models, ~96 API endpoints, 32 screens</dd></div>
+        <div><dt>Built</dt><dd>16 Jul &ndash; 8 Oct 2026, 12 weeks</dd></div>
+        <div><dt>Commits</dt><dd>210</dd></div>
+        <div><dt>Code</dt><dd>~44k lines of TypeScript, 25 SQL migrations</dd></div>
+        <div><dt>Shape</dt><dd>23 data models, ~108 API endpoints, 33 screens</dd></div>
         <div><dt>Roles</dt><dd>Parents, students, staff and a maintainer</dd></div>
         <div><dt>Built with</dt><dd>Vite and TypeScript with no framework, Express, Prisma, PostgreSQL,
           Railway, Brevo, Cloudflare R2, GitHub Actions</dd></div>
@@ -527,7 +538,7 @@
     <footer class="colophon">
       <div>
         <h2>About these numbers</h2>
-        <p>Measured on 16 September 2026 from the repository&rsquo;s git history, its Prisma schema,
+        <p>Measured on 12 October 2026 from the repository&rsquo;s git history, its Prisma schema,
            its route files and its screen directory.</p>
       </div>
       <div>

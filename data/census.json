@@ -1,153 +1,281 @@
 {
-  "_source": "measured 2026-09-14 census, recorded in BRIEF-2",
+  "_source": "measured 2026-10-12 census (code lines: non-blank, non-comment), same method as the 2026-09-14 census, extended to the projects built since",
   "_source_detail": {
-    "recorded_in": "C:\\Users\\owens\\portfolio-site\\_explore\\BRIEF-2.md, section \"Real data you may use\"",
-    "brief_wording": "Lines of code census (16 Sep, already measured): 408,364 code lines in 1,355 files.",
-    "measured": "2026-09-14 census (the 16 Sep brief carries the same figures)",
-    "recount": "NOT recounted. Every figure below is transcribed from the brief exactly as written; only the residuals and percentages are arithmetic on those figures.",
-    "rounding": "The brief gives per-project and per-language figures to one decimal place in thousands. They are expanded here to whole lines for charting, so each carries up to ±50 lines of rounding error and the buckets do not add to the total exactly — see residuals."
+    "measured": "2026-10-12, working trees as they stood that day (Atlas: the main checkout, on branch next, 4 commits ahead of the last production push)",
+    "method": "The 2026-09-14 census script (loc.js) re-run unchanged except one more kept directory (~/.claude/mods). Repo files come from git ls-files -co --exclude-standard, so .gitignore'd output is skipped; non-git folders are walked. Each code file is split into code / comment / blank lines with per-language comment rules; only code lines are counted. Exact copies (sha1) and near-identical copies (line-set Jaccard >= 0.7) are counted once, under the most recently active project; a project that is 80%+ copies of another is not counted. Repos owned by a collaborator count only the lines git blame gives to Owen.",
+    "exclusions": "node_modules, venvs and every package/cache/build-output directory (dist, build, out, release, coverage, .next and the rest); vendored and third-party code (vendor dirs, license-banner files such as bundled marked/purify); minified, bundled, hashed and .d.ts files; generated Prisma migrations; saved web pages; lockfiles, JSON, CSV and other data files (not code extensions); Markdown (counted separately, not included); git worktrees, second clones, deploy copies (mantle-live, news-shadow-deploy, portfolio-site-live, the packaged Quartz build), backups, scratch folders and Claude background-job copies; the frozen _explore/i2 snapshot of this site; skills synced from claude.ai; class notes; and work that is not Owen's (the Tensor extensions, MultiMC, overworld_music_pack, a third-party fly-brain reference model).",
+    "tool": "loc.js (node, no external counter). Raw lines including blanks and comments: 1,194,235; comment lines 227,609; blank lines 91,084.",
+    "previous": "The 2026-09-14 census gave 408,364 code lines in 1,355 files. The growth is mostly new projects (Mantle, Helm, Arkhe, the fly-brain simulation, this site) plus Quartz and the portal growing.",
+    "rounding": "Every figure is a whole-line count; display strings round to one decimal place in thousands."
   },
   "totals": {
-    "code_lines": 408364,
-    "files": 1355,
-    "lines_per_file_mean": 301
+    "code_lines": 875541,
+    "files": 3364,
+    "lines_per_file_mean": 260,
+    "projects_counted": 47
   },
   "by_project": [
     {
       "id": "atlas",
       "name": "Atlas",
-      "lines": 228500,
-      "display": "228.5k",
+      "lines": 238064,
+      "display": "238.1k",
       "breakdown": {
-        "tests": 136000,
-        "tests_display": "about 136k",
-        "rest": 92500,
-        "rest_display": "about 92.5k"
+        "tests": 143928,
+        "tests_display": "about 144k",
+        "rest": 94136,
+        "rest_display": "about 94k"
       },
       "note": "The single biggest body of code, and roughly three fifths of it is tests.",
-      "share_pct": 56
+      "files": 866,
+      "share_pct": 27.2,
+      "sources": [
+        "Downloads/Atlas",
+        "Downloads/Atlas/HarnessAgents/hive"
+      ]
+    },
+    {
+      "id": "mantle",
+      "name": "Mantle",
+      "lines": 172164,
+      "display": "172.2k",
+      "note": "A Windows 11 shell: an Electron bar and panels over a C# sidecar that talks to the system.",
+      "files": 576,
+      "share_pct": 19.7,
+      "sources": [
+        "~/mantle"
+      ]
+    },
+    {
+      "id": "portfolio-site",
+      "name": "This site",
+      "lines": 77167,
+      "display": "77.2k",
+      "note": "This site and the design directions explored on the way to it.",
+      "files": 140,
+      "share_pct": 8.8,
+      "sources": [
+        "~/portfolio-site"
+      ]
     },
     {
       "id": "browser",
-      "name": "Browser",
-      "lines": 51300,
-      "display": "51.3k",
-      "note": "An Electron browser written in six days.",
-      "share_pct": 12.6
+      "name": "Quartz",
+      "lines": 60559,
+      "display": "60.6k",
+      "note": "The Electron browser, now named Quartz.",
+      "files": 107,
+      "share_pct": 6.9,
+      "sources": [
+        "~/browser",
+        "~/quartz-logo"
+      ]
     },
     {
-      "id": "design+site",
-      "name": "Design explorations + site rebuild",
-      "lines": 43000,
+      "id": "helm",
+      "name": "Helm",
+      "lines": 53424,
+      "display": "53.4k",
+      "note": "A desktop and phone app for running Claude Code sessions.",
+      "files": 297,
+      "share_pct": 6.1,
+      "sources": [
+        "~/helm",
+        "~/helm-site"
+      ]
+    },
+    {
+      "id": "arkhe",
+      "name": "Arkhe",
+      "lines": 46270,
+      "display": "46.3k",
+      "note": "A beginner-guide site, co-built with a friend.",
+      "files": 219,
+      "share_pct": 5.3,
+      "sources": [
+        "~/arkhe"
+      ]
+    },
+    {
+      "id": "fly-brain",
+      "name": "Fly brain",
+      "lines": 42972,
       "display": "43k",
-      "note": "Seven standalone visual directions for Atlas plus the 16-page site rebuild.",
-      "share_pct": 10.5
+      "note": "A spiking simulation of the fruit-fly brain wiring map, with the experiments run on it.",
+      "files": 301,
+      "share_pct": 4.9,
+      "sources": [
+        "~/fly-brain"
+      ]
     },
     {
       "id": "portal",
       "name": "TVHA portal",
-      "lines": 26000,
-      "display": "26k",
+      "lines": 38892,
+      "display": "38.9k",
       "note": "The youth-hockey family and staff portal.",
-      "share_pct": 6.4
+      "files": 154,
+      "share_pct": 4.4,
+      "sources": [
+        "Downloads/Academy Website"
+      ]
     },
     {
       "id": "trading",
       "name": "Trading tools",
-      "lines": 14400,
-      "display": "14.4k",
-      "note": "Stock Coach, the Robinhood bot, the backtesting lab and Lens Trade.",
-      "share_pct": 3.5
+      "lines": 38574,
+      "display": "38.6k",
+      "note": "Stock Coach, the Robinhood bot, the backtesting lab, Lens Trade, the stock cone and the news shadow.",
+      "files": 157,
+      "share_pct": 4.4,
+      "sources": [
+        "~/stock-cone",
+        "~/news-shadow",
+        "Downloads/Tradingplatform",
+        "~/New Stock Strategy",
+        "~/robinhood-agent",
+        "~/stock-agent"
+      ]
+    },
+    {
+      "id": "design+site",
+      "name": "Design explorations + site rebuild",
+      "lines": 22556,
+      "display": "22.6k",
+      "note": "Standalone visual directions for Atlas plus the site rebuild's own harness (the rebuilt pages now ship inside Atlas and are counted there).",
+      "files": 89,
+      "share_pct": 2.6,
+      "sources": [
+        "Downloads/design-test-suite",
+        "Downloads/atlas-design",
+        "Downloads/atlas-site"
+      ]
     },
     {
       "id": "prototypes",
       "name": "One-off prototypes",
-      "lines": 13300,
-      "display": "13.3k",
-      "note": "Single-sitting builds: the Star Wars game, the dashboard prototype and the rest.",
-      "share_pct": 3.3
+      "lines": 18443,
+      "display": "18.4k",
+      "note": "Single-sitting builds: the Star Wars game, the NHL picks bot, MarketLens and the rest.",
+      "files": 64,
+      "share_pct": 2.1,
+      "sources": [
+        "Downloads/(loose files)",
+        "~/scratch-games",
+        "Downloads/nhl-bot",
+        "Downloads/MarketLens Website HTML",
+        "Downloads/local ai tests"
+      ]
     },
     {
       "id": "mission-control",
       "name": "Mission Control",
-      "lines": 12100,
+      "lines": 12147,
       "display": "12.1k",
       "note": "The local live dashboard of agents and infrastructure.",
-      "share_pct": 3
+      "files": 14,
+      "share_pct": 1.4,
+      "sources": [
+        "~/mission-control"
+      ]
+    },
+    {
+      "id": "claude-tools",
+      "name": "Claude Code mods + tools",
+      "lines": 9319,
+      "display": "9.3k",
+      "note": "Mods, hooks and helper tools for Claude Code itself.",
+      "files": 36,
+      "share_pct": 1.1,
+      "sources": [
+        "~/.claude/mods",
+        "~/.claude/tools",
+        "~/.claude/autoloop"
+      ]
     },
     {
       "id": "spotify",
       "name": "Spotify Auto-Pause",
-      "lines": 8700,
+      "lines": 8740,
       "display": "8.7k",
       "note": "Pauses music when a video starts talking.",
-      "share_pct": 2.1
+      "files": 12,
+      "share_pct": 1,
+      "sources": [
+        "~/spotify-autopause"
+      ]
     }
   ],
   "by_language": [
     {
       "language": "JavaScript",
-      "lines": 275000,
-      "display": "275k",
-      "share_pct": 67.3
+      "lines": 542603,
+      "display": "542.6k",
+      "share_pct": 62
     },
     {
       "language": "HTML",
-      "lines": 76000,
-      "display": "76k",
-      "share_pct": 18.6
-    },
-    {
-      "language": "TypeScript",
-      "lines": 19000,
-      "display": "19k",
-      "share_pct": 4.7
-    },
-    {
-      "language": "CSS",
-      "lines": 18000,
-      "display": "18k",
-      "share_pct": 4.4
+      "lines": 111763,
+      "display": "111.8k",
+      "share_pct": 12.8
     },
     {
       "language": "Python",
-      "lines": 11000,
-      "display": "11k",
-      "share_pct": 2.7
+      "lines": 74487,
+      "display": "74.5k",
+      "share_pct": 8.5
+    },
+    {
+      "language": "CSS",
+      "lines": 46716,
+      "display": "46.7k",
+      "share_pct": 5.3
+    },
+    {
+      "language": "C#",
+      "lines": 45363,
+      "display": "45.4k",
+      "share_pct": 5.2
+    },
+    {
+      "language": "TypeScript",
+      "lines": 42516,
+      "display": "42.5k",
+      "share_pct": 4.9
     },
     {
       "language": "PowerShell",
-      "lines": 8000,
-      "display": "8k",
-      "share_pct": 2
+      "lines": 10285,
+      "display": "10.3k",
+      "share_pct": 1.2
     }
   ],
   "residuals": {
-    "by_project_sum": 397300,
-    "by_project_unattributed": 11064,
-    "by_project_unattributed_note": "The eight named projects account for 397,300 of 408,364 lines. The remaining 11,064 sit in projects the brief does not break out individually (the smaller side projects and tools). Label any leftover slice \"everything else\", never zero it.",
-    "by_language_sum": 407000,
-    "by_language_unattributed": 1364,
-    "by_language_unattributed_note": "The six named languages account for 407,000 lines; the remaining 1,364 are other languages the brief does not list."
+    "by_project_sum": 839291,
+    "by_project_unattributed": 36250,
+    "by_project_unattributed_note": "The 14 named groups account for 839,291 of 875,541 lines. The remaining 36,250 sit in 17 smaller projects and tools not broken out individually. Label any leftover slice \"everything else\", never zero it.",
+    "by_language_sum": 873733,
+    "by_language_unattributed": 1808,
+    "by_language_unattributed_note": "The 7 named languages account for 873,733 lines; the remaining 1,808 are other languages (SQL, Prisma, shell, batch and others). JSX is folded into JavaScript and TSX into TypeScript."
   },
   "conflicts_with_other_measurements": [
     {
       "subject": "Browser",
-      "census_says": "51.3k lines",
-      "other_measurement_says": "63,029 JavaScript lines + 13,218 CSS lines = 76,247 (CONTENT-UPDATE.md §1, `git ls-files | xargs wc -l`)",
+      "census_says": "60.6k lines (12 Oct census; 51.3k on 14 Sep)",
+      "other_measurement_says": "63,029 JavaScript lines + 13,218 CSS lines = 76,247 (CONTENT-UPDATE.md §1, `git ls-files | xargs wc -l`) [measured 16 Sep, not re-run]",
       "why": "Different rules. The census counts CODE lines; `wc -l` counts every line including blanks and comments, and `git ls-files` sweeps a different file set. Neither figure is wrong; they are not interchangeable. Do not add them together or present them side by side without saying which rule each used."
     },
     {
       "subject": "TVHA portal",
-      "census_says": "26k lines",
-      "other_measurement_says": "35,088 TypeScript lines (CONTENT-UPDATE.md §3, `git ls-files '*.ts' '*.tsx' | xargs wc -l`)",
+      "census_says": "38.9k lines (12 Oct census; 26k on 14 Sep)",
+      "other_measurement_says": "35,088 TypeScript lines (CONTENT-UPDATE.md §3, `git ls-files '*.ts' '*.tsx' | xargs wc -l`) [measured 16 Sep, not re-run]",
       "why": "Same reason as above: code lines vs. raw line count over a different file set."
     },
     {
       "subject": "Atlas",
-      "census_says": "228.5k lines, about 136k of it tests",
+      "census_says": "238.1k lines, about 144k of it tests (12 Oct census; 228.5k / about 136k on 14 Sep)",
       "other_measurement_says": "~140k app lines and ~212k test lines (the figures on the baseline write-up, listed there as NOT remeasured)",
-      "why": "The two were measured with different rules and do not reconcile: 140k + 212k = 352k against the census’s 228.5k. The census is the 16 Sep measurement and is the one to publish. The ~140k/~212k pair is explicitly flagged unverified in CONTENT-UPDATE.md and should not be shown beside the census figure."
+      "why": "The two were measured with different rules and do not reconcile: 140k + 212k = 352k against the census’s figure. The census is the measurement to publish. The ~140k/~212k pair is explicitly flagged unverified in CONTENT-UPDATE.md and should not be shown beside the census figure."
     }
   ]
 }

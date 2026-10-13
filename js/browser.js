@@ -1,12 +1,13 @@
 /* ============================================================
-   browser.js — the browser page.
+   browser.js — the Quartz page (file name kept: browser.html).
 
    1. The window. The phone is a window cut into the same night:
       one second of the real stream fills the glass, 59 frames,
       and the five stages that carry a frame there are marked
       down its edge. Every figure is measured.
    2. The three measured CPU fixes, as instruments.
-   3. The browsable index of the 67 documented features.
+   3. The browsable index of the documented features (the count
+      comes from data/browser-features.json, never from here).
 
    Built on js/scene.js: DPR capped at 2, the scene starts when it
    scrolls into view, the loop stops the moment it settles, a still
@@ -92,8 +93,9 @@
          coordinates and brought back into the canvas, whatever the canvas
          happens to be. 0.55 of the window used to fall just past the end
          of the name; since the name grew to reach the right gutter (D7)
-         it falls inside the w of "browser" instead, and the last third of
-         the word is what the glass carries. The edge is the drawing's
+         it falls inside the name instead (it was the w of "browser"; the
+         page is called Quartz since 12 Oct), and the end of the word is
+         what the glass carries. The edge is the drawing's
          composition, not the name's: pushing it far enough right to clear
          a 1,176 px name would put the column at 87 % of the window. */
       var vw = window.innerWidth || W;
@@ -480,7 +482,7 @@
   }
 
   /* ============================================================
-     3. THE 67 FEATURES — one long list, README order
+     3. THE FEATURES — one long list, README order
      ============================================================ */
 
   /* The JSON is the README, read once and withheld where it named a
@@ -511,13 +513,23 @@
     return { b: name + '.', rest: ' ' + desc };
   }
 
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function dayMonth(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    return m ? Number(m[3]) + ' ' + MONTHS[Number(m[2]) - 1] : iso;
+  }
+
   function features() {
     var host = document.getElementById('feat-list');
     if (!host) return;
     I.loadJSON('data/browser-features.json').then(function (data) {
       var items = data.features.map(function (f) {
         var d = tidy(f.description);
-        return { index: f.index, name: f.name, desc: d, hay: (f.name + ' ' + d).toLowerCase() };
+        /* removed: still in the README, gone from the code; the date is
+           the commit's, from the JSON, never typed here */
+        var gone = f.removed ? String(f.removed).slice(0, 10) : '';
+        return { index: f.index, name: f.name, desc: d, gone: gone,
+                 hay: (f.name + ' ' + d + (gone ? ' removed' : '')).toLowerCase() };
       });
       var count = document.getElementById('feat-count');
       var q = document.getElementById('feat-q');
@@ -551,6 +563,13 @@
           b.textContent = parts.b;
           p.appendChild(b);
           p.appendChild(document.createTextNode(parts.rest));
+          if (f.gone) {
+            var g = document.createElement('span');
+            g.className = 'fx__gone mono';
+            g.textContent = 'Removed ' + dayMonth(f.gone);
+            p.appendChild(document.createTextNode(' '));
+            p.appendChild(g);
+          }
           d.appendChild(n); d.appendChild(p);
           frag.appendChild(d);
         });

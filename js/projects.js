@@ -9,7 +9,7 @@
       below the axis instead of being cut by the viewport. The
       title is set over it, not beside it.
 
-   2. THE REGISTER. The 22 projects that do not have a page of
+   2. THE REGISTER. The projects that do not have a page of
       their own, built from data/projects.json, filterable by
       state and by group. Each entry keeps a stable id so the
       front page — and the field above — can deep-link to it.
@@ -26,10 +26,14 @@
   var OWN_PAGE = { atlas: 'atlas.html', tvha: 'portal.html', browser: 'browser.html' };
 
   function di(s) { var p = s.split('-').map(Number); return (Date.UTC(2026, p[0] - 1, p[1]) - Date.UTC(2026, 2, 1)) / 864e5; }
-  var TOTALD = (Date.UTC(2026, 9, 1) - Date.UTC(2026, 2, 1)) / 864e5;
+  /* the timeline runs 1 March to 31 October 2026; today comes from the data */
+  var TOTALD = (Date.UTC(2026, 10, 1) - Date.UTC(2026, 2, 1)) / 864e5;
+  var TODAY = '10-12';
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function todayLabel(md) { var p = md.split('-').map(Number); return 'Today, ' + p[1] + ' ' + MON[p[0] - 1]; }
 
   /* ============================================================
-     1. THE FIELD — 43 technologies over 22 projects
+     1. THE FIELD — every technology over every project without a page
      ============================================================ */
 
   function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
@@ -68,6 +72,12 @@
     var techs = Object.keys(use).sort(function (a, b) {
       return use[b].length - use[a].length || a.localeCompare(b);
     });
+    /* the counts in the field's description come from the data, so the
+       sentence a screen reader hears can never fall behind the picture */
+    if (svg) svg.setAttribute('aria-label', 'An arc diagram: ' + techs.length +
+      ' technologies along the top, ' + projects.length + ' projects along the bottom in the ' +
+      'order they started, and one arc for every line in a project’s built-with list. ' +
+      'Each is a button; the full list follows below.');
     var order = projects.slice().sort(function (a, b) {
       return a.spans[0][0] < b.spans[0][0] ? -1 : 1;
     });
@@ -536,7 +546,7 @@
   }
 
   /* ============================================================
-     2. THE REGISTER — 22 entries, hairline rows
+     2. THE REGISTER — one hairline row per project
      ============================================================ */
 
   function entry(p) {
@@ -564,8 +574,8 @@
       bar.appendChild(i);
     });
     var u = document.createElement('u');
-    u.style.left = (di('09-16') / TOTALD * 100).toFixed(2) + '%';
-    u.title = 'Today, 16 Sep';
+    u.style.left = (di(TODAY) / TOTALD * 100).toFixed(2) + '%';
+    u.title = todayLabel(TODAY);
     bar.appendChild(u);
     id.appendChild(bar);
 
@@ -724,6 +734,7 @@
     var state = I.reporter('reg-state');
 
     I.loadJSON('data/projects.json').then(function (data) {
+      if (data.tally && /^\d\d-\d\d$/.test(data.tally.timeline_today)) TODAY = data.tally.timeline_today;
       buildRegister(data, host, state);
       if (document.getElementById('graph-pane')) techField(data);
     }).catch(function (e) {

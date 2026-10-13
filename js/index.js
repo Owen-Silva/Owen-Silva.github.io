@@ -1,6 +1,6 @@
 /* ============================================================
    index.js — front page: open the night world, mount the commit
-   river below it, build the register of 23 projects, draw the
+   river below it, build the register of 34 projects, draw the
    census, and check every printed number against the JSON it
    came from.
    ============================================================ */
@@ -31,7 +31,8 @@
        stars there are, and it arrives later if it arrives at all. */
     startWorld(state, commitsOnPage());
     lightTheSky(state);
-    river('loading 2,986 commits…');
+    var onPage = commitsOnPage();
+    river('loading ' + (onPage ? onPage.toLocaleString('en-GB') + ' ' : '') + 'commits…');
 
     Promise.all([
       I.loadJSON('data/commits.json'),
@@ -282,6 +283,11 @@
       browser: commits.projects.browser.total_commits,
       measured: projects.tally.measured_on
     };
+    /* days with a commit in any of the three: the union of their days, not the sum */
+    var seen = {};
+    keys.forEach(function (k) { Object.keys(commits.projects[k].commits_per_day || {}).forEach(function (d) { seen[d] = 1; }); });
+    real.days = Object.keys(seen).length;
+    if (commits.all_repos) { real.repos = commits.all_repos.repos_counted; real.allCommits = commits.all_repos.grand_total_commits; }
     var problems = [];
     if (sum !== real.commits) problems.push('commit totals disagree (' + sum + ' vs ' + real.commits + ')');
     if (projects.projects.length !== projects.tally.projects_since_march_2026) {
@@ -297,7 +303,7 @@
     if (problems.length) state('number check: ' + problems.join('; '), true);
   }
 
-  /* ---- the register: all 25, grouped, with a real timeline ---
+  /* ---- the register: all 34, grouped, with a real timeline ---
      Two systems carry it, not four (QA-4 D13). Every project is ONE LINE
      OF TYPE — the name, with its state and its dates riding the same line
      — over ONE RULE, the hairline that already parted the rows, inked
@@ -307,10 +313,10 @@
      scale the axis prints once, above the first row. */
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function di(s) { var p = s.split('-').map(Number); return (Date.UTC(2026, p[0] - 1, p[1]) - Date.UTC(2026, 2, 1)) / 864e5; }
-  var TOTALD = (Date.UTC(2026, 9, 1) - Date.UTC(2026, 2, 1)) / 864e5;
+  var TOTALD = (Date.UTC(2026, 10, 1) - Date.UTC(2026, 2, 1)) / 864e5;   // 1 Mar to 1 Nov: the October spans fit
   function atPct(md) { return (di(md) / TOTALD * 100).toFixed(2); }
 
-  /* the one scale, printed once: the same Mar 1 -> Oct 1 span every rule
+  /* the one scale, printed once: the same Mar 1 -> Nov 1 span every rule
      below is measured against. Months only — it labels the drawing, it
      does not add a fact. */
   function buildAxis() {
@@ -425,7 +431,7 @@
         });
         g.hidden = !any;
       });
-      if (live) live.textContent = shown + ' of 23 projects shown';
+      if (live) live.textContent = shown + ' of ' + host.querySelectorAll('.entry').length + ' projects shown';
     }
     [].forEach.call(chips, function (c) {
       c.addEventListener('click', function () {
@@ -446,11 +452,11 @@
     var total = census.totals.code_lines;
     bar.innerHTML = ''; key.innerHTML = '';
     /* One measure, parted by hairlines: each project's share of the same
-       408,364 lines, in one tone stepping down by rank. It was a solid
+       875,541 lines, in one tone stepping down by rank. It was a solid
        cream block, a solid vermilion block and seven greys — a stock
        chart, and the loudest use of the accent outside the horizon. No
        number changed; the names ride their own spans where those are wide
-       enough to hold them, and the key below carries all nine either way. */
+       enough to hold them, and the key below carries all fifteen either way. */
     rows.forEach(function (r, i) {
       var share = r.lines / total * 100;
       var seg = document.createElement('i');

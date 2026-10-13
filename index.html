@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Owen Silva</title>
-<meta name="description" content="Everything Owen Silva has built since March 2026 — 23 projects, 2,986 real commits, drawn as a bay at sunset and a river.">
+<meta name="description" content="Everything Owen Silva has built since March 2026 — 34 projects, 3,176 real commits, drawn as a bay at sunset and a river.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='k' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%230A1124'/><stop offset='.46' stop-color='%235A2652'/><stop offset='.8' stop-color='%23DE6A33'/><stop offset='1' stop-color='%23F9B95E'/></linearGradient></defs><rect width='32' height='32' fill='%230B0A12'/><rect width='32' height='20' fill='url(%23k)'/><circle cx='17' cy='20' r='4.2' fill='%23FFF3D8'/><rect y='20' width='32' height='12' fill='%23120F1A'/><path d='M0 20 L5 13.4 L9 17 L12.5 20 Z' fill='%23090B12'/><path d='M32 20 L26 12.4 L22 16.6 L19.8 20 Z' fill='%23090B12'/><rect x='15.5' y='20.6' width='3' height='8.4' fill='%23F9B95E' opacity='.72'/></svg>">
 <script>
   (function () {
@@ -246,7 +246,7 @@
   /* ---- the river: one picture, full bleed ----
      It used to carry three systems in one rectangle — the commit field,
      a 23-row gantt of project names with dotted leaders, and a set of
-     state squares. The field alone is the picture now; the 23 projects,
+     state squares. The field alone is the picture now; the 34 projects,
      their spans and their states are the register further down, which is
      where a reader can actually use them. What is left in the band is
      the water, the calendar it runs along, and the readout. */
@@ -314,7 +314,7 @@
      It was a solid cream block, a solid vermilion block and seven greys —
      a stock chart, and the loudest non-horizon use of the accent on the
      page. The numbers are unchanged: the same nine shares of the same
-     408,364 lines, laid end to end along one rule, parted by hairlines,
+     875,541 lines, laid end to end along one rule, parted by hairlines,
      each one named in mono where its own span can hold the name. */
   .census .census__bar {
     height: clamp(56px, 6.4vw, 84px);
@@ -454,7 +454,7 @@
   <div class="nav__links">
     <a href="index.html" aria-current="page">Index</a>
     <a href="atlas.html">Atlas</a>
-    <a href="browser.html">Browser</a>
+    <a href="browser.html">Quartz</a>
     <a href="portal.html">Portal</a>
     <a href="projects.html">Projects</a>
     <a href="lab.html">Lab</a>
@@ -475,7 +475,7 @@
       <div class="crop hero__crop">
         <h1 class="hero__name" id="hero-name"><span>Owen</span> <span>Silva</span></h1>
       </div>
-      <p class="hero__sub" id="hero-sub">I build software and put it to work — <strong>Atlas</strong>, a youth hockey academy&rsquo;s <strong>portal</strong>, and a <strong>browser</strong> I wrote and use every day.</p>
+      <p class="hero__sub" id="hero-sub">I build software and put it to work — <strong>Atlas</strong>, a youth hockey academy&rsquo;s <strong>portal</strong>, and <strong>Quartz</strong>, a browser I wrote and use every day.</p>
       <p class="hero__cue" id="hero-cue" aria-hidden="true"></p>
 
       <p class="vh">
@@ -500,11 +500,11 @@
   <!-- ============ and now the data ============ -->
   <section class="mark" aria-label="Since March 2026, counted">
     <dl class="tally" id="hero-tally">
-      <div><dt>Projects</dt><dd data-num="projects">23</dd></div>
-      <div><dt>Live on the web</dt><dd data-num="live">3</dd></div>
-      <div><dt>Used weekly</dt><dd data-num="tools">6</dd></div>
-      <div><dt>Commits</dt><dd data-num="commits">2,986</dd></div>
-      <p class="tally__note">Since March 2026 · measured <span data-num="measured">16 September 2026</span></p>
+      <div><dt>Projects</dt><dd data-num="projects">34</dd></div>
+      <div><dt>Live on the web</dt><dd data-num="live">4</dd></div>
+      <div><dt>Used weekly</dt><dd data-num="tools">9</dd></div>
+      <div><dt>Commits</dt><dd data-num="commits">3,176</dd></div>
+      <p class="tally__note">Since March 2026 · measured <span data-num="measured">12 October 2026</span></p>
     </dl>
   </section>
 
@@ -526,11 +526,11 @@
       </div>
 
       <p class="vh">
-        The picture above is a river of 2,986 dots. Each dot is one real commit, taken from the git
-        history of Atlas, the academy portal and the browser. The dots flow into a timeline running
-        from March to September 2026, so a mark sits on the day its commit landed and a tall plume
-        is a day with a lot of them. The three currents are the three repositories, deepest first.
-        The 23 projects, their dates and their states are written out as a table under
+        The picture above is a river of 3,176 dots. Each dot is one real commit, taken from the git
+        history of Atlas, the academy portal and Quartz, my browser. The dots flow into a timeline running
+        from 1 March to 12 October 2026, so a mark sits on the day its commit landed and a tall plume
+        is a day with a lot of them. The three currents are the three repositories: Atlas, the portal, then Quartz.
+        The 34 projects, their dates and their states are written out as a table under
         &ldquo;The register&rdquo;, below.
       </p>
 
@@ -539,10 +539,10 @@
 
     <div class="wrap">
       <p class="legend">
-        <span><i class="l-atlas"></i>Atlas · 2,636</span>
-        <span><i class="l-portal"></i>Academy portal · 188</span>
-        <span><i class="l-browser"></i>Browser · 162</span>
-        <span>Bucketed by UTC author date · 143 days with a commit</span>
+        <span><i class="l-atlas"></i>Atlas · <span data-num="atlas">2,720</span></span>
+        <span><i class="l-portal"></i>Academy portal · <span data-num="portal">210</span></span>
+        <span><i class="l-browser"></i>Quartz · <span data-num="browser">246</span></span>
+        <span>Bucketed by UTC author date · <span data-num="days">136</span> days with a commit</span>
       </p>
 
       <div class="cols">
@@ -551,18 +551,21 @@
             I build software and put it to work. <a href="atlas.html"><strong>Atlas</strong></a>, my AI task
             automation service, has been live at <a href="https://try-atlas.app" rel="noopener">try-atlas.app</a>
             since 27 August. A youth hockey academy runs attendance, coaching notes and its roster on
-            <a href="portal.html"><strong>a portal I built</strong></a> over the summer. And every day I use
-            <a href="browser.html"><strong>a browser I wrote</strong></a> that opens Claude sessions, desktop
-            apps and my phone as tabs.
+            <a href="portal.html"><strong>a portal I built</strong></a> over the summer. Every day I use
+            <a href="browser.html"><strong>Quartz</strong></a>, a browser I wrote that opens Claude sessions, desktop
+            apps and my phone as tabs. Since 21 September it has run on
+            <a href="projects.html#p-mantle"><strong>Mantle</strong></a>, my own layer over the Windows 11 desktop,
+            and since 7 October I run Claude Code from <a href="projects.html#p-helm"><strong>Helm</strong></a>,
+            an app of mine on the desktop and my phone.
           </p>
         </div>
         <div>
           <h3 class="vh">How to read the river</h3>
           <ul class="ticks">
-            <li>Left to right is the calendar: 1 March to 1 October 2026.</li>
+            <li>Left to right is the calendar: 1 March to 12 October 2026.</li>
             <li>Three currents, one per repository. A dot is one commit; a tall plume is a day with a lot of them &mdash; the deepest is 5 September, 208 commits to Atlas.</li>
-            <li>The width of a current is that repository&rsquo;s share of the work: Atlas 2,636 commits, the portal 188, the browser 162.</li>
-            <li>Point at the water for the day under the pointer and its count, and run the pointer through it to move it. The 23 projects are listed with their dates and states in the register below.</li>
+            <li>The width of a current is that repository&rsquo;s share of the work: Atlas 2,720 commits, the portal 210, Quartz 246.</li>
+            <li>Point at the water for the day under the pointer and its count, and run the pointer through it to move it. The 34 projects are listed with their dates and states in the register below.</li>
           </ul>
         </div>
       </div>
@@ -573,13 +576,13 @@
     <div class="wrap">
       <div class="band__head">
         <p class="eyebrow">02 — Counted out</p>
-        <h2 class="ink-in" id="h-count">Two thousand nine hundred and eighty-six</h2>
+        <h2 class="ink-in" id="h-count">Three thousand one hundred and seventy-six</h2>
         <p>Not a figure in a box. Every commit, every project and every week is drawn here as its own
            mark, from the same files the river reads.</p>
       </div>
       <div class="pane pane--tally" id="count-pane">
         <canvas class="pane__cv" id="count-cv" aria-hidden="true"></canvas>
-        <svg class="pane__svg ink-svg" id="count-svg" role="group" aria-label="The four tally figures drawn as individual marks: 2,986 commits, 23 projects, 6 tools used weekly and 3 live on the public web."></svg>
+        <svg class="pane__svg ink-svg" id="count-svg" role="group" aria-label="The four tally figures drawn as individual marks: 3,176 commits, 34 projects, 9 tools used weekly and 4 live on the public web."></svg>
       </div>
       <p class="scene-note" id="count-state" role="status"></p>
     </div>
@@ -600,18 +603,18 @@
     <div class="wrap">
       <div class="band__head">
         <p class="eyebrow">04 — The register</p>
-        <h2 class="ink-in" id="h-reg">Twenty-three projects</h2>
+        <h2 class="ink-in" id="h-reg">Thirty-four projects</h2>
         <p>Everything since March 2026, grouped the way I think about it. Some are still running, some
            shipped and stopped, and some were experiments I learned from and then shelved. Three have pages of
-           their own; the other twenty-two are written up on <a href="projects.html">the projects page</a>.</p>
+           their own; the other thirty-one are written up on <a href="projects.html">the projects page</a>.</p>
       </div>
 
       <div class="reg-tools" id="reg-tools">
-        <button class="chip" type="button" data-filter="all" aria-pressed="true">All 23</button>
+        <button class="chip" type="button" data-filter="all" aria-pressed="true">All 34</button>
         <button class="chip" type="button" data-filter="run" aria-pressed="false">Running now</button>
         <button class="chip" type="button" data-filter="done" aria-pressed="false">Finished</button>
         <button class="chip" type="button" data-filter="off" aria-pressed="false">Paused or shelved</button>
-        <span class="mono" id="reg-count" role="status" style="color:var(--ink-faint);letter-spacing:.05em;text-transform:none">23 of 23 projects shown</span>
+        <span class="mono" id="reg-count" role="status" style="color:var(--ink-faint);letter-spacing:.05em;text-transform:none">34 of 34 projects shown</span>
       </div>
 
       <p class="reg-down" id="reg-down" role="status" hidden></p>
@@ -627,8 +630,9 @@
       <div class="band__head">
         <p class="eyebrow">05 — In full</p>
         <h2 class="ink-in" id="h-feat">The ones with users</h2>
-        <p>Two are live on the public web and one is the program this page was written in. Each has its own
-           page; these are the leads.</p>
+        <p>Two are live on the public web, and the other three are programs I use all day: one of them is the
+           program this page was written in. Atlas, the portal and Quartz each have a page of their own; these are
+           the leads.</p>
       </div>
 
       <!-- Atlas -->
@@ -639,10 +643,10 @@
             <p class="feature__lead">Type &ldquo;every weekday at 8am, send me the top tech news&rdquo; and Atlas
               runs it on that schedule, checks the answer, and sends you the result.</p>
             <dl class="facts">
-              <div><dt>Built</dt><dd>1 Apr &ndash; 9 Sep 2026, with commits on 109 days</dd></div>
+              <div><dt>Built</dt><dd>1 Apr &ndash; 4 Oct 2026, with commits on 112 days</dd></div>
               <div><dt>Public launch</dt><dd>27 Aug 2026</dd></div>
-              <div><dt>Commits</dt><dd>2,636 to production</dd></div>
-              <div><dt>Releases</dt><dd>337 internal before 1.0, then 10 public</dd></div>
+              <div><dt>Commits</dt><dd>2,720 to production</dd></div>
+              <div><dt>Releases</dt><dd>337 internal before 1.0, then 13 public</dd></div>
             </dl>
             <a class="more" href="atlas.html">The release history and the 50-node system map</a>
           </div>
@@ -663,10 +667,10 @@
               note on a skill, and the office imports its roster spreadsheet. All of it happens in one portal
               I built for a youth hockey academy.</p>
             <dl class="facts">
-              <div><dt>Built</dt><dd>16 Jul &ndash; 16 Sep 2026, 9 weeks</dd></div>
-              <div><dt>Commits</dt><dd>188</dd></div>
-              <div><dt>Code</dt><dd>~35k lines of TypeScript, 22 SQL migrations</dd></div>
-              <div><dt>Shape</dt><dd>22 data models, ~96 API endpoints, 32 screens</dd></div>
+              <div><dt>Built</dt><dd>16 Jul &ndash; 8 Oct 2026, 12 weeks</dd></div>
+              <div><dt>Commits</dt><dd>210</dd></div>
+              <div><dt>Code</dt><dd>~44k lines of TypeScript, 25 SQL migrations</dd></div>
+              <div><dt>Shape</dt><dd>23 data models, ~108 API endpoints, 33 screens</dd></div>
               <div><dt>Roles</dt><dd>Parents, students, staff and a maintainer</dd></div>
               <div><dt>Built with</dt><dd>Vite and TypeScript with no framework, Express, Prisma, PostgreSQL, Railway, Brevo, Cloudflare R2, GitHub Actions</dd></div>
             </dl>
@@ -681,19 +685,19 @@
 
       </article>
 
-      <!-- Browser -->
+      <!-- Quartz -->
       <article class="feature" id="f-browser">
         <div class="feature__top">
           <div>
-            <h3>A browser</h3>
+            <h3>Quartz</h3>
             <p class="feature__lead">Claude coding sessions, Windows programs like Paint and Discord, and my
               Android phone all open as tabs beside ordinary web pages, in a browser I wrote.</p>
             <dl class="facts">
-              <div><dt>Built</dt><dd>10&ndash;15 Sep 2026, 6 days</dd></div>
-              <div><dt>Commits</dt><dd>162</dd></div>
-              <div><dt>Code</dt><dd>~63k lines of JavaScript, ~13k lines of CSS</dd></div>
-              <div><dt>Features</dt><dd>67, documented in a 1,400-line README</dd></div>
-              <div><dt>Distribution</dt><dd>A Windows installer and a portable build (0.1.0, not code-signed)</dd></div>
+              <div><dt>Built</dt><dd>10 Sep &ndash; 11 Oct 2026, commits on 13 days</dd></div>
+              <div><dt>Commits</dt><dd>246</dd></div>
+              <div><dt>Code</dt><dd>~75k lines of JavaScript, ~12k lines of CSS</dd></div>
+              <div><dt>Features</dt><dd>67, documented in a 1,467-line README</dd></div>
+              <div><dt>Distribution</dt><dd>A Windows installer and a portable build (0.1.0, built 14 Sep under the old name, not code-signed)</dd></div>
               <div><dt>Built with</dt><dd>Electron, node-pty and xterm.js, koffi for Win32 calls, WebCodecs, scrcpy and adb, Ghostery ad blocker, Mozilla Readability</dd></div>
             </dl>
             <a class="more" href="browser.html">The phone pipeline and all 67 features</a>
@@ -705,6 +709,37 @@
           </figure>
         </div>
 
+      </article>
+
+      <!-- Mantle and Helm: the two biggest builds since September. No
+           screenshot of either is on the site, so the pair share one row,
+           each in the same lead + facts + link pattern as the three above. -->
+      <article class="feature" id="f-desk">
+        <div class="feature__top">
+          <div>
+            <h3>Mantle</h3>
+            <p class="feature__lead">A bar, a launcher, a desktop and a set of tools of my own, drawn over
+              Windows 11 while Windows keeps running underneath.</p>
+            <dl class="facts">
+              <div><dt>Built</dt><dd>21 Sep &ndash; 11 Oct 2026, my desktop every day</dd></div>
+              <div><dt>Commits</dt><dd>202</dd></div>
+              <div><dt>Inside</dt><dd>Its own file manager, Alt+Tab switcher, task view, snap layouts, clipboard history and a Settings app</dd></div>
+              <div><dt>Built with</dt><dd>Electron, koffi, and one C# helper process that makes every Windows call</dd></div>
+            </dl>
+            <a class="more" href="projects.html#p-mantle">Mantle on the projects page</a>
+          </div>
+          <div>
+            <h3>Helm</h3>
+            <p class="feature__lead">A window for Claude Code instead of a terminal: a sidebar of sessions, a
+              readable conversation, and the same screen on my phone.</p>
+            <dl class="facts">
+              <div><dt>Built</dt><dd>7&ndash;11 Oct 2026, in use now</dd></div>
+              <div><dt>Commits</dt><dd>53</dd></div>
+              <div><dt>Built with</dt><dd>Electron, the Claude Agent SDK, Preact, WebSockets</dd></div>
+            </dl>
+            <a class="more" href="projects.html#p-helm">Helm on the projects page</a>
+          </div>
+        </div>
       </article>
 
       <!-- the two defs .plate--duo asks every page that uses it to carry,
@@ -737,10 +772,10 @@
     <div class="wrap">
       <div class="band__head">
         <p class="eyebrow">06 — The numbers</p>
-        <h2 class="ink-in" id="h-num">408,364 lines, counted once</h2>
-        <p><span data-num="lines">408,364</span> code lines across <span data-num="files">1,355</span> files,
-           measured on 14 September 2026. Atlas is more than half of it, and roughly three fifths of Atlas
-           is tests.</p>
+        <h2 class="ink-in" id="h-num">875,541 lines, counted once</h2>
+        <p><span data-num="lines">875,541</span> code lines across <span data-num="files">3,364</span> files,
+           measured on 12 October 2026. Atlas is the biggest share, about a quarter, and roughly three fifths
+           of Atlas is tests. Mantle, my Windows 11 desktop, is next.</p>
       </div>
       <div class="census">
         <div class="census__bar" data-quiet id="census-bar"></div>
@@ -759,14 +794,16 @@
     <footer class="colophon">
       <div>
         <h2>About these numbers</h2>
-        <p>Measured on 16 September 2026 from git history, file counts and the live sites. Where a project
-           has no git history, its dates come from its files. Trading results, client and family data, and
+        <p>Measured on 12 October 2026 from git history, file counts and the live sites, counting commits
+           through 11 October. The commit figures above are Atlas, the portal and Quartz; across all
+           <span data-num="repos">31</span> of my repositories it is <span data-num="allCommits">3,750</span>.
+           Where a project has no git history, its dates come from its files. Trading results, client and family data, and
            security details are left out on purpose.</p>
       </div>
       <div>
         <h2>How I work</h2>
-        <p>I build with Claude Code as a pair programmer. A few of the projects here, like Atlas Autopilot,
-           Mission Control and VOLT, are tools I made for working that way.</p>
+        <p>I build with Claude Code as a pair programmer. A few of the projects here, like Helm,
+           my Claude Code mods, Mission Control and VOLT, are tools I made for working that way.</p>
       </div>
       <div>
         <h2>How this site is made</h2>

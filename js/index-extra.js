@@ -3,7 +3,7 @@
 
    1. The tally, counted out. Each figure is drawn as that many
       individual marks, read from the same JSON the river reads,
-      so 2,986 is two thousand nine hundred and eighty-six marks
+      so 3,176 is three thousand one hundred and seventy-six marks
       and not a number in a box.
    2. Three live miniatures — the opening scene of each of the
       three project pages, drawn small, as the link to it.
@@ -23,7 +23,7 @@
     var report = I.reporter('count-state');
 
     var GROUPS = [
-      { n: data.commits, label: 'commits', sub: 'across Atlas, the portal and the browser', hot: true },
+      { n: data.commits, label: 'commits', sub: 'across Atlas, the portal and Quartz', hot: true },
       { n: data.projects, label: 'projects', sub: 'since March 2026' },
       { n: data.tools, label: 'tools', sub: 'I use every week' },
       { n: data.live, label: 'live', sub: 'on the public web' }
@@ -114,11 +114,11 @@
         if (rows * cell > h) { cell = h / rows; cols = Math.max(1, Math.floor(c.w / cell)); rows = Math.ceil(n / cols); }
         var mw = Math.max(1, cell * 0.46), mh = Math.max(1, Math.min(cell * 0.62, 6));
         var shown = Math.floor(n * p);
-        /* 2,986 marks used to be drawn in vermilion: a 700x130 block of the
+        /* The commit marks used to be drawn in vermilion: a 700x130 block of the
            one accent the night reserves for its horizon, the loudest thing
            on the page after the census bar. The marks are the ink the rest
            of the site is written in; the commit field keeps its weight from
-           being 2,986 of them, not from being orange. */
+           being 3,176 of them, not from being orange. */
         ctx.fillStyle = css('--lane-atlas');
         ctx.globalAlpha = grp.hot ? 0.68 : 0.6;
         for (var k = 0; k < shown; k++) {
@@ -143,7 +143,7 @@
   var MINIS = [
     { h: 'atlas.html', t: 'Atlas', s: 'A scheduled task, end to end', kind: 'life' },
     { h: 'portal.html', t: 'Family &amp; staff portal', s: 'Four roles, one boundary', kind: 'roles' },
-    { h: 'browser.html', t: 'A browser', s: 'Phone to pixels in five stages', kind: 'pipe' }
+    { h: 'browser.html', t: 'Quartz', s: 'Phone to pixels in five stages', kind: 'pipe' }
   ];
 
   function minis() {

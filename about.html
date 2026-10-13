@@ -263,7 +263,7 @@
   <div class="nav__links">
     <a href="index.html">Index</a>
     <a href="atlas.html">Atlas</a>
-    <a href="browser.html">Browser</a>
+    <a href="browser.html">Quartz</a>
     <a href="portal.html">Portal</a>
     <a href="projects.html">Projects</a>
     <a href="lab.html">Lab</a>
@@ -338,27 +338,29 @@
       <h2 id="h-num">How everything here was counted</h2>
       <div class="ab-cols">
         <div class="prose">
-          <p>Measured on <strong>16 September 2026</strong> from git history, file counts and the live
-             sites. Where a project has no git history, its dates come from its files.</p>
+          <p>Measured on <strong>12 October 2026</strong> from git history, file counts and the live
+             sites, counting commits through 11 October. Where a project has no git history, its dates
+             come from its files.</p>
           <p>The commit river on the front page is built from the per-day commit counts of three
-             repositories &mdash; Atlas, the academy portal and the browser &mdash; bucketed by UTC
-             author date. Every dot in it is one commit; there are 2,986 of them, and nothing is
-             sampled or rounded to make the picture work.</p>
+             repositories &mdash; Atlas, the academy portal and Quartz, my browser &mdash; bucketed by UTC
+             author date. Every dot in it is one commit; there are 3,176 of them, and nothing is
+             sampled or rounded to make the picture work. Across all 31 of my repositories, counted
+             the same way, there are 3,750.</p>
           <p>Two different line-counting rules appear across the site and they do not reconcile, so they
-             are never shown side by side. The 408,364-line census counts <em>code lines</em>. The
+             are never shown side by side. The 875,541-line census counts <em>code lines</em>. The
              per-project figures in the write-ups come from <code>git ls-files | wc -l</code>, which
              counts every line in a different file set. Both are stated with the rule that produced them.</p>
         </div>
         <div class="ab-facing" data-enter="fade">
           <div>
             <h3>Commits</h3>
-            <p><code>git rev-list --count</code> on each repository&rsquo;s production branch: 2,636 for
-               Atlas, 188 for the portal, 162 for the browser.</p>
+            <p><code>git rev-list --count</code> on each repository&rsquo;s production branch: 2,720 for
+               Atlas, 210 for the portal, 246 for Quartz.</p>
           </div>
           <div>
             <h3>Dates</h3>
-            <p><code>git log --date=short | sort -u</code> for the days work actually landed: 143
-               distinct commit days across the three.</p>
+            <p><code>git log --date=short | sort -u</code> for the days work actually landed: 112 for
+               Atlas, 37 for the portal and 13 for Quartz, in local time.</p>
           </div>
           <div>
             <h3>Shape</h3>
@@ -368,8 +370,8 @@
           <div>
             <h3>Not remeasured</h3>
             <p>A few of Atlas&rsquo;s derived figures &mdash; test-file counts, eval runs, its app and
-               test line counts &mdash; were not recounted on 16 September. Nothing has landed in Atlas
-               since 9 September, so they cannot have moved, but they were not recounted.</p>
+               test line counts &mdash; were not recounted on 16 September or 12 October. Atlas has shipped
+               since, up to v1.3.1.1 on 4 October, so read them as approximate.</p>
           </div>
         </div>
       </div>
@@ -490,13 +492,13 @@
       <div>
         <h2>The work</h2>
         <p><a href="index.html">The index</a> &middot; <a href="atlas.html">Atlas</a> &middot;
-           <a href="browser.html">The browser</a> &middot; <a href="portal.html">The portal</a> &middot;
-           <a href="projects.html">The other twenty-two</a> &middot; <a href="lab.html">The lab</a></p>
+           <a href="browser.html">Quartz</a> &middot; <a href="portal.html">The portal</a> &middot;
+           <a href="projects.html">The other thirty-one</a> &middot; <a href="lab.html">The lab</a></p>
       </div>
       <div>
         <h2>Measured</h2>
-        <p>16 September 2026. 23 projects, 3 live on the public web, 6 tools used every week,
-           2,986 commits.</p>
+        <p>12 October 2026. 34 projects, 4 live on the public web, 9 tools used every week,
+           3,176 commits.</p>
       </div>
     </footer>
 

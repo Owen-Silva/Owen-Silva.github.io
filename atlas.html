@@ -220,9 +220,10 @@
 }
 
 /* ---- 3. the release scene: the names get a rail of their own ----
-   Nine of the ten releases land in one week at the far right of a
-   five-month axis, so the names sit on a rail across the whole band
-   and a lens joins that rail to the week it magnifies. Pointing at a
+   Nine of the thirteen releases land in one September week and three
+   more on 2-4 October, at the far right of a six-month axis, so the
+   names sit on a rail across the whole band and a lens joins that
+   rail to the stretch it magnifies. Pointing at a
    name ties it to its own mark; at rest nothing crosses. */
 .p-atlas .rel-scene { height: clamp(360px, 34vw, 460px); }
 .p-atlas .rel-lens__fill, .p-atlas .rel-lens { pointer-events: none; }
@@ -434,7 +435,7 @@
   <div class="nav__links">
     <a href="index.html">Index</a>
     <a href="atlas.html" aria-current="page">Atlas</a>
-    <a href="browser.html">Browser</a>
+    <a href="browser.html">Quartz</a>
     <a href="portal.html">Portal</a>
     <a href="projects.html">Projects</a>
     <a href="lab.html">Lab</a>
@@ -488,16 +489,16 @@
 
     <div class="page-head page-head--tight">
       <dl class="at-spec">
-        <div><dt>Built</dt><dd>1 Apr &ndash; 9 Sep 2026, with commits on 109 days</dd></div>
+        <div><dt>Built</dt><dd>1 Apr &ndash; 4 Oct 2026, with commits on 112 days</dd></div>
         <div><dt>Public launch</dt><dd>27 Aug 2026</dd></div>
-        <div><dt>Commits</dt><dd>2,636 to production</dd></div>
-        <div><dt>Releases</dt><dd>337 internal before 1.0, then 10 public</dd></div>
+        <div><dt>Commits</dt><dd>2,720 to production</dd></div>
+        <div><dt>Releases</dt><dd>337 internal before 1.0, then 13 public</dd></div>
         <div><dt>Code</dt><dd>~140k lines of app code, ~212k lines of tests</dd></div>
         <div><dt>Built with</dt><dd>Node and Express, PostgreSQL, Clerk, Railway, Cloudflare, Brevo,
           LemonSqueezy. Gemini by default, or your own OpenAI or Anthropic key. Playwright and axe-core.</dd></div>
       </dl>
       <p class="note">The two code figures above were counted with <code>wc</code>-style rules on 13 September
-        and were not remeasured on 16 September; the 408,364-line census on the front page counts code lines
+        and were not remeasured on 16 September or 12 October; the 875,541-line census on the front page counts code lines
         under a different rule. The two do not reconcile, so they are never placed side by side.</p>
     </div>
 
@@ -517,6 +518,9 @@
               <li>Grades every run and warns you when a task has quietly stopped finding anything new.</li>
               <li>Fetches live stock and crypto prices and headlines before the AI writes: about 230 company names map to tickers, and 37 coins are recognised.</li>
               <li>Invite a friend and you both get 10 more runs.</li>
+              <li>The home page runs your sentence before you sign up, and <em>Email me this every weekday</em> turns that try into a task of your own, with the schedule it spotted.</li>
+              <li>A task&rsquo;s first email says what it is and when the next one comes, and stopping Atlas&rsquo;s emails takes one click with no sign-in.</li>
+              <li>A help assistant on the site answers questions about Atlas from the site&rsquo;s own pages and nothing else.</li>
             </ul>
           </div>
           <div>
@@ -527,6 +531,9 @@
               <li>Stored credentials are encrypted at rest.</li>
               <li>A launch gate that fails closed. The server alone decides whether the site is open, and a missing or malformed setting keeps it shut.</li>
               <li>Answer quality. A classifier retries weak answers or switches provider, and an LLM-as-judge eval harness has run 52 times.</li>
+              <li>A help assistant that can only read the site. It answers from the same generated index of the site&rsquo;s pages that search uses, with no web tool anywhere in the path; a question that lands on no page is turned down before any model call, and past a daily spending ceiling it hands back links instead.</li>
+              <li>One price fetch per stock or coin. When several runs ask for the same quote at the same moment, they share one request instead of each making its own.</li>
+              <li>A Discord bot, run as its own service, posts each release to the Atlas server and sends me alerts and a morning digest in a private channel. It posts only as itself and never replies to members.</li>
               <li>Release gate, 9 Sep: 456 unit test files and 596 Playwright tests passing, none flaky (from the project&rsquo;s release record).</li>
             </ul>
           </div>
@@ -543,14 +550,14 @@
     <section class="band" aria-labelledby="h-rel">
       <div class="band__head">
         <p class="eyebrow">03 — The release history</p>
-        <h2 class="ink-in" id="h-rel">Ten releases over a current of 2,636 commits</h2>
+        <h2 class="ink-in" id="h-rel">Thirteen releases over a current of 2,720 commits</h2>
         <p id="rel-total">Loading the changelog&hellip;</p>
       </div>
 
       <div class="scene rel-scene" id="rel-scene">
         <canvas class="scene__canvas" id="rel-canvas" aria-hidden="true"></canvas>
         <svg class="scene__svg ink-svg" id="rel-svg" role="group"
-             aria-label="The ten public Atlas releases as marks on a line, each a button that opens its entry below. Beneath them, 2,636 dots: one per commit to production, by date."></svg>
+             aria-label="The thirteen public Atlas releases as marks on a line, each a button that opens its entry below. Beneath them, 2,720 dots: one per commit to production, by date."></svg>
       </div>
       <p class="scene-note" id="rel-state" role="status">the release scene has not started yet</p>
       <p class="vh">The same releases are listed in full below, newest first, with every entry each one shipped.</p>
@@ -625,9 +632,9 @@
     <footer class="colophon">
       <div>
         <h2>About these numbers</h2>
-        <p>Measured on 16 September 2026 from git history and the project&rsquo;s own changelog. Nothing has
-           landed in Atlas since 9 September. The derived figures &mdash; 456 unit test files, 596 Playwright
-           tests, 52 eval runs &mdash; were not remeasured on that date.</p>
+        <p>Measured on 12 October 2026 from the production branch&rsquo;s git history and the project&rsquo;s own changelog.
+           The last commit to production landed on 4 October. The derived figures &mdash; 456 unit test files, 596 Playwright
+           tests, 52 eval runs &mdash; come from the 9 September release record and were not remeasured.</p>
       </div>
       <div>
         <h2>About this map</h2>
@@ -636,7 +643,7 @@
       </div>
       <div>
         <h2>Back</h2>
-        <p><a href="index.html">The index &mdash; 23 projects, 2,986 commits</a></p>
+        <p><a href="index.html">The index &mdash; 34 projects, 3,176 commits</a></p>
       </div>
     </footer>
 

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A browser — Owen Silva</title>
-<meta name="description" content="An Electron browser written in six days: Claude sessions, Windows programs and an Android phone all open as tabs. 162 commits, 67 documented features.">
+<title>Quartz — Owen Silva</title>
+<meta name="description" content="Quartz, the Electron browser I built and use every day: Claude beside any page, Windows programs and an Android phone as tabs. 246 commits, 67 documented features.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230A0F14'/><circle cx='23.5' cy='7' r='1.4' fill='%23ECE5D7'/><circle cx='8' cy='10' r='1' fill='%23ECE5D7'/><rect x='2' y='19.2' width='28' height='1.2' fill='%23F0603A'/><path d='M2 20.4 L9 12 L14 17.4 L21 8.6 L30 20.4 Z' fill='%23ECE5D7'/></svg>">
 <script>
   (function () {
@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="css/ink.css">
 <style>
 /* ============================================================
-   The browser page only. Every selector below is scoped to
+   The Quartz page only. Every selector below is scoped to
    .pg-browser, so nothing here reaches another page or edits
    the shared stylesheet. The vocabulary is ink.css section 16:
    .bleed, .cols-hair, .measure, .air, .t-* and the tokens.
@@ -50,8 +50,9 @@
    the screen and the title did not. It is one line of max-content
    width now, and below the split the hero's own overflow: hidden
    crops it exactly the way .crop crops index and atlas: the screen
-   ends inside the "e" of "browser" at 320, at 393 and at every width
-   up to 900. Nothing below reaches another page; ink.css is untouched. */
+   ended inside the "e" of "browser". Since 12 Oct the name is
+   "Quartz", which is shorter: at 393 it sets inside the gutters
+   (measured 12 Oct) and the crop has nothing to cut there. Nothing below reaches another page; ink.css is untouched. */
 .pg-browser .band-hero__text h1 {
   width: max-content; max-width: none; white-space: nowrap;
   line-height: .84;                /* the display line-height index and atlas set */
@@ -140,6 +141,8 @@
 .pg-browser .fx:hover { border-top-color: var(--rule-strong); }
 .pg-browser .fx:hover .fx__n { color: var(--ink-low); }
 .pg-browser .fx-note { margin-top: var(--s-6); max-width: var(--measure); }
+/* a feature the README still documents but the code no longer has */
+.pg-browser .fx__gone { font-size: var(--t-micro); letter-spacing: .05em; color: var(--ink-faint); white-space: nowrap; }
 
 /* ---- phones: the same page, a lighter scene ---------------- */
 /* Inside max-width queries only. 1280 is untouched by everything below. */
@@ -174,7 +177,7 @@
   <div class="nav__links">
     <a href="index.html">Index</a>
     <a href="atlas.html">Atlas</a>
-    <a href="browser.html" aria-current="page">Browser</a>
+    <a href="browser.html" aria-current="page">Quartz</a>
     <a href="portal.html">Portal</a>
     <a href="projects.html">Projects</a>
     <a href="lab.html">Lab</a>
@@ -188,9 +191,10 @@
          the glass follows it; above 900 both are positioned and order is moot -->
     <div class="band-hero__text">
       <p class="eyebrow">Project &middot; in use every day</p>
-      <h1 id="h-title">A browser</h1>
-      <p class="lede">Claude coding sessions, Windows programs and my Android phone all open as tabs
-        beside ordinary web pages, in a browser I wrote in six days.</p>
+      <h1 id="h-title">Quartz</h1>
+      <p class="lede">My own browser. Claude beside any page, Windows programs and my Android phone all
+        open in it next to ordinary web pages. The first version took six days; it has been Quartz
+        since 26 September.</p>
     </div>
     <div class="pane" id="pipe-scene">
       <canvas class="pane__cv" id="pipe-canvas" aria-hidden="true"></canvas>
@@ -221,12 +225,12 @@
          transform, so the block has one position at every moment. -->
     <div class="page-head page-head--tight" data-enter="fade">
       <dl class="facts">
-        <div><dt>Built</dt><dd>10&ndash;15 Sep 2026, 6 days</dd></div>
-        <div><dt>Commits</dt><dd>162</dd></div>
-        <div><dt>Code</dt><dd>~63k lines of JavaScript, ~13k lines of CSS</dd></div>
-        <div><dt>Features</dt><dd>67, documented in a 1,400-line README</dd></div>
+        <div><dt>Built</dt><dd>10 Sep&ndash;11 Oct 2026, commits on 13 days</dd></div>
+        <div><dt>Commits</dt><dd>246</dd></div>
+        <div><dt>Code</dt><dd>~75k lines of JavaScript, ~12k lines of CSS</dd></div>
+        <div><dt>Features</dt><dd>67, documented in a 1,467-line README</dd></div>
         <div><dt>Distribution</dt><dd>A Windows installer (127&nbsp;MB) and a portable build (a 178&nbsp;MB zip),
-          version 0.1.0, not code-signed. Available on request.</dd></div>
+          version 0.1.0, built on 14 Sep under the old name, not code-signed. Available on request.</dd></div>
         <div><dt>Built with</dt><dd>Electron, node-pty and xterm.js, koffi for Win32 calls, WebCodecs,
           scrcpy and adb, Ghostery ad blocker, Mozilla Readability</dd></div>
       </dl>
@@ -261,11 +265,16 @@
           <div>
             <h3>What it does</h3>
             <ul class="ticks">
-              <li>Claude tabs: a real Claude Code session in each tab, with its own folder, resume, and a pulse when it needs me.</li>
+              <li>Claude beside a page: a real Claude Code session in a pane next to the page, on one key, with &ldquo;Ask Claude about this page&rdquo; and &ldquo;Show Claude this page&rdquo; in the right-click menu. Claude had tabs of its own until 8 October; now it lives only beside a page.</li>
               <li>App tabs: real Windows programs hosted inside a tab, opened from a dock or by typing in the address bar.</li>
               <li>Phone workspace: mirrors and fully controls my Android phone. The mouse acts as touch, and the clipboard works both ways.</li>
               <li>Workspaces: the School workspace opens the right section of my class notes for the question on screen.</li>
-              <li>New tab page: clock, live CPU, memory, disk and network readouts, a process list and a Markets tile.</li>
+              <li>The address bar searches my own things before the web: open tabs, saved sites, sections of my school notes and project folders, then apps and history. Keywords like &ldquo;yt&rdquo; or &ldquo;gh&rdquo; search one site directly.</li>
+              <li>Saved sites: a star in the address bar or Ctrl+D, and a Saved row on the new tab.</li>
+              <li>New tab Home: live system readouts, a process list and an apps dock. Every piece can be hidden, put back or dragged anywhere, with snapping and no overlaps.</li>
+              <li>Autocorrect as I type, in every tab and in Quartz itself, through the Windows spellchecker, with a personal dictionary and a per-site off switch.</li>
+              <li>One look with my other apps: Quartz shares its theme, accent colour and glass with Helm and Mantle, and its background lines up with the desktop wallpaper behind the window.</li>
+              <li>It can be the Windows default browser. A link clicked in any other app opens as a tab in the window that is already up.</li>
               <li>Ad blocking, reader view, split view, a command palette, tab sleep and picture-in-picture.</li>
               <li>Phone sound plays on the computer, the phone or both, chosen from the phone rail.</li>
             </ul>
@@ -277,6 +286,9 @@
               <li>Quality that adapts to a TCP round-trip probe, because timing adb itself costs about 170 ms even on a 7 ms link.</li>
               <li>Windows apps hosted through Win32 SetParent via koffi, with no native rebuild. It passed 30 of 30 live checks with Paint.</li>
               <li>CPU fixes, measured. The animated background went from 27% to 3% of a core, and stats sampling from 4.7% to 0.35%.</li>
+              <li>Memory, measured. A camera service that any page could start never exited; now it quits 5 seconds later. The standard memory test with one camera check went from 745.3 to 712.7 MB private.</li>
+              <li>It runs as Quartz.exe, a copy of Electron stamped with its own name and icon, so Task Manager lists Quartz instead of Electron.</li>
+              <li>The rename kept everything: the first start as Quartz moves the old profile folder in one rename, and refuses to start rather than start empty.</li>
               <li>About 550 ms cold start. Hidden workspaces go to sleep, which fixed a 1.9 GB GPU process.</li>
               <li>No silent failures. Every state shows its reason and what to do next.</li>
             </ul>
@@ -284,8 +296,8 @@
         </div>
         <figure class="plate plate--duo">
           <img src="img/browser-new-tab.jpg" width="1400" height="898" loading="lazy" decoding="async"
-               alt="The browser’s new tab page: a clock, live CPU, memory, disk and network readouts, a process list and a markets tile.">
-          <figcaption>The new tab page, with live machine readouts</figcaption>
+               alt="The new tab page as it looked in September: a clock, live CPU, memory, disk and network readouts, a process list and a markets tile.">
+          <figcaption>The new tab page in September, before the shared look</figcaption>
         </figure>
       </div>
 
@@ -318,7 +330,8 @@
       <div class="band__head" data-enter="rise">
         <p class="eyebrow">02 — Measured, not estimated</p>
         <h2 class="ink-in" id="h-cpu">Three numbers that had to come down</h2>
-        <p>Every performance claim on this page was measured before and after the change that caused it.</p>
+        <p>Every performance claim on this page was measured before and after the change that caused it.
+           The animated circuit board measured here was replaced on 8 October by one still picture.</p>
       </div>
       <div class="pane bleed cpu-frame" id="cpu-pane">
         <canvas class="pane__cv" id="cpu-cv" aria-hidden="true"></canvas>
@@ -330,19 +343,19 @@
       </div>
     </section>
 
-    <!-- ============ the 67 features ============ -->
+    <!-- ============ the documented features ============ -->
     <section class="band" aria-labelledby="h-feat">
       <div class="band__head" data-enter="rise">
         <p class="eyebrow">03 — The feature index</p>
         <h2 class="ink-in" id="h-feat">Sixty-seven features, as documented</h2>
-        <p>Every feature the 1,400-line README documents, with the README&rsquo;s own first sentence
+        <p>Every feature the 1,467-line README documents, with the README&rsquo;s own first sentence
            about each. Nothing here is written for the website.</p>
       </div>
 
       <div class="bleed">
         <div class="filter-bar fx-head">
           <label class="vh" for="feat-q">Filter features by name or description</label>
-          <input type="search" id="feat-q" placeholder="Filter 67 features — try phone, tab, Claude…" autocomplete="off">
+          <input type="search" id="feat-q" placeholder="Try phone, tab, Claude…" autocomplete="off">
           <button class="chip" type="button" id="feat-order" aria-pressed="false">A&ndash;Z</button>
           <span class="mono" id="feat-count" role="status" style="color:var(--ink-faint);letter-spacing:.05em;text-transform:none">67 features</span>
         </div>
@@ -350,20 +363,23 @@
         <div class="fx-list" id="feat-list"></div>
       </div>
 
-      <p class="note fx-note">The &ldquo;67 features&rdquo; figure is what the 1,400-line README documents. Four
-        more user-facing features landed on 14&ndash;15 September and are not in it, so they are not
-        counted here either.</p>
+      <p class="note fx-note">The &ldquo;67 features&rdquo; figure is what the 1,467-line README documents. It
+        has not moved since 16 September: the README gained a section on being the default browser,
+        but no new feature paragraph, so the address bar search, autocorrect, the movable Home and
+        the shared look are not counted, and neither are four features from 14&ndash;15 September.
+        Four of the 67 were removed from the code on 8 October and are marked.</p>
     </section>
 
     <footer class="colophon">
       <div>
         <h2>About these numbers</h2>
-        <p>Measured on 16 September 2026 from the repository&rsquo;s git history and its README. The
-           feature list is generated from the README, not written by hand.</p>
+        <p>Measured on 12 October 2026 from the repository&rsquo;s git history (246 commits through
+           11 October) and its README. The feature list is generated from the README, not written by hand.</p>
       </div>
       <div>
         <h2>Distribution</h2>
-        <p>There is a Windows installer and a portable build, version 0.1.0, not code-signed. They are
+        <p>There is a Windows installer and a portable build, version 0.1.0, built on 14 September before
+           the rename, not code-signed. They are
            too large to host here and there is no download link; available on request.</p>
       </div>
       <div>

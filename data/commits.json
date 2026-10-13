@@ -1,47 +1,50 @@
 {
   "_source": {
-    "generated": "2026-09-16",
+    "generated": "2026-10-12",
+    "cutoff": "author date before 2026-10-12T00:00:00-07:00 (through 11 October 2026, Owen's local time)",
     "timezone": "UTC (author date)",
     "commands": [
-      "git -C <repo> rev-list --count <branch>",
-      "TZ=UTC git -C <repo> log <branch> --format='%ad' --date=format-local:'%Y-%m-%d|%G-W%V|%Y-%m-%dT%H:%M:%SZ'",
-      "git -C <repo> log <branch> --format='%ad' --date=short | sort -u | wc -l   (local-time day count, for cross-reference)"
+      "git -C <repo> rev-list --count --before=2026-10-12T00:00:00-07:00 <branch>",
+      "TZ=UTC git -C <repo> log <branch> --before=2026-10-12T00:00:00-07:00 --format='%ad' --date=format-local:'%Y-%m-%d|%G-W%V|%Y-%m-%dT%H:%M:%SZ'",
+      "git -C <repo> log <branch> --before=2026-10-12T00:00:00-07:00 --format='%ad' --date=short | sort -u | wc -l   (local-time day count, for cross-reference)"
     ],
     "notes": [
-      "All buckets use the AUTHOR date converted to UTC. Owen commits from UTC-07:00, so a late-evening local commit lands on the next UTC day. The local-time span and day count are carried alongside in each project's \"local_time\" block because the site copy quotes local dates.",
-      "Atlas is measured on branch `main` (mirrors origin/master, production). Local `master` in that checkout is stale (2,002 commits, last 21 Aug) and was NOT used.",
-      "ISO week keys are %G-W%V (ISO-8601 week-numbering year and week)."
+      "All buckets use the AUTHOR date converted to UTC. Owen commits from UTC-07:00, so a late-evening local commit lands on the next UTC day (the last Quartz commit, 22:41 on 11 Oct local, is bucketed on 2026-10-12 UTC). The local-time span and day count are carried alongside in each project's \"local_time\" block because the site copy quotes local dates.",
+      "Atlas is measured on `origin/master`, the production branch. The 16 Sep run used local `main`, which then mirrored origin/master; local `main` has not moved since 9 Sep (2,636 commits) and is an ancestor of origin/master, so origin/master (2,720) is the same line carried to the last production push (4 Oct). Re-running the 16 Sep method on `main` reproduces the old atlas block byte for byte. Local `master` (2,002, 21 Aug) is stale and was NOT used. The 4 commits on the unpushed `next` branch are not counted.",
+      "The browser is now named Quartz; its id stays `browser`.",
+      "ISO week keys are %G-W%V (ISO-8601 week-numbering year and week), cross-checked against an independent ISO-week computation for every commit.",
+      "all_repos is an extra block (added 2026-10-12) that the site's existing code ignores: commit totals for every repo of Owen's own work on this machine, same cutoff."
     ]
   },
   "totals": {
-    "total_commits": 2986,
+    "total_commits": 3176,
     "projects": 3,
-    "distinct_commit_days_utc_sum": 143,
-    "distinct_commit_days_local_sum": 144,
+    "distinct_commit_days_utc_sum": 161,
+    "distinct_commit_days_local_sum": 162,
     "earliest_commit_utc": "2026-04-01T23:22:36Z",
-    "latest_commit_utc": "2026-09-16T19:21:20Z"
+    "latest_commit_utc": "2026-10-12T05:41:13Z"
   },
   "projects": {
     "atlas": {
       "name": "Atlas",
-      "repo_path": "C:\\Users\\owens\\Downloads\\Atlas",
-      "branch": "main",
-      "total_commits": 2636,
+      "repo_path": "~/Downloads/Atlas",
+      "branch": "origin/master",
+      "total_commits": 2720,
       "first_commit_utc": "2026-04-01T23:22:36Z",
-      "last_commit_utc": "2026-09-10T00:56:34Z",
+      "last_commit_utc": "2026-10-04T22:43:12Z",
       "first_commit_day_utc": "2026-04-01",
-      "last_commit_day_utc": "2026-09-10",
-      "calendar_span_days_utc": 163,
-      "distinct_commit_days_utc": 109,
-      "distinct_commit_weeks_utc": 22,
+      "last_commit_day_utc": "2026-10-04",
+      "calendar_span_days_utc": 187,
+      "distinct_commit_days_utc": 112,
+      "distinct_commit_weeks_utc": 23,
       "busiest_day_utc": "2026-09-05",
       "busiest_day_commits": 208,
       "median_commits_per_active_day": 11,
       "local_time": {
         "note": "Same commits bucketed in Owen's local zone (UTC-07:00) — these are the dates the site copy quotes.",
-        "distinct_commit_days": 109,
+        "distinct_commit_days": 112,
         "first_commit_local": "2026-04-01 16:22:36 -0700",
-        "last_commit_local": "2026-09-09 17:56:34 -0700"
+        "last_commit_local": "2026-10-04 15:43:12 -0700"
       },
       "commits_per_week": {
         "2026-W14": 2,
@@ -65,7 +68,8 @@
         "2026-W34": 144,
         "2026-W35": 88,
         "2026-W36": 483,
-        "2026-W37": 60
+        "2026-W37": 63,
+        "2026-W40": 81
       },
       "commits_per_day": {
         "2026-04-01": 1,
@@ -176,29 +180,32 @@
         "2026-09-07": 22,
         "2026-09-08": 7,
         "2026-09-09": 28,
-        "2026-09-10": 3
+        "2026-09-10": 6,
+        "2026-10-02": 45,
+        "2026-10-03": 8,
+        "2026-10-04": 28
       }
     },
     "portal": {
       "name": "TVHA portal",
-      "repo_path": "C:\\Users\\owens\\Downloads\\Academy Website",
+      "repo_path": "~/Downloads/Academy Website",
       "branch": "master",
-      "total_commits": 188,
+      "total_commits": 210,
       "first_commit_utc": "2026-07-17T06:27:02Z",
-      "last_commit_utc": "2026-09-16T19:21:20Z",
+      "last_commit_utc": "2026-10-09T04:24:40Z",
       "first_commit_day_utc": "2026-07-17",
-      "last_commit_day_utc": "2026-09-16",
-      "calendar_span_days_utc": 62,
-      "distinct_commit_days_utc": 28,
-      "distinct_commit_weeks_utc": 9,
+      "last_commit_day_utc": "2026-10-09",
+      "calendar_span_days_utc": 85,
+      "distinct_commit_days_utc": 36,
+      "distinct_commit_weeks_utc": 12,
       "busiest_day_utc": "2026-07-17",
       "busiest_day_commits": 42,
-      "median_commits_per_active_day": 4,
+      "median_commits_per_active_day": 3,
       "local_time": {
         "note": "Same commits bucketed in Owen's local zone (UTC-07:00) — these are the dates the site copy quotes.",
-        "distinct_commit_days": 29,
+        "distinct_commit_days": 37,
         "first_commit_local": "2026-07-16 23:27:02 -0700",
-        "last_commit_local": "2026-09-16 12:21:20 -0700"
+        "last_commit_local": "2026-10-08 21:24:40 -0700"
       },
       "commits_per_week": {
         "2026-W29": 51,
@@ -209,7 +216,10 @@
         "2026-W35": 16,
         "2026-W36": 6,
         "2026-W37": 18,
-        "2026-W38": 1
+        "2026-W38": 2,
+        "2026-W39": 4,
+        "2026-W40": 13,
+        "2026-W41": 4
       },
       "commits_per_day": {
         "2026-07-17": 42,
@@ -239,33 +249,44 @@
         "2026-09-10": 4,
         "2026-09-11": 1,
         "2026-09-12": 2,
-        "2026-09-16": 1
+        "2026-09-16": 1,
+        "2026-09-17": 1,
+        "2026-09-22": 2,
+        "2026-09-23": 1,
+        "2026-09-26": 1,
+        "2026-09-28": 2,
+        "2026-10-01": 11,
+        "2026-10-08": 2,
+        "2026-10-09": 2
       }
     },
     "browser": {
-      "name": "Browser",
-      "repo_path": "C:\\Users\\owens\\browser",
+      "name": "Quartz",
+      "repo_path": "~/browser",
       "branch": "master",
-      "total_commits": 162,
+      "total_commits": 246,
       "first_commit_utc": "2026-09-11T04:26:21Z",
-      "last_commit_utc": "2026-09-16T00:45:16Z",
+      "last_commit_utc": "2026-10-12T05:41:13Z",
       "first_commit_day_utc": "2026-09-11",
-      "last_commit_day_utc": "2026-09-16",
-      "calendar_span_days_utc": 6,
-      "distinct_commit_days_utc": 6,
-      "distinct_commit_weeks_utc": 2,
+      "last_commit_day_utc": "2026-10-12",
+      "calendar_span_days_utc": 32,
+      "distinct_commit_days_utc": 13,
+      "distinct_commit_weeks_utc": 5,
       "busiest_day_utc": "2026-09-12",
       "busiest_day_commits": 75,
-      "median_commits_per_active_day": 15,
+      "median_commits_per_active_day": 8,
       "local_time": {
         "note": "Same commits bucketed in Owen's local zone (UTC-07:00) — these are the dates the site copy quotes.",
-        "distinct_commit_days": 6,
+        "distinct_commit_days": 13,
         "first_commit_local": "2026-09-10 21:26:21 -0700",
-        "last_commit_local": "2026-09-15 17:45:16 -0700"
+        "last_commit_local": "2026-10-11 22:41:13 -0700"
       },
       "commits_per_week": {
         "2026-W37": 145,
-        "2026-W38": 17
+        "2026-W38": 18,
+        "2026-W39": 8,
+        "2026-W41": 74,
+        "2026-W42": 1
       },
       "commits_per_day": {
         "2026-09-11": 53,
@@ -273,8 +294,374 @@
         "2026-09-13": 17,
         "2026-09-14": 13,
         "2026-09-15": 2,
-        "2026-09-16": 2
+        "2026-09-16": 2,
+        "2026-09-17": 1,
+        "2026-09-27": 8,
+        "2026-10-08": 1,
+        "2026-10-09": 63,
+        "2026-10-10": 8,
+        "2026-10-11": 2,
+        "2026-10-12": 1
       }
     }
+  },
+  "all_repos": {
+    "note": "Every git repo of Owen's own work on his machine, counted the same way (author date before 2026-10-12T00:00:00-07:00, i.e. through 11 October local). Site code that reads totals/projects ignores this block. A repo with a single commit dated 2026-09-20 is a backup snapshot: that project was built before it had git history and was pushed once as a private backup, so its count of 1 says nothing about its size.",
+    "command": "git -C <repo> rev-list --count --before=2026-10-12T00:00:00-07:00 <branch>; first/last = git log <branch> --before=... --date=short",
+    "branch_rule": "Atlas on origin/master (production); every other repo on its checked-out default branch.",
+    "grand_total_commits": 3750,
+    "repos_counted": 31,
+    "repos": [
+      {
+        "id": "atlas",
+        "name": "Atlas",
+        "path": "~/Downloads/Atlas",
+        "branch": "origin/master",
+        "commits": 2720,
+        "first_commit_local": "2026-04-01",
+        "last_commit_local": "2026-10-04",
+        "distinct_commit_days_local": 112,
+        "note": "production branch (origin/master); same ref as projects.atlas"
+      },
+      {
+        "id": "browser",
+        "name": "Quartz",
+        "path": "~/browser",
+        "branch": "master",
+        "commits": 246,
+        "first_commit_local": "2026-09-10",
+        "last_commit_local": "2026-10-11",
+        "distinct_commit_days_local": 13
+      },
+      {
+        "id": "portal",
+        "name": "TVHA portal",
+        "path": "~/Downloads/Academy Website",
+        "branch": "master",
+        "commits": 210,
+        "first_commit_local": "2026-07-16",
+        "last_commit_local": "2026-10-08",
+        "distinct_commit_days_local": 37
+      },
+      {
+        "id": "mantle",
+        "name": "Mantle",
+        "path": "~/mantle",
+        "branch": "master",
+        "commits": 202,
+        "first_commit_local": "2026-09-21",
+        "last_commit_local": "2026-10-11",
+        "distinct_commit_days_local": 16
+      },
+      {
+        "id": "portfolio-site",
+        "name": "This site",
+        "path": "~/portfolio-site",
+        "branch": "main",
+        "commits": 115,
+        "first_commit_local": "2026-09-16",
+        "last_commit_local": "2026-09-21",
+        "distinct_commit_days_local": 4
+      },
+      {
+        "id": "arkhe",
+        "name": "Arkhe",
+        "path": "~/arkhe",
+        "branch": "main",
+        "commits": 67,
+        "first_commit_local": "2026-10-04",
+        "last_commit_local": "2026-10-07",
+        "distinct_commit_days_local": 4,
+        "note": "co-built with a friend; 2 of the commits are a collaborator's"
+      },
+      {
+        "id": "helm",
+        "name": "Helm",
+        "path": "~/helm",
+        "branch": "master",
+        "commits": 53,
+        "first_commit_local": "2026-10-07",
+        "last_commit_local": "2026-10-11",
+        "distinct_commit_days_local": 5
+      },
+      {
+        "id": "fly-brain",
+        "name": "Fly brain",
+        "path": "~/fly-brain",
+        "branch": "master",
+        "commits": 49,
+        "first_commit_local": "2026-09-22",
+        "last_commit_local": "2026-09-24",
+        "distinct_commit_days_local": 3
+      },
+      {
+        "id": "stock-cone",
+        "name": "Stock cone",
+        "path": "~/stock-cone",
+        "branch": "master",
+        "commits": 24,
+        "first_commit_local": "2026-10-03",
+        "last_commit_local": "2026-10-04",
+        "distinct_commit_days_local": 2
+      },
+      {
+        "id": "news-shadow",
+        "name": "News shadow",
+        "path": "~/news-shadow",
+        "branch": "master",
+        "commits": 15,
+        "first_commit_local": "2026-10-10",
+        "last_commit_local": "2026-10-11",
+        "distinct_commit_days_local": 2
+      },
+      {
+        "id": "atlas-marketing-research",
+        "name": "Atlas marketing research",
+        "path": "~/atlas-marketing-research",
+        "branch": "main",
+        "commits": 14,
+        "first_commit_local": "2026-10-02",
+        "last_commit_local": "2026-10-04",
+        "distinct_commit_days_local": 2
+      },
+      {
+        "id": "atlas-design",
+        "name": "Atlas design explorations",
+        "path": "~/Downloads/atlas-design",
+        "branch": "main",
+        "commits": 5,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-10-04",
+        "distinct_commit_days_local": 2
+      },
+      {
+        "id": "look-sync",
+        "name": "Look sync",
+        "path": "~/look-sync",
+        "branch": "main",
+        "commits": 5,
+        "first_commit_local": "2026-10-10",
+        "last_commit_local": "2026-10-11",
+        "distinct_commit_days_local": 2
+      },
+      {
+        "id": "atlas-discord",
+        "name": "Atlas Discord bot",
+        "path": "~/atlas-discord",
+        "branch": "main",
+        "commits": 4,
+        "first_commit_local": "2026-10-02",
+        "last_commit_local": "2026-10-04",
+        "distinct_commit_days_local": 2
+      },
+      {
+        "id": "claude-mods",
+        "name": "Claude Code mods",
+        "path": "~/.claude/mods",
+        "branch": "main",
+        "commits": 4,
+        "first_commit_local": "2026-10-02",
+        "last_commit_local": "2026-10-09",
+        "distinct_commit_days_local": 2
+      },
+      {
+        "id": "robinhood-agent",
+        "name": "Robinhood agent",
+        "path": "~/robinhood-agent",
+        "branch": "main",
+        "commits": 2,
+        "first_commit_local": "2026-06-04",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 2
+      },
+      {
+        "id": "atlas-autopilot",
+        "name": "Atlas autopilot",
+        "path": "~/atlas-autopilot",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "atlas-dashboard-prototype",
+        "name": "Atlas dashboard prototype",
+        "path": "~/atlas-dashboard-redesign",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "atlas-gate-watch",
+        "name": "Atlas gate watch",
+        "path": "~/atlas-gate-watch",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "atlas-site",
+        "name": "Atlas site rebuild",
+        "path": "~/Downloads/atlas-site",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "axiom",
+        "name": "Axiom",
+        "path": "~/repos/axiom",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "backtesting-lab",
+        "name": "Backtesting lab",
+        "path": "~/New Stock Strategy",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "gear-order-cards",
+        "name": "Gear order cards",
+        "path": "~/repos/gear-order-cards",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "lens-trade",
+        "name": "Lens Trade",
+        "path": "~/Downloads/Tradingplatform",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "lesson-slide-recorder",
+        "name": "Lesson slide recorder",
+        "path": "~/repos/lesson-slide-recorder",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "marketlens",
+        "name": "MarketLens",
+        "path": "~/Downloads/MarketLens Website HTML",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "mission-control",
+        "name": "Mission control",
+        "path": "~/mission-control",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "nhl-picks-bot",
+        "name": "NHL picks bot",
+        "path": "~/Downloads/nhl-bot",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "spotify-autopause",
+        "name": "Spotify auto-pause",
+        "path": "~/spotify-autopause",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "star-wars-game",
+        "name": "Star Wars game",
+        "path": "~/Downloads/game",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "stock-agent",
+        "name": "Stock coach",
+        "path": "~/stock-agent",
+        "branch": "main",
+        "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      }
+    ],
+    "excluded": [
+      {
+        "what": "Atlas worktrees and trial checkouts (atlas-main-wt, atlas-master-wt, atlas-merge-trial, atlas-ux-*)",
+        "why": "same repository as Atlas; would double count"
+      },
+      {
+        "what": "~/mantle-live",
+        "why": "deploy copy of ~/mantle (same history)"
+      },
+      {
+        "what": "~/portfolio-site-live",
+        "why": "deploy copy of the built site; its single commit is a publish of ~/portfolio-site"
+      },
+      {
+        "what": "two repos owned by a collaborator that Owen contributed to",
+        "why": "not his repositories"
+      },
+      {
+        "what": "a terminal AI CLI (Downloads/project)",
+        "why": "authorship unconfirmed, same call as the census"
+      },
+      {
+        "what": "school notes repos (Documents/school, repos/class-notebooks)",
+        "why": "notes, not software; same call as the census"
+      },
+      {
+        "what": "fly-brain/data/reference",
+        "why": "third-party research model cloned as reference data"
+      },
+      {
+        "what": "one internal automation repo",
+        "why": "kept off the site under its privacy rules"
+      },
+      {
+        "what": "tensor extensions, MultiMC, overworld_music_pack",
+        "why": "not Owen's work (none are git repos here anyway)"
+      }
+    ]
   }
 }

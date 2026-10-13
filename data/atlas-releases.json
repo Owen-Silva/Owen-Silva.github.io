@@ -1,12 +1,13 @@
 {
   "_source": {
-    "changelog_path": "C:\\Users\\owens\\Downloads\\Atlas\\public\\changelog.html",
-    "archive_path": "C:\\Users\\owens\\Downloads\\Atlas\\public\\changelog-archive.json",
-    "read": "2026-09-16, read-only",
+    "changelog_path": "~/Downloads/Atlas/public/changelog.html",
+    "archive_path": "~/Downloads/Atlas/public/changelog-archive.json",
+    "read": "2026-10-12, read-only, from branch origin/master (production, c0515922, last commit 4 Oct 2026) via git show origin/master:public/changelog.html and git show origin/master:public/changelog-archive.json. Local branch main is stale (last commit 9 Sep, 2,636 commits) and was not used; the September read (2026-09-16) used main when it still matched production.",
     "parse_rule": "One public release = one <div class=\"tl__item\" id=\"atlas-…\"> block. version = .timeline-version, date = .tl__date, title = the <h3 class=\"tl__h\"> link text, kind = the .tag chip. A bullet = one <p><strong>…</strong>…</p> paragraph inside .tl__body; bullet_leads carries each bullet's bolded lead sentence.",
-    "verification_of_337": "The changelog prose claims \"337 releases before 1.0\" in three places (lines 328, 590, 604) and a figure block (line 608). Independently confirmed by counting the archive: changelog-archive.json .entries has exactly 337 items. The write-up's 337 REPRODUCES."
+    "verification_of_337": "The changelog prose claims \"337 releases before 1.0\" in three places (lines 328, 590, 604) and a figure block (line 608). Independently confirmed by counting the archive: changelog-archive.json .entries has exactly 337 items. The write-up's 337 REPRODUCES. Re-checked 2026-10-12 on origin/master: changelog-archive.json .entries still has 337 items.",
+    "reparse_check_2026_10_12": "The ten September entries were re-parsed with the same rule and match field for field (version, date, kind, title, every bullet lead); the only difference is that the new parse decodes &rarr; in v1.1.0 bullet 4, which the September file kept as an entity. The September entries are carried over unchanged. Three releases are new: v1.3.0 (2 Oct), v1.3.1 and v1.3.1.1 (4 Oct)."
   },
-  "public_release_count": 10,
+  "public_release_count": 13,
   "internal_releases_before_1_0": {
     "count": 337,
     "claimed_in_writeup": 337,
@@ -17,9 +18,70 @@
     "note": "Pre-1.0 releases were never shipped to anyone outside; the public log restarts at 1.0 on 27 August 2026 rather than continuing from v2.365.0."
   },
   "public_launch_date": "2026-08-27",
-  "latest_version": "v1.2.6",
-  "total_public_bullets": 132,
+  "latest_version": "v1.3.1.1",
+  "total_public_bullets": 160,
   "releases": [
+    {
+      "version": "v1.3.1.1",
+      "date_display": "Oct 4, 2026",
+      "date": "2026-10-04",
+      "kind": "Improvement",
+      "title": "Told when the month’s runs are used up",
+      "bullet_count": 3,
+      "bullet_leads": [
+        "When your free runs for the month are used up, Atlas now emails you once.",
+        "Runs skipped for the monthly limit no longer show up later as missed runs.",
+        "A search typed as a question finds an answer."
+      ],
+      "anchor": "atlas-1-3-1-1"
+    },
+    {
+      "version": "v1.3.1",
+      "date_display": "Oct 4, 2026",
+      "date": "2026-10-04",
+      "kind": "Improvement",
+      "title": "From first try to first email",
+      "bullet_count": 13,
+      "bullet_leads": [
+        "On a phone, the box that runs a task on the home page now sits right under the headline.",
+        "When a try on the home page fails, you can still keep the sentence.",
+        "A new page, try-atlas.app/stocks, is for anyone who checks the market close by hand.",
+        "Links that open the app with a sentence to try no longer cover the answer with the welcome tour.",
+        "The sign-up panel shows the sentence you are signing up to keep.",
+        "A task brought over from the home page or the stocks page can send its first email straight away.",
+        "The sentence you brought over from a try stays in the app until the task is saved.",
+        "A task’s first email says what it is and when the next one comes.",
+        "Stopping Atlas’s emails takes one click, with no sign-in.",
+        "Price tasks come back with live prices even when many run at once.",
+        "Free tries are counted per visitor.",
+        "A run you start yourself that fails no longer uses one of your runs.",
+        "The site’s promises now match what Atlas does."
+      ],
+      "anchor": "atlas-1-3-1"
+    },
+    {
+      "version": "v1.3.0",
+      "date_display": "Oct 2, 2026",
+      "date": "2026-10-02",
+      "kind": "Feature",
+      "title": "Try it, then keep it",
+      "bullet_count": 12,
+      "bullet_leads": [
+        "The home page runs a task before you sign up, and the sentence is already typed for you.",
+        "“Email me this every weekday” turns that try into a task of your own.",
+        "The schedule Atlas spotted while you were trying it out is the schedule you get after signing up.",
+        "“Try a sample task” sets up a morning task that says when it runs.",
+        "Coming back to the app, you see what ran while you were away.",
+        "Links in Atlas’s emails open the task they are about, even when you have to sign in first.",
+        "A failed run offers Run again right under the error, and Open Settings when the error is about your API key.",
+        "Deleting is harder to do by accident, and it never fails silently.",
+        "The keyboard goes where you expect.",
+        "More of the app fits a phone, and a few rough edges are gone.",
+        "A task asking why several stocks moved keeps headlines for every one of them.",
+        "Atlas now counts how visitors get from the home page to their first task, using one first-party cookie."
+      ],
+      "anchor": "atlas-1-3-0"
+    },
     {
       "version": "v1.2.6",
       "date_display": "Sep 10, 2026",
