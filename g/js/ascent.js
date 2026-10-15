@@ -496,6 +496,73 @@
       coast({ seed: 5527, a0: -1.45, a1: 1.45, shore: 132, width: 46, h: 1.5, rough: 9, taper: 0.30, flip: false, tone: 0.24, far: true });
     }
 
+    /* ---- the hero's own land ---------------------------------
+       The hero hands this world its three ranges (js/world.js bay()), and
+       they ARE the coast here: every vertex of the hero's outline is put
+       back into the world as a real crest on the sphere — the point where
+       the sea-level camera's ray through that pixel stands over the
+       ground at the range's distance. So at sea level the land re-projects
+       on to the hero's own pixels, and from the first metre of the climb
+       on it is the same mountains seen from higher up: they sink towards
+       the rim, the far range comes up over the near one, the shore opens
+       out under them. Nothing is swapped, ever, and nothing is lower
+       resolution than the hero (one vertex every couple of device px).
+       Distances, far range to near, in km: shore, crest, the back of it. */
+    var bay = null, bayFn = null, hl = [], baySunAz = null;
+    var HL_D = [[47, 57, 74], [33, 41, 55], [23, 29, 40]];
+    function readBay() {
+      if (!bayFn) return null;
+      var b = null;
+      try { b = bayFn(Math.round(W * 0.6)); } catch (e) { b = null; }
+      if (!b || !b.ranges || !b.ranges.length || !(b.W > 0) || !(b.hz > 0)) return null;
+      /* mid-resize the hero may not have caught up yet; it says when it
+         has (the 'inkbay' event) and this is asked again */
+      if (Math.abs(b.W - W) > 2) return null;
+      return b;
+    }
+    function makeBayLands() {
+      hl = []; baySunAz = null;
+      if (!bay) return;
+      var k0 = kmAt(0), hz0 = HZ0 * H, f0 = (H * 0.5) / Math.tan(fovAt(k0) * 0.5);
+      var d0 = Math.acos(clamp(R_EARTH / (R_EARTH + k0), -1, 1));
+      var q0 = d0 - Math.atan((hz0 - H * 0.5) / f0), s0 = Math.sin(q0), c0 = Math.cos(q0);
+      var cx0 = W * 0.5, cy0 = H * 0.5, rr = [0, 0, 0];
+      /* the sea-level camera's ray through a pixel: its azimuth, and its
+         horizontal and vertical parts (proj, run backwards) */
+      function ray(X, Y) {
+        var vx = (X - cx0) / f0, vy = (cy0 - Y) / f0;
+        var dx = vx, dy = vy * c0 - s0, dz = vy * s0 + c0;
+        rr[0] = Math.atan2(dx, dz); rr[1] = Math.sqrt(dx * dx + dz * dz); rr[2] = dy;
+        return rr;
+      }
+      baySunAz = ray(bay.sunX, bay.hz)[0];
+      for (var k = 0; k < bay.ranges.length; k++) {
+        var R = bay.ranges[k], n = R.x.length, D = HL_D[Math.min(k, HL_D.length - 1)];
+        var pc = D[1] / R_EARTH, cot = 1 / Math.tan(pc), sinc = Math.sin(pc);
+        var sa = new Float64Array(n), ca = new Float64Array(n), ht = new Float64Array(n), az = new Float64Array(n);
+        var runs = [], st = -1, i;
+        for (i = 0; i < n; i++) {
+          if (bay.hz - R.y[i] > 0.02) {
+            var r = ray(R.x[i], R.y[i]);
+            /* where that ray stands over the radial at the crest's
+               distance: t along the ray, then the height above the sphere */
+            var t = (R_EARTH + k0) / (r[1] * cot - r[2]);
+            ht[i] = t * r[1] / sinc - R_EARTH;
+            az[i] = r[0]; sa[i] = Math.sin(r[0]); ca[i] = Math.cos(r[0]);
+            if (st < 0) st = i;
+          } else if (st >= 0) { if (i - st > 1) runs.push([st, i - 1]); st = -1; }
+        }
+        if (st >= 0 && n - st > 1) runs.push([st, n - 1]);
+        hl.push({ tone: R.tone, amp: R.amp, sa: sa, ca: ca, ht: ht, az: az, runs: runs,
+                  sC: Math.sin(pc), cC: Math.cos(pc),
+                  sS: Math.sin(D[0] / R_EARTH), cS: Math.cos(D[0] / R_EARTH),
+                  sF: Math.sin(D[2] / R_EARTH), cF: Math.cos(D[2] / R_EARTH) });
+      }
+    }
+    /* how much of the hero's own sea and sky is still lying over this
+       world's: all of it on the water, none of it by a few km up */
+    function bayAt(a, b) { return bay ? 1 - sstep(a, b, km) : 0; }
+
     /* the town: warm grains along the far shore and in the fold between
        the headlands. Nothing from the water — it is over the bulge — and
        a small scatter from two hundred kilometres up, which is exactly
@@ -668,18 +735,28 @@
       var r = host.getBoundingClientRect();
       W = Math.max(280, Math.round(r.width || window.innerWidth));
       H = Math.max(360, Math.round(r.height || window.innerHeight));
-      dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      /* THE HERO'S BAY, IF IT HAS ONE TO GIVE. Its layout decides this
+         world's sea level: the same horizon row, the same sun, the same
+         DPR — a dissolve between a sharp picture and a soft copy of it
+         is a visible drop in quality, so this canvas is as sharp as the
+         hero's (which is itself never more than 2). */
+      bay = readBay();
+      var dRaw = window.devicePixelRatio || 1;
+      dpr = bay ? Math.max(1, Math.min(2, bay.dpr)) : Math.min(1.5, dRaw);
       cvs.width = Math.round(W * dpr); cvs.height = Math.round(H * dpr);
       cvs.style.width = W + 'px'; cvs.style.height = H + 'px';
       /* PHONE TUNING IS GATED ON THE PICTURE, NOT THE WINDOW. A desktop
          window is never narrow by this test, so nothing here can move it. */
       narrow = (W / H) < 0.72;
-      budget = W * H * dpr * dpr;
-      HZ0 = narrow ? 0.700 : 0.780;
+      /* the density of the stars and the town is the look, not the
+         canvas: it stays where it was at 1.5 whatever the DPR now is */
+      budget = W * H * Math.pow(Math.min(1.5, dRaw), 2);
+      HZ0 = bay ? clamp(bay.hz / H, 0.5, 0.92) : (narrow ? 0.700 : 0.780);
       NS = Math.round(clamp(W / 22, 28, 72));
       hzArr = new Float32Array(NS + 1);
       palette(); makeStars(); makeClouds(); makeSprites(); makeLands(); makeTown(); makeGrain();
       makeQuiet();
+      makeBayLands();
     }
 
     /* ---- the camera -----------------------------------------
@@ -702,7 +779,9 @@
       sq = Math.sin(q); cq = Math.cos(q);
       /* the sun keeps its bearing; the hour walks on a little as you
          climb, so it stays a sliver on the rim instead of rising again */
-      sunAz = narrow ? 0.055 : 0.093;
+      /* with the hero's bay adopted the bearing is the hero's own sun's,
+         read back through the sea-level camera (makeBayLands) */
+      sunAz = baySunAz != null ? baySunAz : (narrow ? 0.055 : 0.093);
       buildHorizon();
       arcH = Math.max(2.5, HZ0 * H * compressAt(km) * 0.30);
       /* THE SUN'S DISC SITS ON THE WATERLINE, half of it already under,
@@ -711,7 +790,7 @@
          instead of rising again as a real sun at altitude would. */
       var sp = projSky(Math.sin(sunAz), -Math.sin(dip), Math.cos(sunAz));
       sunScrX = sp ? sp[0] : cx;
-      sunR = Math.max(4, H * (narrow ? 0.048 : 0.056));
+      sunR = bay ? Math.max(4, bay.sunR) : Math.max(4, H * (narrow ? 0.048 : 0.056));
       sunScrY = hzAt(sunScrX) + sunR * (0.02 + 2.1 * sstep(0.4, 24, km));
     }
 
@@ -1121,11 +1200,16 @@
     /* the light on the water: one wide soft path from the sun at sea
        level, dying before it reaches the viewer; a small lens of fire on
        the ocean once the ocean is a long way down. */
-    function paintGlint() {
+    function paintGlint(seaA) {
+      /* while the hero's own sea is lying on the water its path of light
+         is the one on it; this one takes over as that one goes */
+      var own = 1 - (seaA || 0);
+      if (own <= 0.004) return;
       var low = 1 - sstep(1.2, 70, km);
       var vis = seaSpan() * 1.35;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.globalCompositeOperation = P.dark ? 'lighter' : 'source-over';
+      ctx.globalAlpha = own;
       var hy = hzAt(sunScrX);
       ctx.save();
       ctx.translate(sunScrX, hy);
@@ -1142,6 +1226,7 @@
          up into the sky above the horizon, which read as a hill. */
       ctx.beginPath(); ctx.arc(0, 0.985, 1, 0, TAU); ctx.fill();
       ctx.restore();
+      ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
     }
 
@@ -1155,6 +1240,9 @@
       var nm = nightAt(km);
       for (L = 0; L < lands.length; L++) {
         var la = lands[L];
+        /* with the hero's bay adopted its ranges are the headlands
+           (paintBayLands); only the far shore is drawn from here */
+        if (hl.length && !la.far) continue;
         n = la.n;
         if (!_tx || _tx.length < n) {
           _tx = new Float32Array(n); _ty = new Float32Array(n);
@@ -1200,6 +1288,142 @@
         ctx.closePath();
         ctx.fill();
       }
+    }
+
+    /* the hero's ranges, from wherever the camera is now. Far to near, as
+       the hero paints them; each range one path of all its runs. The
+       colour is the hero's (a crest a breath warmer than the foot) and
+       goes over to this world's land colour as the light leaves it. */
+    var _hx = null, _hy = null, _gx = null, _gy = null;
+    function paintBayLands() {
+      if (!hl.length) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var nm = nightAt(km), w = sstep(0.25, 9, km), Rk = R_EARTH + km;
+      var hzC = hzAt(cx), i, k, j;
+      /* the azimuths the frame can see, from its four corners, so the
+         vertices round the back of the camera cost nothing */
+      var azL = 9, azR = -9, cxs = [0, W, 0, W], cys = [0, 0, H, H];
+      for (j = 0; j < 4; j++) {
+        var vx = (cxs[j] - cx) / f, vy = (cy - cys[j]) / f;
+        var a0 = Math.atan2(vx, vy * sq + cq);
+        if (a0 < azL) azL = a0; if (a0 > azR) azR = a0;
+      }
+      azL -= 0.08; azR += 0.08;
+      var stride = km < 30 ? 1 : km < 120 ? 2 : 4;
+      for (k = 0; k < hl.length; k++) {
+        var L = hl[k], n = L.ht.length;
+        if (!_hx || _hx.length < n) {
+          _hx = new Float32Array(n); _hy = new Float32Array(n);
+          _gx = new Float32Array(n); _gy = new Float32Array(n);
+        }
+        var crest = mix(P.land, mix(P.coral, P.magenta, 0.5), L.tone * 0.30);
+        var foot = mix(P.land, P.flare, L.tone * 0.16);
+        if (!P.dark) { crest = mix(crest, P.flare, 0.42); foot = mix(foot, P.flare, 0.50); }
+        var flat = mix(P.land, mix(P.indigo, P.night, 0.6), L.tone * 0.30 * (1 - nm * 0.5) + nm * 0.55);
+        var g = ctx.createLinearGradient(0, hzC - L.amp, 0, hzC + 2);
+        g.addColorStop(0, rgb(mix(crest, flat, w)));
+        g.addColorStop(1, rgb(mix(foot, flat, w)));
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        var any = false;
+        for (var ru = 0; ru < L.runs.length; ru++) {
+          var a = L.runs[ru][0], b = L.runs[ru][1], cnt = 0;
+          if (L.az[b] < azL || L.az[a] > azR) continue;
+          for (i = a; i <= b; i += (i + stride > b && i !== b ? b - i : stride)) {
+            var A = L.az[i];
+            if (A < azL || A > azR) continue;
+            var sa = L.sa[i], ca = L.ca[i], rc = R_EARTH + L.ht[i];
+            var x1 = rc * L.sC * sa, y1 = rc * L.cC - Rk, z1 = rc * L.sC * ca;
+            var p1 = proj(x1, y1, z1);
+            if (!p1) continue;
+            var tX = p1[0], tY = p1[1], vis1 = seen(x1, y1, z1);
+            /* the back of the range, flat: from height it is what draws
+               the land's top edge, from the water it is behind the bulge */
+            var x3 = R_EARTH * L.sF * sa, y3 = R_EARTH * L.cF - Rk, z3 = R_EARTH * L.sF * ca;
+            var s3 = seen(x3, y3, z3);
+            if (s3) { var p3 = proj(x3, y3, z3); if (p3 && p3[1] < tY) { tX = p3[0]; tY = p3[1]; } }
+            if (!vis1 && !s3) tY = hzAt(tX);
+            /* the shoreline, or the rim where the bulge hides it */
+            var x2 = R_EARTH * L.sS * sa, y2 = R_EARTH * L.cS - Rk, z2 = R_EARTH * L.sS * ca;
+            var bX = tX, bY = hzAt(tX);
+            if (seen(x2, y2, z2)) { var p2 = proj(x2, y2, z2); if (p2) { bX = p2[0]; bY = p2[1]; } }
+            var hb = hzAt(bX);
+            if (bY < hb) bY = hb;
+            if (tY > bY) tY = bY;
+            _hx[cnt] = tX; _hy[cnt] = tY; _gx[cnt] = bX; _gy[cnt] = bY; cnt++;
+          }
+          if (cnt < 2) continue;
+          ctx.moveTo(_hx[0], _hy[0]);
+          for (j = 1; j < cnt; j++) ctx.lineTo(_hx[j], _hy[j]);
+          for (j = cnt - 1; j >= 0; j--) ctx.lineTo(_gx[j], _gy[j]);
+          ctx.closePath();
+          any = true;
+        }
+        if (any) ctx.fill();
+      }
+      /* the haze the light leaves along the waterline at the two sides of
+         the bay, the hero's own, going as the camera leaves the water */
+      var ha = bayAt(0.2, 3.0);
+      if (ha > 0.01) {
+        if (P.dark) ctx.globalCompositeOperation = 'lighter';
+        var side = [[0.06, 0.30], [0.97, 0.26]], bh = bay.H;
+        for (var s = 0; s < 2; s++) {
+          var hxs = W * side[s][0];
+          ctx.save();
+          ctx.translate(hxs, hzAt(hxs) - bh * 0.010);
+          ctx.scale(W * side[s][1], bh * 0.042);
+          var hg = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+          hg.addColorStop(0, rgba(P.flare, 0.26 * ha * P.k));
+          hg.addColorStop(0.42, rgba(P.flare, 0.10 * ha * P.k));
+          hg.addColorStop(1, rgba(P.flare, 0));
+          ctx.fillStyle = hg;
+          ctx.fillRect(-1, -1, 2, 2);
+          ctx.restore();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+      }
+    }
+
+    /* THE HERO'S SEA: its plate (the sky given back, the headlands given
+       back, the one path of light) laid on this world's water from the
+       same waterline, foreshortened as the camera climbs and let go of by
+       a few km up, where the water is this world's own ramp. Clipped to
+       under the horizon's curve so it never paints into the sky. */
+    function hzClip() {
+      ctx.beginPath();
+      ctx.moveTo(hzX0, hzArr[0]);
+      for (var k = 1; k <= NS; k++) ctx.lineTo(hzX0 + hzStep * k, hzArr[k]);
+      ctx.lineTo(W + PAD, H + 4); ctx.lineTo(-PAD, H + 4);
+      ctx.closePath();
+      ctx.clip();
+    }
+    function paintBaySea() {
+      var a = bayAt(0.12, 2.6);
+      if (!bay || !bay.sea || a <= 0.004) return 0;
+      var deep = bay.H - bay.hz, pad = bay.seaPad || 0;
+      var sc = seaSpan() / Math.max(1, (1 - HZ0) * H);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.save();
+      hzClip();
+      ctx.globalAlpha = a;
+      ctx.drawImage(bay.sea, 0, hzY - pad * sc, W, (deep + pad * 2) * sc);
+      ctx.globalAlpha = 1;
+      ctx.restore();
+      return a;
+    }
+    /* and its clouds: the painted bands, pressed down towards the rim as
+       the lit air thins, and gone by the time this world's own bands are
+       the ones in the sky */
+    function paintBayClouds() {
+      var a = bayAt(0.4, 5.0);
+      if (!bay || !bay.clouds || a <= 0.004) return;
+      var cs = compressAt(km) / compressAt(kmAt(0));
+      var srcH = Math.round(bay.hz * (bay.clouds.height / bay.H));
+      if (srcH < 2) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalAlpha = a;
+      ctx.drawImage(bay.clouds, 0, 0, bay.clouds.width, srcH, 0, hzY - bay.hz * cs, W, bay.hz * cs);
+      ctx.globalAlpha = 1;
     }
 
     function paintTown(clock) {
@@ -1299,6 +1523,10 @@
            users, two whole beats — looking down at a flat brown field
            with nothing on it. A planet always has weather on it. */
         if (c.deck) a *= sstep(4.5, 34, km); else a *= (1 - gone);
+        /* on the water the sky's bands are the hero's painted ones
+           (paintBayClouds); these come in as those are let go of, so the
+           first kilometre has no ruled hairlines in it */
+        if (!c.deck && bay) a *= sstep(0.5, 4.2, km);
         if (a < 0.02) continue;
         /* the ones you are passing through soften and let go */
         /* 1.7 km, not 2.6: the bands live between three and thirteen
@@ -1334,57 +1562,123 @@
 
     /* ---- a meteor, now and then -----------------------------
        In the sky while you are in the air with them; burning up BELOW
-       you, over the deck, once you are not. */
+       you, over the deck, once you are not. The same streak as the
+       hero's: a hot head drawn out along its path by its own motion, a
+       tail that tapers on a curve and cools from white to the evening's
+       gold, a fade in and a fade out — and in the sky it is painted
+       behind the land and the cloud, so it falls BEHIND the mountains.
+       It never asks for a frame of its own past its own second and a
+       half (step() runs at 24 ms only while one is alive). */
     var MET = null, metNext = 6;
     function metGap() { return 7 + Math.random() * 11; }
-    function spawnMeteor() {
+    function spawnMeteor(force) {
       var below = km > 105;
-      var x0, y0, ang, len;
+      var x0, y0, ang, len, travel, dir = Math.random() < 0.5 ? -1 : 1;
       var hy = hzY;
       if (below) {
         var lo = hy + 6, hi = H - 10;
         if (hi - lo < 30) return false;
         x0 = W * (0.08 + Math.random() * 0.84);
         y0 = lo + Math.random() * (hi - lo) * 0.7;
-        ang = (Math.random() * 0.7 - 0.35) + (Math.random() < 0.5 ? 0 : Math.PI);
-        len = W * (0.06 + Math.random() * 0.11);
+        /* seen from above it can be going any way at all */
+        ang = (Math.random() * 0.7 - 0.35) + (dir < 0 ? Math.PI : 0);
+        len = W * (0.05 + Math.random() * 0.08);
+        travel = len * 1.6;
       } else {
         var top = 10, bot = hy - arcH * 1.8;
         if (bot - top < 60) return false;
-        x0 = W * (0.05 + Math.random() * 0.9);
-        y0 = top + Math.random() * (bot - top) * 0.72;
-        ang = 1.05 + (Math.random() - 0.5) * 0.9;
-        len = H * (0.10 + Math.random() * 0.20);
+        /* a falling star, not a dropped one: twelve to thirty-eight
+           degrees under the level, either way across the sky */
+        var dip = (12 + Math.random() * 26) * Math.PI / 180;
+        ang = dir > 0 ? dip : Math.PI - dip;
+        len = Math.max(36, H * (0.075 + Math.random() * 0.075));
+        travel = Math.max(len * 1.4, Math.min(W * 0.42, H * (0.22 + Math.random() * 0.14)));
+        var room = (bot - top) * 0.80;
+        if (travel * Math.sin(dip) > room) travel = room / Math.sin(dip);
+        y0 = top + Math.random() * Math.max(1, (bot - top) * 0.80 - travel * Math.sin(dip));
+        var span = travel * Math.cos(dip);
+        x0 = dir > 0 ? W * 0.04 + Math.random() * Math.max(1, W * 0.92 - span)
+                     : W * 0.96 - Math.random() * Math.max(1, W * 0.92 - span);
       }
-      MET = { x: x0, y: y0, dx: Math.cos(ang), dy: Math.sin(ang), len: len, t: 0,
-              life: 0.75 + Math.random() * 0.85, below: below, w: 1 + Math.random() * 0.9 };
+      MET = { x: x0, y: y0, dx: Math.cos(ang), dy: Math.sin(ang), len: len, travel: travel, t: 0,
+              life: 0.75 + Math.random() * 0.55, below: below,
+              w: Math.max(1, Math.min(W, H) * 0.0016) * (0.9 + Math.random() * 0.3),
+              px: null, py: null, held: !!force };
       return true;
     }
     function metTick(dt) {
       if (reduced) return;
-      if (MET) { MET.t += dt; if (MET.t >= MET.life) MET = null; return; }
+      if (MET) { if (MET.held) return; MET.t += dt; if (MET.t >= MET.life) MET = null; return; }
       metNext -= dt;
       if (metNext <= 0) { metNext = metGap(); spawnMeteor(); }
     }
-    function paintMeteor() {
-      if (!MET) return;
-      var m = MET, u = m.t / m.life;
-      var travel = m.len * 1.55;
-      var hx = m.x + m.dx * travel * u, hy = m.y + m.dy * travel * u;
-      var tx = hx - m.dx * m.len, ty = hy - m.dy * m.len;
-      var a = Math.sin(clamp(u, 0, 1) * Math.PI);
-      a *= m.below ? 0.72 : 1;
+    function metTaper(hx, hy, ux, uy, nx, ny, tl, wh) {
+      var K = 10, j, s, w;
+      ctx.beginPath();
+      for (j = 0; j <= K; j++) {
+        s = j / K; w = wh * (Math.pow(1 - s, 1.7) * 0.97 + 0.03 * (1 - s));
+        if (j === 0) ctx.moveTo(hx + nx * w, hy + ny * w);
+        else ctx.lineTo(hx + ux * tl * s + nx * w, hy + uy * tl * s + ny * w);
+      }
+      for (j = K; j >= 0; j--) {
+        s = j / K; w = wh * (Math.pow(1 - s, 1.7) * 0.97 + 0.03 * (1 - s));
+        ctx.lineTo(hx + ux * tl * s - nx * w, hy + uy * tl * s - ny * w);
+      }
+      ctx.closePath();
+    }
+    function paintMeteor(below) {
+      if (!MET || MET.below !== below) return;
+      var m = MET, u = clamp(m.t / m.life, 0, 1);
+      /* constant speed: a meteor does not ease */
+      var hx = m.x + m.dx * m.travel * u, hy = m.y + m.dy * m.travel * u;
+      var env = sstep(0, 0.12, u) * (1 - sstep(0.62, 1, u)) * (below ? 0.72 : 1) * P.k;
+      if (env <= 0.004) { m.px = hx; m.py = hy; return; }
+      var ux = -m.dx, uy = -m.dy, nx = -uy, ny = ux;
+      var stepPx = m.px == null ? 0 : Math.hypot(hx - m.px, hy - m.py);
+      m.px = hx; m.py = hy;
+      /* the tail is only as long as the path it has actually come */
+      var tl = Math.max(Math.min(m.len, m.travel * u), stepPx + m.w);
+      var px1 = 1 / dpr;
+      var col = P.dark ? mix(P.star, [255, 255, 255], 0.55) : mix(P.indigo, [4, 6, 12], 0.30);
+      var hot = P.dark ? mix(col, [255, 251, 242], 0.55) : col;
+      var warm = P.dark ? mix(mix(P.gold, P.coral, 0.35), col, 0.30) : col;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.globalCompositeOperation = P.dark ? 'lighter' : 'source-over';
-      var g = ctx.createLinearGradient(tx, ty, hx, hy);
-      g.addColorStop(0, rgba(P.coral, 0));
-      g.addColorStop(0.55, rgba(mix(P.gold, P.star, 0.4), 0.26 * a));
-      g.addColorStop(1, rgba(P.star, 0.92 * a));
-      ctx.strokeStyle = g;
-      ctx.lineWidth = m.w;
-      ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx, hy); ctx.stroke();
       ctx.globalCompositeOperation = 'source-over';
+      ctx.lineCap = 'round';
+      if (tl > 1.2) {
+        var wh = Math.max(m.w * 0.60, px1 * 0.6);
+        var g = ctx.createLinearGradient(hx, hy, hx + ux * tl, hy + uy * tl);
+        g.addColorStop(0, rgba(hot, clamp(0.95 * env, 0, 1)));
+        g.addColorStop(0.10, rgba(col, clamp(0.68 * env, 0, 1)));
+        g.addColorStop(0.38, rgba(mix(col, warm, 0.55), clamp(0.28 * env, 0, 1)));
+        g.addColorStop(0.72, rgba(warm, clamp(0.08 * env, 0, 1)));
+        g.addColorStop(1, rgba(warm, 0));
+        ctx.fillStyle = g;
+        metTaper(hx, hy, ux, uy, nx, ny, tl, wh);
+        ctx.fill();
+        if (P.dark) {
+          var g2 = ctx.createLinearGradient(hx, hy, hx + ux * tl * 0.5, hy + uy * tl * 0.5);
+          g2.addColorStop(0, rgba(col, clamp(0.13 * env, 0, 1)));
+          g2.addColorStop(1, rgba(warm, 0));
+          ctx.fillStyle = g2;
+          metTaper(hx, hy, ux, uy, nx, ny, tl * 0.5, wh * 2.4);
+          ctx.fill();
+        }
+      }
+      var hr = Math.max(m.w * 0.80, px1 * 0.9);
+      var hlen = Math.max(hr * 1.6, Math.min(stepPx, m.w * 14));
+      var hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr * 4.2);
+      hg.addColorStop(0, rgba(col, clamp(0.12 * env, 0, 1)));
+      hg.addColorStop(0.45, rgba(col, clamp(0.04 * env, 0, 1)));
+      hg.addColorStop(1, rgba(col, 0));
+      ctx.fillStyle = hg;
+      ctx.beginPath(); ctx.arc(hx, hy, hr * 4.2, 0, TAU); ctx.fill();
+      var hgx = ctx.createLinearGradient(hx, hy, hx + ux * hlen, hy + uy * hlen);
+      hgx.addColorStop(0, rgba(hot, clamp(env, 0, 1)));
+      hgx.addColorStop(1, rgba(col, clamp(env * 0.35, 0, 1)));
+      ctx.strokeStyle = hgx;
+      ctx.lineWidth = hr * 2;
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + ux * hlen, hy + uy * hlen); ctx.stroke();
     }
 
     /* ---- the quiet, and the grain --------------------------- */
@@ -1394,8 +1688,13 @@
       /* the plate is black shapes. On ink that IS the wash. On paper the
          type is ink on a pale evening, so the same shapes are turned into
          cream with `color-dodge` — quiet there means LIGHTER. */
+      /* the hero's own type stands on the hero's own sky, which has no
+         plate under it — so neither does this one while it IS that sky;
+         the quiet comes in as the page's own words arrive */
+      var qa = bay ? sstep(60, 560, sy) : 1;
+      if (qa <= 0.004) return;
       ctx.globalCompositeOperation = P.dark ? 'multiply' : 'screen';
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = qa;
       ctx.drawImage(qp, 0, sy * qScale, qp.width, H * qScale, 0, 0, W, H);
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
@@ -1438,14 +1737,18 @@
       paintSun();
       paintArc();
       paintClouds(clock, false);
+      paintBayClouds();
+      paintMeteor(false);                 // in the sky: behind the land and the type
       paintGround(gGnd);
+      var seaA = paintBaySea();
       paintTerminator();
-      paintGlint();
+      paintGlint(seaA);
       paintLands();
+      paintBayLands();
       paintTown(clock);
       paintClouds(clock, true);
       paintRim();
-      paintMeteor();
+      paintMeteor(true);                  // burning up below you, over the deck
       paintQuiet(yScroll);
       paintGrain();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -1477,8 +1780,15 @@
       if (!frozen) clock += dt;
       sTarget = target();
       var d = sTarget - sPos;
-      /* the ease: fast scrolls arrive smoothly, slow ones feel welded */
-      sPos += d * (1 - Math.pow(0.0000035, dt));
+      /* the ease: fast scrolls arrive smoothly, slow ones feel welded —
+         EXCEPT across the lock, where the hero is scrolling 1:1 with the
+         page over this picture: an eased camera there trails the hero by
+         the scroll speed times 80 ms (80 px at an ordinary flick), which
+         is two horizons and two suns in the dissolve. So in the lock the
+         camera IS the scroll, and the ease is let in over the next 260 px. */
+      var kE = 1 - Math.pow(0.0000035, dt);
+      var lockW = sstep(LOCK, LOCK + 260, Math.min(sPos, sTarget));
+      sPos += d * (kE + (1 - kE) * (1 - lockW));
       if (Math.abs(d) < 0.4) sPos = sTarget;
       var moving = Math.abs(sTarget - sPos) >= 0.4;
       movingNow = moving;
@@ -1546,6 +1856,17 @@
       setY: function (y) { sPos = sTarget = +y || 0; repaintOnce(); return sPos; },
       snap: function () { sPos = target(); repaintOnce(); return sPos; },
       resetRafs: function () { rafs = 0; return 0; },
+      /* debug only, never called from in here: a probe can hold a meteor
+         at phase u (0..1) so a still can catch it; meteor(-1) drops it */
+      meteor: function (u) {
+        if (+u < 0) { MET = null; repaintOnce(); return true; }
+        if (reduced || !spawnMeteor(true)) return false;
+        var uu = clamp(+u || 0.4, 0, 1);
+        MET.t = uu * MET.life;
+        MET.px = null; repaintOnce();
+        return { x: Math.round(MET.x + MET.dx * MET.travel * uu), y: Math.round(MET.y + MET.dy * MET.travel * uu),
+                 below: MET.below, len: Math.round(MET.len) };
+      },
       repaint: function () { repaintOnce(); }
     };
     window.__scroll = KNOBS;
@@ -1617,6 +1938,13 @@
       }, 20);
     }
     document.addEventListener('inkthemechange', onTheme);
+    /* the hero has made its ranges and its sea again (a resize, a theme):
+       take the new ones, so sea level is never a stale copy */
+    function onBay() {
+      if (killed || !bayFn) return;
+      size(); sPos = sTarget = target(); repaintOnce(); wake();
+    }
+    document.addEventListener('inkbay', onBay);
     function onVis() { if (document.hidden) stop(); else wake(); }
     document.addEventListener('visibilitychange', onVis);
 
@@ -1643,6 +1971,14 @@
         else { repaintOnce(); wake(); }
       },
       relayout: function () { refreshMax(); makeQuiet(); repaintOnce(); },
+      /* the hero's bay: a function returning its layout, ranges and sea
+         (js/world.js bay()). Adopted now, and again whenever the hero
+         says it has made them again ('inkbay') */
+      adoptBay: function (fn) {
+        if (killed) return;
+        bayFn = typeof fn === 'function' ? fn : null;
+        size(); sPos = sTarget = target(); repaintOnce();
+      },
       repaint: repaintOnce,
       pause: function () { paused = true; stop(); },
       resume: function () { paused = false; wake(); },
@@ -1652,6 +1988,7 @@
         window.removeEventListener('scroll', onScroll);
         window.removeEventListener('resize', onResize);
         document.removeEventListener('inkthemechange', onTheme);
+        document.removeEventListener('inkbay', onBay);
         document.removeEventListener('visibilitychange', onVis);
         try { host.removeChild(cvs); } catch (e) {}
       },

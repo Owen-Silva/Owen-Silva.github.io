@@ -292,19 +292,38 @@
        mask is what makes it a bay rather than a skyline: the land runs
        out of the picture at the sides and falls to the waterline before
        it reaches the light. */
-    var ranges = [];
+    var ranges = [], wideRanges = null;
     function makeRanges() {
-      ranges = [];
-      var defs = [
-        { seed: 1471, amp: 0.105, oct: 4, freq: 3.1, tone: 0.40, l: 0.36, rr: 0.585 },
-        { seed: 9311, amp: 0.148, oct: 4, freq: 2.2, tone: 0.18, l: 0.27, rr: 0.700 },
-        { seed: 5527, amp: 0.200, oct: 5, freq: 1.5, tone: 0.00, l: 0.175, rr: 0.835 }
-      ];
       var x0 = -W * 0.20, x1 = W * 1.20;
       /* A VERTEX EVERY COUPLE OF DEVICE PIXELS. At one every eight the
          outline can only be a smooth hump however much noise is under
          it, which is exactly what it looked like: a blob. */
       var pts = Math.max(110, Math.min(1500, Math.round((x1 - x0) * dpr / (phone ? 3 : 2))));
+      ranges = rangesOver(x0, x1, pts);
+      wideRanges = null;
+    }
+    /* THE SAME THREE RANGES, OUT PAST THE FRAME. The ascent (js/ascent.js)
+       climbs out of this very bay, so it is handed these outlines rather
+       than drawing headlands of its own: at sea level its land IS this
+       land, vertex for vertex, and from altitude it sees round the sides
+       of the frame. The extra vertices are laid on the same spacing,
+       which keeps every one of the hero's own at the same x with the same
+       height, so the overlap is not a copy of the hero's land, it is it. */
+    function rangesWide(over) {
+      if (wideRanges && wideRanges.over === over) return wideRanges;
+      var x0 = -W * 0.20, x1 = W * 1.20;
+      var pts = Math.max(110, Math.min(1500, Math.round((x1 - x0) * dpr / (phone ? 3 : 2))));
+      var dx = (x1 - x0) / pts, k = Math.max(0, Math.ceil(over / dx));
+      wideRanges = { over: over, k: k, dx: dx, list: rangesOver(x0 - k * dx, x1 + k * dx, pts + 2 * k) };
+      return wideRanges;
+    }
+    function rangesOver(x0, x1, pts) {
+      var out = [];
+      var defs = [
+        { seed: 1471, amp: 0.105, oct: 4, freq: 3.1, tone: 0.40, l: 0.36, rr: 0.585 },
+        { seed: 9311, amp: 0.148, oct: 4, freq: 2.2, tone: 0.18, l: 0.27, rr: 0.700 },
+        { seed: 5527, amp: 0.200, oct: 5, freq: 1.5, tone: 0.00, l: 0.175, rr: 0.835 }
+      ];
       for (var k = 0; k < defs.length; k++) {
         var d = defs[k], tbl = noiseTable(d.seed);
         var px = new Float32Array(pts + 1), py = new Float32Array(pts + 1);
@@ -376,8 +395,9 @@
           }
           py[q] = hz - hv;
         }
-        ranges.push({ x: px, y: py, tone: d.tone, amp: amp });
+        out.push({ x: px, y: py, tone: d.tone, amp: amp });
       }
+      return out;
     }
 
     /* ---- the water: direction A's bay, carrying THIS sky -------
@@ -705,6 +725,12 @@
       palette(); makeStars(); makeClouds(); makeRanges();
       makeBrushes(); makeRows(); makeSeaPlate(); makeGrain();
       bakeClouds();
+      bayChanged();
+    }
+    /* the ascent reads its land and its sea from this bay: tell it when
+       they have been made again (a resize, a theme) */
+    function bayChanged() {
+      try { document.dispatchEvent(new Event('inkbay')); } catch (e) {}
     }
 
     /* ---- the camera -------------------------------------------- */
@@ -1611,6 +1637,24 @@
       return m.life * m.hE * (1 - Math.pow(1 - clamp(f, 0, 1), 1 / m.hExp));
     }
 
+    /* the outline of a streak's tail: from the head (hx, hy) back along
+       (ux, uy) for tl px, half-width wh at the head falling off on a
+       curve to a hair at the end. One path, filled once. */
+    function metTaper(cx, hx, hy, ux, uy, nx, ny, tl, wh) {
+      var K = 10, j, s, w;
+      cx.beginPath();
+      for (j = 0; j <= K; j++) {
+        s = j / K; w = wh * (Math.pow(1 - s, 1.7) * 0.97 + 0.03 * (1 - s));
+        if (j === 0) cx.moveTo(hx + nx * w, hy + ny * w);
+        else cx.lineTo(hx + ux * tl * s + nx * w, hy + uy * tl * s + ny * w);
+      }
+      for (j = K; j >= 0; j--) {
+        s = j / K; w = wh * (Math.pow(1 - s, 1.7) * 0.97 + 0.03 * (1 - s));
+        cx.lineTo(hx + ux * tl * s - nx * w, hy + uy * tl * s - ny * w);
+      }
+      cx.closePath();
+    }
+
     function metDraw(cx, ox, oy) {
       var m = MET;
       if (!m) return;
@@ -1647,31 +1691,46 @@
          seconds after the head has gone, and dissolving in patches
          rather than fading all at once. Very low alpha, a little wider
          than the streak, and it never glows. */
+      /* ONE STRIP, NOT A ROW OF STROKES. Each length of it used to be its
+         own round-capped stroke, and every cap overlapped the next one at
+         a fraction of an alpha: the train came out as a string of beads.
+         Now it is a single filled outline — its width at each length is
+         how far that length has spread — with ONE gradient along it that
+         carries each length's own weight, so nothing is painted twice. */
       if (m.train > 0 && m.tn) {
         var tcol = P.dark ? mix(cream, P.gold, 0.30) : cream;
         var N = m.tn.length, base = 0.22 * k * Math.max(0, tn('train'));
-        for (i = 0; i < N; i++) {
-          var f0 = i / N, f1 = (i + 1) / N;
-          if (f0 >= hu) break;                        // not laid down yet
-          var fe = Math.min(f1, hu);
-          var old = age - metAgeAt(m, fe);            // how long ago it passed
-          var hold = m.train * m.th[i];
-          var q0 = clamp(old / Math.max(0.05, hold), 0, 1);
-          if (q0 >= 1) continue;
+        var tf = [], ta = [], tw = [], live = 0;
+        for (i = 0; i <= N; i++) {
+          var fi = Math.min(i / N, hu), ii = Math.min(i, N - 1);
+          var old = age - metAgeAt(m, fi);            // how long ago it passed
+          var q0 = clamp(old / Math.max(0.05, m.train * m.th[ii]), 0, 1);
           /* it thins and spreads as it goes, and it comes in as the head
              passes rather than appearing whole */
-          var a = base * (0.42 + 0.58 * m.tn[i]) * Math.pow(1 - q0, 1.25)
-                       * clamp((fe - f0) / (f1 - f0), 0, 1);
-          if (a < 0.004) continue;
-          cx.globalAlpha = clamp(a, 0, 1);
-          cx.strokeStyle = rgb(tcol);
-          cx.lineWidth = wpx * (1.5 + 2.6 * q0);
-          cx.beginPath();
-          cx.moveTo(m.x0 + m.dx * f0, m.y0 + m.dy * f0);
-          cx.lineTo(m.x0 + m.dx * fe, m.y0 + m.dy * fe);
-          cx.stroke();
+          var a = base * (0.42 + 0.58 * m.tn[ii]) * Math.pow(1 - q0, 1.25);
+          tf.push(fi); ta.push(clamp(a, 0, 1)); tw.push(wpx * (0.75 + 1.3 * q0));
+          if (a > 0.004) live++;
+          if (fi >= hu) break;
         }
-        cx.globalAlpha = 1;
+        var TN = tf.length;
+        if (live && TN > 1 && hu > 0.004) {
+          var sx0 = m.x0, sy0 = m.y0, ex0 = m.x0 + m.dx * hu, ey0 = m.y0 + m.dy * hu;
+          var tg = cx.createLinearGradient(sx0, sy0, ex0, ey0);
+          for (i = 0; i < TN; i++) tg.addColorStop(clamp(tf[i] / hu, 0, 1), rgba(tcol, ta[i]));
+          var tnx = -Math.sin(m.ang) * m.dir, tny = Math.cos(m.ang);   // across the path
+          cx.fillStyle = tg;
+          cx.beginPath();
+          for (i = 0; i < TN; i++) {
+            var px0 = m.x0 + m.dx * tf[i], py0 = m.y0 + m.dy * tf[i];
+            if (i === 0) cx.moveTo(px0 + tnx * tw[i], py0 + tny * tw[i]);
+            else cx.lineTo(px0 + tnx * tw[i], py0 + tny * tw[i]);
+          }
+          for (i = TN - 1; i >= 0; i--) {
+            cx.lineTo(m.x0 + m.dx * tf[i] - tnx * tw[i], m.y0 + m.dy * tf[i] - tny * tw[i]);
+          }
+          cx.closePath();
+          cx.fill();
+        }
       }
 
       var env, bright, fk = 0, heat = 0, tailEnd = col;
@@ -1699,21 +1758,36 @@
       if (env > 0.004) {
         var tl = Math.min(m.tail * Math.max(0, tn('tail')), m.run * hu);
         tl = Math.max(tl, step + wpx);
+        var lum0 = clamp(env * bright * k, 0, 1), px1 = 1 / dpr;
+        /* the hottest part is nearly white on ink; on paper the streak is
+           ink, and stays it */
+        var hot = P.dark ? mix(col, [255, 251, 242], 0.55) : col;
         if (tl > 1.2) {
-          var tx = hx + ux * tl, ty = hy + uy * tl;
-          var wh = wpx * (burn ? 0.72 + 0.95 * fk : 0.62), we = wpx * 0.06;
-          var g = cx.createLinearGradient(hx, hy, tx, ty);
-          g.addColorStop(0, rgba(col, clamp(0.72 * env * bright * k, 0, 1)));
-          g.addColorStop(0.35, rgba(mix(col, tailEnd, 0.5), clamp(0.30 * env * bright * k, 0, 1)));
-          g.addColorStop(1, rgba(tailEnd, 0));
+          /* THE TAIL: widest just behind the head and drawn in to nothing
+             along a CURVE (metTaper), so it reads as speed and not as a
+             ruled line; its colour cools from the head's white through
+             cream to the evening's gold before it is gone */
+          var warmT = burn ? tailEnd : (P.dark ? mix(mix(P.gold, P.coral, 0.35), col, 0.30) : col);
+          var wh = Math.max(wpx * (burn ? 0.72 + 0.95 * fk : 0.60), px1 * 0.6);
+          var g = cx.createLinearGradient(hx, hy, hx + ux * tl, hy + uy * tl);
+          g.addColorStop(0, rgba(hot, clamp(0.95 * lum0, 0, 1)));
+          g.addColorStop(0.10, rgba(col, clamp(0.68 * lum0, 0, 1)));
+          g.addColorStop(0.38, rgba(mix(col, warmT, 0.55), clamp(0.28 * lum0, 0, 1)));
+          g.addColorStop(0.72, rgba(warmT, clamp(0.08 * lum0, 0, 1)));
+          g.addColorStop(1, rgba(warmT, 0));
           cx.fillStyle = g;
-          cx.beginPath();
-          cx.moveTo(hx + nx * wh, hy + ny * wh);
-          cx.lineTo(tx + nx * we, ty + ny * we);
-          cx.lineTo(tx - nx * we, ty - ny * we);
-          cx.lineTo(hx - nx * wh, hy - ny * wh);
-          cx.closePath();
+          metTaper(cx, hx, hy, ux, uy, nx, ny, tl, wh);
           cx.fill();
+          if (P.dark && !burn) {
+            /* and under it, wider and faint over its first half: the
+               blur of a thing moving faster than the eye, not a glow */
+            var g2 = cx.createLinearGradient(hx, hy, hx + ux * tl * 0.5, hy + uy * tl * 0.5);
+            g2.addColorStop(0, rgba(col, clamp(0.13 * lum0, 0, 1)));
+            g2.addColorStop(1, rgba(warmT, 0));
+            cx.fillStyle = g2;
+            metTaper(cx, hx, hy, ux, uy, nx, ny, tl * 0.5, wh * 2.4);
+            cx.fill();
+          }
         }
 
         if (burn) {
@@ -1731,20 +1805,27 @@
           cx.lineWidth = wpx * (1.15 + 1.15 * fk);
           cx.beginPath(); cx.moveTo(hx, hy); cx.lineTo(bx, by); cx.stroke();
         } else {
-          /* the shooting star keeps its small bright point and the one
-             tight halo that has always been on it */
-          var hr = wpx * 0.78, halo = 0.10 * Math.max(0, tn('halo'));
+          /* THE HEAD, MOVING: a bright core drawn out along the path by the
+             distance it covered since the last frame (what a shutter does
+             to it; round only when it is barely moving), and one tight
+             bloom no wider than a few of its own widths */
+          var hr = Math.max(wpx * 0.80, px1 * 0.9);
+          var hlen = Math.max(hr * 1.6, Math.min(step, wpx * 14));
+          var halo = 0.12 * Math.max(0, tn('halo'));
           if (halo > 0.002) {
-            var hg = cx.createRadialGradient(hx, hy, 0, hx, hy, hr * 3.4);
+            var hg = cx.createRadialGradient(hx, hy, 0, hx, hy, hr * 4.2);
             hg.addColorStop(0, rgba(col, clamp(halo * env * k, 0, 1)));
+            hg.addColorStop(0.45, rgba(col, clamp(halo * 0.35 * env * k, 0, 1)));
             hg.addColorStop(1, rgba(col, 0));
             cx.fillStyle = hg;
-            cx.beginPath(); cx.arc(hx, hy, hr * 3.4, 0, 6.2832); cx.fill();
+            cx.beginPath(); cx.arc(hx, hy, hr * 4.2, 0, 6.2832); cx.fill();
           }
-          cx.globalAlpha = clamp(env * bright * k, 0, 1);
-          cx.fillStyle = rgb(col);
-          cx.beginPath(); cx.arc(hx, hy, hr, 0, 6.2832); cx.fill();
-          cx.globalAlpha = 1;
+          var hgx = cx.createLinearGradient(hx, hy, hx + ux * hlen, hy + uy * hlen);
+          hgx.addColorStop(0, rgba(hot, lum0));
+          hgx.addColorStop(1, rgba(col, lum0 * 0.35));
+          cx.strokeStyle = hgx;
+          cx.lineWidth = hr * 2;
+          cx.beginPath(); cx.moveTo(hx, hy); cx.lineTo(hx + ux * hlen, hy + uy * hlen); cx.stroke();
         }
       }
 
@@ -2203,7 +2284,7 @@
       setTimeout(function () {
         if (killed) return;
         metKill();
-        palette(); makeBrushes(); makeSeaPlate(); bakeClouds(); paintStill(); wake();
+        palette(); makeBrushes(); makeSeaPlate(); bakeClouds(); bayChanged(); paintStill(); wake();
         if (settledSaid) saySt();
       }, 20);
     }
@@ -2250,6 +2331,16 @@
       pause: function () { paused = true; stop(); if (settledSaid) saySt(); },
       resume: function () { if (killed) return; paused = false; paintFrozen(); wake(); if (settledSaid) saySt(); },
       repaint: function () { if (!killed) { size(); paintFrozen(); wake(); } },
+      /* the bay, for the ascent to climb out of: this frame's layout, the
+         three ranges carried `over` px past each side of it, and the sea
+         plate. Read-only; nothing in here changes when it is asked. */
+      bay: function (over) {
+        if (killed || lostCv || !(W > 0)) return null;
+        var wr = rangesWide(Math.max(0, +over || 0));
+        return { W: W, H: H, hz: hz, dpr: dpr, phone: phone, sunX: sunX, sunR: sunR,
+                 ranges: wr.list, sea: seaCv, seaPad: SEA_PAD,
+                 clouds: cloudsBaked ? cloudCv : null };
+      },
       destroy: function () {
         if (killed) return;
         killed = true; stop();

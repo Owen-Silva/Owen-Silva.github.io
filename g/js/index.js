@@ -127,6 +127,12 @@
     try {
       world = mount(host, {
         stars: stars || undefined,
+        /* the hero holds STILL while it scrolls away: its own pull-back
+           (zoom, lift, the layers parting, the fade) moved the sky, the
+           sun and the clouds up to 16 px off the ascent underneath during
+           the 150 px dissolve, which is a double sun and doubled clouds.
+           The climb is the ascent's to do; the hero just leaves. */
+        auto: false,
         onState: function (m, bad) { state(m, bad, 'world'); }
       });
     } catch (e) {
@@ -134,6 +140,12 @@
       standDownPastTheHero(host, null);
       reveal(false);
       return;
+    }
+    /* the ascent climbs out of THIS bay: it is handed the hero's own
+       ranges, layout and sea, so the dissolve between the two is a
+       dissolve between one picture and itself */
+    if (ascent && ascent.adoptBay && world && world.bay) {
+      ascent.adoptBay(function (over) { return world.bay(over); });
     }
     standDownPastTheHero(host, world);
     holdTheWaterline(host, world);
