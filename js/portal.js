@@ -341,14 +341,6 @@
       rt = setTimeout(again, 200);
     });
     document.addEventListener('inkthemechange', function () { setTimeout(again, 24); });
-
-    /* one plane of depth on the plate, only if the camera is there */
-    try {
-      var plate = document.querySelector('.pt-plate');
-      if (plate && window.InkScene && window.InkScene.layer && !REDUCED) {
-        window.InkScene.layer(plate, 0.07, { mode: 'viewport', max: 46 });
-      }
-    } catch (e) {}
   }
 
   if (document.readyState === 'loading') {

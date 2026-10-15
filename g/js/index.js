@@ -1,6 +1,6 @@
 /* ============================================================
    index.js — front page: open the sunset world, mount the commit
-   river below it, build the register of 34 projects, draw the
+   river below it, build the register of 33 projects, draw the
    census, and check every printed number against the JSON it
    came from.
    ============================================================ */
@@ -85,13 +85,29 @@
       return;
     }
     try {
-      ascent = window.Ascent.mount(host, { onState: function (m, bad) { say(m, bad); } });
+      ascent = window.Ascent.mount(host, { onState: function (m, bad) { say(m, bad); }, onHorizon: ruleFade });
     } catch (e) {
       say('failed: the ascent could not start (' + (e.message || e) + '). The evening below the hero is the CSS gradient only.', true);
       ascent = null;
     }
   }
   function relayoutAscent() { if (ascent && ascent.relayout) { try { ascent.relayout(); } catch (e) {} } }
+
+  /* ---- the count's rule only lives on the water ----
+     The hairline over the four figures separates them from the bay while
+     it sits on the dark sea. Scrolled up past the horizon it would run
+     straight through the sun and the lit sky as a hard seam, so it fades
+     out over the last 96 px before the painted horizon and stays out in
+     the sky. Without the ascent nothing calls this and it simply stays. */
+  var ruleEl = null, ruleOn = -1;
+  function ruleFade(hy) {
+    if (!ruleEl) ruleEl = document.querySelector('.mark');
+    if (!ruleEl) return;
+    var gap = ruleEl.getBoundingClientRect().top - hy;     // px the rule sits below the horizon
+    var t = Math.max(0, Math.min(1, (gap - 12) / 84));
+    var v = Math.round(t * t * (3 - 2 * t) * 100) / 100;
+    if (v !== ruleOn) { ruleOn = v; ruleEl.style.setProperty('--rule-on', String(v)); }
+  }
 
   /* ---- the sunset world, and the type that arrives in it ------ */
   function startWorld(state, stars) {
@@ -291,7 +307,7 @@
     if (problems.length) state('number check: ' + problems.join('; '), true);
   }
 
-  /* ---- the register: all 34, grouped, with a real timeline ---
+  /* ---- the register: all 33, grouped, with a real timeline ---
      Two systems carry it, not four (QA-4 D13). Every project is ONE LINE
      OF TYPE — the name, with its state and its dates riding the same line
      — over ONE RULE, the hairline that already parted the rows, inked

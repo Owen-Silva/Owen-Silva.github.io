@@ -1,6 +1,6 @@
 /* ============================================================
    index.js — front page: open the night world, mount the commit
-   river below it, build the register of 34 projects, draw the
+   river below it, build the register of 33 projects, draw the
    census, and check every printed number against the JSON it
    came from.
    ============================================================ */
@@ -303,7 +303,7 @@
     if (problems.length) state('number check: ' + problems.join('; '), true);
   }
 
-  /* ---- the register: all 34, grouped, with a real timeline ---
+  /* ---- the register: all 33, grouped, with a real timeline ---
      Two systems carry it, not four (QA-4 D13). Every project is ONE LINE
      OF TYPE — the name, with its state and its dates riding the same line
      — over ONE RULE, the hairline that already parted the rows, inked

@@ -495,16 +495,6 @@
         "distinct_commit_days_local": 1
       },
       {
-        "id": "atlas-gate-watch",
-        "name": "Atlas gate watch",
-        "path": "~/atlas-gate-watch",
-        "branch": "main",
-        "commits": 1,
-        "first_commit_local": "2026-09-20",
-        "last_commit_local": "2026-09-20",
-        "distinct_commit_days_local": 1
-      },
-      {
         "id": "atlas-site",
         "name": "Atlas site rebuild",
         "path": "~/Downloads/atlas-site",
@@ -528,16 +518,6 @@
         "id": "backtesting-lab",
         "name": "Backtesting lab",
         "path": "~/New Stock Strategy",
-        "branch": "main",
-        "commits": 1,
-        "first_commit_local": "2026-09-20",
-        "last_commit_local": "2026-09-20",
-        "distinct_commit_days_local": 1
-      },
-      {
-        "id": "gear-order-cards",
-        "name": "Gear order cards",
-        "path": "~/repos/gear-order-cards",
         "branch": "main",
         "commits": 1,
         "first_commit_local": "2026-09-20",
@@ -590,6 +570,17 @@
         "path": "~/Downloads/nhl-bot",
         "branch": "main",
         "commits": 1,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-09-20",
+        "distinct_commit_days_local": 1
+      },
+      {
+        "id": "small-tools",
+        "name": "Small tools",
+        "path": "(two small personal tools, not shown on the site)",
+        "repos": 2,
+        "branch": "main",
+        "commits": 2,
         "first_commit_local": "2026-09-20",
         "last_commit_local": "2026-09-20",
         "distinct_commit_days_local": 1

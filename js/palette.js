@@ -2,7 +2,7 @@
    palette.js — one place to go anywhere on the site.
 
    Ctrl/⌘K, or the button in the nav. It indexes the seven pages
-   and, once the project data has loaded, all 34 projects, so a
+   and, once the project data has loaded, all 33 projects, so a
    name typed here lands on the right page and the right entry.
    ============================================================ */
 (function () {
@@ -10,11 +10,11 @@
   var I = window.Ink;
 
   var PAGES = [
-    { t: 'Index', s: 'the commit river, 34 projects', h: 'index.html' },
+    { t: 'Index', s: 'the commit river, 33 projects', h: 'index.html' },
     { t: 'Atlas', s: 'AI task automation, live since 27 Aug', h: 'atlas.html' },
     { t: 'Quartz', s: 'my own browser, first version in six days', h: 'browser.html' },
     { t: 'Portal', s: 'the academy family and staff portal', h: 'portal.html' },
-    { t: 'Projects', s: 'the other thirty-one', h: 'projects.html' },
+    { t: 'Projects', s: 'the other thirty', h: 'projects.html' },
     { t: 'Lab', s: 'the work actually running', h: 'lab.html' },
     { t: 'About', s: 'how I work and how this was measured', h: 'about.html' }
   ];
@@ -25,8 +25,7 @@
     { t: 'The phone pipeline', s: 'five stages, ~1 ms a frame', h: 'browser.html#h-pipe' },
     { t: 'The CPU fixes', s: '27% to 3% of a core', h: 'browser.html#h-cpu' },
     { t: 'The four-role model', s: 'and the planted leak the tests catch', h: 'portal.html#h-roles' },
-    { t: 'The technology graph', s: '31 projects by what they are built with', h: 'projects.html#h-graph' },
-    { t: 'The gear-card generator', s: 'type a name, get a real 3×5 PDF', h: 'lab.html#exhibit-cards' },
+    { t: 'The technology graph', s: '30 projects by what they are built with', h: 'projects.html#h-graph' },
     { t: 'The slide fingerprint', s: '24×24 grayscale change detection', h: 'lab.html#exhibit-slides' },
     { t: 'Star Wars: Strategic Battle', s: 'playable, mouse only', h: 'lab.html#exhibit-game' },
     { t: 'The Atlas design studies', s: 'seven directions, D shipped', h: 'lab.html#exhibit-studies' },
@@ -135,7 +134,7 @@
     document.addEventListener('keydown', function (e) {
       if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); open ? hide() : show(); }
     });
-    // the 34 projects, once their data is here
+    // the 33 projects, once their data is here
     if (I && I.loadJSON) {
       I.loadJSON('data/projects.json').then(function (d) {
         d.projects.forEach(function (p) {

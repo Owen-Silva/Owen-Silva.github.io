@@ -11,8 +11,8 @@
     "refresh_note_front": "Refreshed 12 Oct 2026 (lane front): tally.commits_across_atlas_portal_browser set from commits.json (3,176; the 16 Sep 2,986 kept as commits_across_atlas_portal_browser_16_sep), commits_all_repos added from commits.json all_repos; the facts blocks of atlas, browser and tvha copied from the refreshed atlas.html, browser.html and portal.html (Built, Commits, Releases, Code, Features, Shape). No other entry carries a commit figure."
   },
   "tally": {
-    "projects_since_march_2026": 34,
-    "live_on_the_public_web": 4,
+    "projects_since_march_2026": 33,
+    "live_on_the_public_web": 3,
     "tools_used_every_week": 9,
     "commits_across_atlas_portal_browser": 3176,
     "commits_as_written_in_source": 2978,
@@ -20,7 +20,7 @@
     "measured_on": "12 October 2026",
     "timeline_today": "10-12",
     "timeline_today_in_source": "09-13",
-    "live_on_the_public_web_basis": "atlas (try-atlas.app), tvha (the portal), tvha-site (tvhockeyacademy.com), portfolio (owen-silva.github.io). Arkhe is link-only and unverified, so it is not counted.",
+    "live_on_the_public_web_basis": "atlas (try-atlas.app), tvha (the portal, portal.tvhockeyacademy.com), portfolio (owen-silva.github.io). Arkhe is link-only and unverified, so it is not counted. The academy’s public landing page (tvhockeyacademy.com) is not Owen’s work and was removed on 14 Oct 2026.",
     "tools_used_every_week_basis": "stockcoach (weekly scan report 10 Oct), volt (session import files written 12 Oct), spotify (bridge listening 12 Oct), browser/Quartz (Quartz.exe running 12 Oct), slides (lesson captures dated 10-12 Oct), notebooks (class files edited 11 Oct), mantle (sidecar running 12 Oct), helm (Helm.exe running 12 Oct), mods (load in every Claude Code session via settings). News Shadow runs daily but is a paper test, not a tool, so it is not counted.",
     "commits_across_atlas_portal_browser_16_sep": 2986,
     "commits_all_repos": 3750,
@@ -46,14 +46,14 @@
     },
     {
       "name": "Hockey",
-      "count": 2
+      "count": 1
     },
     {
       "name": "School",
       "count": 2
     }
   ],
-  "project_count": 34,
+  "project_count": 33,
   "corrections_applied": [
     {
       "id": "browser",
@@ -154,18 +154,18 @@
       "why": "CONTENT-UPDATE §4: the <h2> rule counts 15 lessons (5+4+2+3+1). 131 sections reproduces exactly."
     },
     {
-      "id": "gatewatch",
+      "id": "small-tools",
       "field": "removed",
       "from": "listed",
       "to": "removed",
-      "why": "Owen, 20 Sep 2026: gear cards and the launch-day gate watcher are not to be on the site. Not in the commit or line counts, so 2,986 and 408,364 stand."
+      "why": "Owen, 20 Sep 2026: two small personal tools are not to be on the site. Not in the commit or line counts, so 2,986 and 408,364 stand."
     },
     {
-      "id": "gear",
-      "field": "removed",
-      "from": "listed",
+      "id": "tvha-site",
+      "field": "entry",
+      "from": "Academy public site (tvhockeyacademy.com), counted as a project and as live",
       "to": "removed",
-      "why": "Owen, 20 Sep 2026: gear cards and the launch-day gate watcher are not to be on the site. Not in the commit or line counts, so 2,986 and 408,364 stand."
+      "why": "Owen, 14 Oct 2026: he built the family & staff portal (portal.tvhockeyacademy.com), not the public landing page at tvhockeyacademy.com. Project count 34 to 33, live on the public web 4 to 3, Hockey group 2 to 1."
     }
   ],
   "projects": [
@@ -1214,37 +1214,6 @@
         "A maintainer console that logs failed sign-ins, dead reset links and server errors."
       ],
       "admin_only_note": "On-Ice Work shipped admin-only on 16 Sep 2026. Parent and student views exist in the release but families are not switched on."
-    },
-    {
-      "id": "tvha-site",
-      "name": "Academy public site",
-      "group": "Hockey",
-      "state": "run",
-      "state_meaning": "running now",
-      "label": "Live",
-      "spans": [
-        [
-          "07-20",
-          "08-25"
-        ]
-      ],
-      "ongoing": true,
-      "featured": false,
-      "note": "Public website and interest form",
-      "when": "20 Jul – 25 Aug 2026",
-      "what": "The academy’s public website, with programs, tuition, coaches, an FAQ and an interest form. tvhockeyacademy.com",
-      "detail": [
-        "The interest form now saves to the database first and then emails the director, with rate limiting.",
-        "The academy monogram favicon is rendered in Chromium and shared with the portal."
-      ],
-      "stack": [
-        "HTML",
-        "CSS",
-        "the portal’s API"
-      ],
-      "links": [
-        "https://tvhockeyacademy.com"
-      ]
     },
     {
       "id": "slides",

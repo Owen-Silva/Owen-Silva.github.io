@@ -1251,7 +1251,8 @@
     /* ---- the meteors -------------------------------------------
        Owen asked for shooting stars, and for some of them to come into
        the air and burn up. They are the one thing in this sky that
-       ARRIVES: a thin streak every 8-14 s, over in half a second, and
+       ARRIVES: a thin streak every 12-24 s (rare is what makes one worth
+       looking up for), over in about a second, and
        about one in five a slower one that enters lower, brightens,
        flares and breaks into two or three sparks that drift and go out.
 
@@ -1708,7 +1709,13 @@
           /* it thins and spreads as it goes, and it comes in as the head
              passes rather than appearing whole */
           var a = base * (0.42 + 0.58 * m.tn[ii]) * Math.pow(1 - q0, 1.25);
-          tf.push(fi); ta.push(clamp(a, 0, 1)); tw.push(wpx * (0.75 + 1.3 * q0));
+          /* AND IT STARTS WHERE THE METEOR STARTED TO BURN. The head comes
+             in dim, so the train it leaves is born thin and faint there
+             and thickens along the path; it used to begin at its widest,
+             cut off square, a grey bar laid on the sky */
+          var ent = sstep(0, 0.24, fi);
+          a *= ent;
+          tf.push(fi); ta.push(clamp(a, 0, 1)); tw.push(wpx * (0.60 + 1.05 * q0) * (0.30 + 0.70 * ent));
           if (a > 0.004) live++;
           if (fi >= hu) break;
         }
@@ -1719,17 +1726,29 @@
           for (i = 0; i < TN; i++) tg.addColorStop(clamp(tf[i] / hu, 0, 1), rgba(tcol, ta[i]));
           var tnx = -Math.sin(m.ang) * m.dir, tny = Math.cos(m.ang);   // across the path
           cx.fillStyle = tg;
-          cx.beginPath();
-          for (i = 0; i < TN; i++) {
-            var px0 = m.x0 + m.dx * tf[i], py0 = m.y0 + m.dy * tf[i];
-            if (i === 0) cx.moveTo(px0 + tnx * tw[i], py0 + tny * tw[i]);
-            else cx.lineTo(px0 + tnx * tw[i], py0 + tny * tw[i]);
+          /* SOFT ACROSS, NOT A RIBBON. One strip of one alpha has a hard
+             edge, and a hard-edged band reads as a thing laid on the sky
+             rather than smoke in it. Three nested strips of the same
+             outline — full, two thirds, a third as wide — at a third of
+             the weight each: the centre line carries what the one strip
+             did and it falls away to nothing at the sides. */
+          var LW = [1, 0.64, 0.30], LA = [0.30, 0.34, 0.36];
+          for (var ly = 0; ly < 3; ly++) {
+            var sw = LW[ly];
+            cx.globalAlpha = LA[ly];
+            cx.beginPath();
+            for (i = 0; i < TN; i++) {
+              var px0 = m.x0 + m.dx * tf[i], py0 = m.y0 + m.dy * tf[i];
+              if (i === 0) cx.moveTo(px0 + tnx * tw[i] * sw, py0 + tny * tw[i] * sw);
+              else cx.lineTo(px0 + tnx * tw[i] * sw, py0 + tny * tw[i] * sw);
+            }
+            for (i = TN - 1; i >= 0; i--) {
+              cx.lineTo(m.x0 + m.dx * tf[i] - tnx * tw[i] * sw, m.y0 + m.dy * tf[i] - tny * tw[i] * sw);
+            }
+            cx.closePath();
+            cx.fill();
           }
-          for (i = TN - 1; i >= 0; i--) {
-            cx.lineTo(m.x0 + m.dx * tf[i] - tnx * tw[i], m.y0 + m.dy * tf[i] - tny * tw[i]);
-          }
-          cx.closePath();
-          cx.fill();
+          cx.globalAlpha = 1;
         }
       }
 
@@ -1889,7 +1908,7 @@
     /* how long until the next one, and how long this one is around for
        (the burn-up is not over when the head is: its train is still in
        the sky and has to be painted until it has gone) */
-    function metGap() { return (8 + mrnd() * 6) / Math.max(0.05, tn('rate')); }
+    function metGap() { return (12 + mrnd() * 12) / Math.max(0.05, tn('rate')); }
 
     /* between swell frames: the meteor alone advances and repaints, inside
        its own small rectangle. The sky under it has not changed, so this
@@ -2337,9 +2356,19 @@
       bay: function (over) {
         if (killed || lostCv || !(W > 0)) return null;
         var wr = rangesWide(Math.max(0, +over || 0));
+        /* the cloud plate is empty above its highest band: the row where
+           that band's ink can start at the worst (its tilt across the
+           frame, its wobble, its thickest stretch and three sigmas of its
+           blur), so the ascent blits the bands and not a sky of nothing */
+        var cTop = hz;
+        for (var ci = 0; ci < clouds.length; ci++) {
+          var C = clouds[ci];
+          cTop = Math.min(cTop, hz - C.t * hz - Math.abs(C.tilt) * W * 0.72 - C.wob -
+                                C.th * 1.6 - 3 * (1.1 + C.th * 0.10) - 2);
+        }
         return { W: W, H: H, hz: hz, dpr: dpr, phone: phone, sunX: sunX, sunR: sunR,
                  ranges: wr.list, sea: seaCv, seaPad: SEA_PAD,
-                 clouds: cloudsBaked ? cloudCv : null };
+                 clouds: cloudsBaked ? cloudCv : null, cloudTop: Math.max(0, Math.floor(cTop)) };
       },
       destroy: function () {
         if (killed) return;

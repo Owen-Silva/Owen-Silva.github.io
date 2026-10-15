@@ -169,7 +169,7 @@
         panel.innerHTML = '';
         var b = document.createElement('b'); b.textContent = 'The commit river could not draw';
         var p1 = document.createElement('p');
-        p1.textContent = 'All 34 projects, their dates and their state are written out in the register below — nothing is missing, only the picture.';
+        p1.textContent = 'All 33 projects, their dates and their state are written out in the register below — nothing is missing, only the picture.';
         var c = document.createElement('code'); c.textContent = 'Reason: ' + glErr;
         var a = document.createElement('a'); a.className = 'more'; a.href = '#h-reg';
         a.textContent = 'Go to the register';
@@ -183,7 +183,7 @@
         var s = document.createElement('b'); s.textContent = 'The commit river above could not draw. ';
         note.appendChild(s);
         note.appendChild(document.createTextNode(
-          'This register is the same data: all 34 projects with their dates and state. Reason: ' + glErr + '.'));
+          'This register is the same data: all 33 projects with their dates and state. Reason: ' + glErr + '.'));
         note.hidden = false;
       }
       reveal();

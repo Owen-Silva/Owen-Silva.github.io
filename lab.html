@@ -23,228 +23,38 @@
    lab.html — page-only. Every rule is scoped to body.lab; the
    shared stylesheet belongs to another lane. Nothing here paints
    a second sky or a second horizon: the world behind this page is
-   the engine's. The one thing this page owns is the SHEET — a
-   piece of paper standing in the night, written as you type.
-
-   PAPER TOKENS. The sheet is not a white card pasted on the night: it
-   is stock cut from the night itself — the same values the world has
-   where it stands, with the page's own ink printed on it and a little
-   light falling across the print. Every value is mixed from the site's
-   own tokens, so the sheet can never be the brightest thing here.
+   the engine's, and the page's name stands in it alone.
    ============================================================ */
-.lab {
-  --paper-ink:   var(--ink-hi);
-  --paper-mid:   var(--ink-mid);
-  --paper-faint: var(--ink-low);
-  --paper-rule:  var(--rule-strong);
-  --paper-hair:  var(--rule);
-  --paper-field: color-mix(in srgb, var(--ink-hi) 7%, transparent);
-  /* THE STOCK. The sheet has no cut edge, because its stock is the night
-     itself: the value the world paints at every height the sheet stands
-     through, so the sky runs on across it and only the printing tells you
-     a card is there. A 3 x 5 card is small, and this one stands in the
-     open sky — above the ranges, clear of the dawn — so what it has to
-     match is one smooth ramp, read off the page at 1280 x 900, scroll 0,
-     with the content hidden (paper 230 at its head and 202 at its foot;
-     ink 15 and 44), written back as mixes of this theme's own ink. If the
-     world's sky or its dawn band moves, re-measure and re-fit these. */
-  --stock: linear-gradient(to bottom,
-    color-mix(in srgb, var(--rule) 42.5%, var(--panel)) 0%,
-    color-mix(in srgb, var(--rule) 26.5%, var(--ground)) 20%,
-    color-mix(in srgb, var(--panel) 17.5%, var(--ground-deep)) 40%,
-    color-mix(in srgb, var(--ground-deep) 92.5%, var(--panel)) 60%,
-    color-mix(in srgb, var(--rule-strong) 9%, var(--ground-deep)) 75%,
-    color-mix(in srgb, var(--rule-strong) 24.5%, var(--ground-deep)) 88%,
-    color-mix(in srgb, var(--rule-strong) 37%, var(--ground-deep)) 100%);
-  /* the light the sheet catches: it falls where the print is and gives
-     out a tenth of the card short of every side, so that nothing the
-     sheet is lit by can ever draw a straight edge down it */
-  --stock-glow: var(--panel);
-  --stock-lift: radial-gradient(46% 34% at 50% 30%,
-    color-mix(in srgb, var(--stock-glow) 45%, transparent) 0%,
-    color-mix(in srgb, var(--stock-glow) 20%, transparent) 45%,
-    transparent 76%);
-  /* A 3 x 5 card is a small thing, and this one is at card size: sized
-     by the room between the masthead and the ridges so it stands whole
-     in the open sky, and never under 276 px — the width at which the
-     smallest line printed on it still renders over 10 px. */
-  --sheet-w: clamp(276px, min(24vw, calc((100svh - 170px) * .38)), 340px);
-}
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) .lab {
-    --paper-ink:   var(--ink-hi);
-    --paper-mid:   var(--ink-mid);
-    --paper-faint: var(--ink-low);
-    --paper-rule:  color-mix(in srgb, var(--ink-hi) 20%, transparent);
-    --paper-hair:  color-mix(in srgb, var(--ink-hi) 15%, transparent);
-    --paper-field: color-mix(in srgb, var(--ink-hi) 9%, transparent);
-    --stock: linear-gradient(to bottom,
-      color-mix(in srgb, var(--rule) 2%, var(--ground)) 0%,
-      color-mix(in srgb, var(--rule) 20.5%, var(--ground)) 20%,
-      color-mix(in srgb, var(--rule) 33.5%, var(--ground)) 40%,
-      color-mix(in srgb, var(--rule) 43.5%, var(--ground)) 60%,
-      color-mix(in srgb, var(--rule) 76.5%, var(--ground)) 75%,
-      color-mix(in srgb, var(--rule-strong) 63.5%, var(--ground-deep)) 88%,
-      color-mix(in srgb, var(--ink-mid) 11%, var(--panel)) 100%);
-    --stock-glow: color-mix(in srgb, var(--ink-hi) 18%, transparent);
-  }
-}
-html[data-theme="dark"] .lab {
-  --paper-ink:   var(--ink-hi);
-  --paper-mid:   var(--ink-mid);
-  --paper-faint: var(--ink-low);
-  --paper-rule:  color-mix(in srgb, var(--ink-hi) 20%, transparent);
-  --paper-hair:  color-mix(in srgb, var(--ink-hi) 15%, transparent);
-  --paper-field: color-mix(in srgb, var(--ink-hi) 9%, transparent);
-  --stock: linear-gradient(to bottom,
-    color-mix(in srgb, var(--rule) 2%, var(--ground)) 0%,
-    color-mix(in srgb, var(--rule) 20.5%, var(--ground)) 20%,
-    color-mix(in srgb, var(--rule) 33.5%, var(--ground)) 40%,
-    color-mix(in srgb, var(--rule) 43.5%, var(--ground)) 60%,
-    color-mix(in srgb, var(--rule) 76.5%, var(--ground)) 75%,
-    color-mix(in srgb, var(--rule-strong) 63.5%, var(--ground-deep)) 88%,
-    color-mix(in srgb, var(--ink-mid) 11%, var(--panel)) 100%);
-  --stock-glow: color-mix(in srgb, var(--ink-hi) 18%, transparent);
-}
 
 /* a hash link never lands under the 56 px sticky nav */
 html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
 .lab .exhibit { scroll-margin-top: calc(var(--nav-h, 56px) + 22px); }
 
-/* ---- the hero: one sheet of paper standing in the night ---- */
+/* ---- the hero: the page's name standing in the night ------- */
 .lab .lab-hero { overflow: hidden; }
 /* the column starts higher than the site's default, because the name in
    it is taller: the room the title takes is taken off the top margin */
 .lab .lab-hero .band-hero__text { max-width: min(42ch, 45%); top: clamp(26px, 5.2vh, 62px); }
 .lab .lab-hero .lede { max-width: 34ch; }
-/* the status line stays clear of the sheet, however long it gets */
+/* the status line keeps to the column the title stands in */
 .lab .lab-hero .scene-note { max-width: min(64ch, 52%); }
 
 /* the page's own name, on the display scale — the same voice index,
-   atlas and portal open in. Two words, two lines, beside the sheet:
-   the title never reaches the stage, at any desktop width. */
+   atlas and portal open in. Two words, two lines, and the open
+   night beside them. */
 .lab .lab-hero .band-hero__text h1 {
   font-family: var(--display); font-weight: 700;
   font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
   /* the display scale the site opens in — index reads 448 px cropped and
      atlas 742; lab's two words take what the window can give them, sized
-     by the room above the fold the way the sheet beside them is */
+     by the room above the fold */
   font-size: clamp(176px, min(19.4vw, calc((100svh - 152px) * .34)), 288px);
   line-height: .82; letter-spacing: -.045em;
   max-width: none; margin-bottom: 14px;
 }
 .lab .lab-hero .band-hero__text h1 span { display: block; }
 
-.lab .sheet-stage { position: absolute; z-index: 3; top: clamp(24px, 3.2vh, 52px); right: clamp(20px, 6vw, 124px); width: var(--sheet-w); }
-/* The stock, painted on the sheet itself and opaque at every pixel: the
-   fitted night first, the light it catches over the top of it. Hide the
-   world behind this page and not one pixel inside the sheet moves — and
-   yet no column of it steps away from the night it stands in. */
-.lab .sheet {
-  position: relative; container-type: inline-size; aspect-ratio: 216 / 360;
-  background-color: var(--ground-deep);
-  background-image: var(--stock-lift), var(--stock);
-}
-/* the printing. No cast shadow: a shadow is a rim by another name, and
-   this sheet has no rim to cast one — the crop marks say where it is. */
-.lab .sheet__svg { position: absolute; inset: 0; z-index: 1; }
-.lab .sheet__svg svg { display: block; width: 100%; height: 100%; }
-/* the one line that tells you the sheet is yours to type on */
-.lab .sheet-hint {
-  margin: 14px 0 0; font-family: var(--mono); font-size: var(--t-micro);
-  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-low);
-}
-
-/* the name and the number are not form controls sitting beside the
-   card — they are the card's own two variable fields, typed in place
-   at the size and the position the PDF writer computed for them.
-   Each one is a tinted well over the ruled line the sheet draws under
-   it, so the two places you can type are the two places that are lit. */
-.lab .sheet input {
-  position: absolute; z-index: 2; appearance: none;
-  /* the well is light on the stock, and light has no edge: it gives out
-     before either end of the line it is ruled over */
-  background-color: transparent;
-  background-image: linear-gradient(to right,
-    transparent 0%, var(--paper-field) 18%, var(--paper-field) 82%, transparent 100%);
-  border: 0; border-radius: 0; padding: 0; margin: 0;
-  color: var(--paper-ink); caret-color: var(--accent);
-  font-family: Helvetica, Arial, sans-serif; line-height: 1; cursor: text;
-  transition: background-image var(--dur-fast) var(--ease);
-}
-.lab .sheet input::placeholder { color: var(--paper-faint); opacity: 1; }
-.lab .sheet__name {
-  left: 8%; width: 84%; text-align: center; font-weight: 700;
-  font-size: calc(var(--nm-size, 19) * 100cqw / 216);
-  height:    calc(var(--nm-size, 19) * 100cqw / 216);
-  top:       calc((42 - 0.8465 * var(--nm-size, 19)) * 100cqw / 216);
-}
-.lab .sheet__num {
-  text-align: left; font-weight: 400;
-  left:      calc(var(--num-x, 84) * 100cqw / 216);
-  width:     calc(38 * 100cqw / 216);
-  font-size: calc(11 * 100cqw / 216);
-  height:    calc(11 * 100cqw / 216);
-  top:       calc(98.69 * 100cqw / 216);
-}
-/* A thumb gets the 44 px target ink.css gives every field; the card keeps
-   its own metrics. The taller box is recentred on the line the PDF writes,
-   so what you type still sits on that line, and the lit well is painted at
-   the type's own height inside the target rather than filling it. */
-@media (hover: none) and (pointer: coarse) {
-  .lab .sheet input { background-repeat: no-repeat; background-position: 50% 50%; height: 44px; }
-  .lab .sheet__name {
-    top: calc((42 - 0.8465 * var(--nm-size, 19)) * 100cqw / 216 + var(--nm-size, 19) * 50cqw / 216 - 22px);
-    background-size: 100% calc(var(--nm-size, 19) * 100cqw / 216);
-  }
-  .lab .sheet__num {
-    top: calc(98.69 * 100cqw / 216 + 11 * 50cqw / 216 - 22px);
-    background-size: 100% calc(11 * 100cqw / 216);
-  }
-}
-/* the measurement arrives once, then it only ever tracks the name */
-@media (prefers-reduced-motion: no-preference) {
-  .lab .sheet .nm-rule {
-    stroke-dasharray: 216;
-    animation: lab-measure 680ms var(--ease-ink-long) both 700ms;
-  }
-  @keyframes lab-measure { from { stroke-dashoffset: 216; } to { stroke-dashoffset: 0; } }
-}
-.lab .sheet input:hover {
-  background-image: linear-gradient(to right,
-    transparent 0%,
-    color-mix(in srgb, var(--paper-ink) 14%, transparent) 18%,
-    color-mix(in srgb, var(--paper-ink) 14%, transparent) 82%,
-    transparent 100%);
-}
-.lab .sheet input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-
-.lab .sheet-do { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; margin: 24px 0 0; }
-.lab .sheet-cap { font-family: var(--mono); font-size: var(--t-micro); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-low); }
-.lab .sheet-dl {
-  font-family: var(--mono); font-size: var(--t-micro); letter-spacing: .12em; text-transform: uppercase;
-  color: var(--ink-hi); border-bottom: 1px solid var(--ink-low); padding-bottom: 5px; text-decoration: none;
-  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
-}
-.lab .sheet-dl:hover { border-bottom-color: var(--horizon); }
-/* the readout is a caption, not a block */
-.lab .sheet-read { margin: var(--s-4) 0 0; max-width: 54ch; }
-/* one word of the lede belongs to the layout: the card is beside the
-   sentence on a desktop and under it on a phone, and it says which */
-.lab .lede .at-narrow { display: none; }
-
-/* a short window may not cut the caption off the card: the hero keeps
-   the height the card's own column needs, and scrolls if it must */
-@media (min-width: 901px) {
-  .lab .lab-hero { min-height: 764px; }
-}
-
-/* ---- 01: the head and its facts sit side by side ----------- */
-.lab .lab-split { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr); gap: clamp(26px, 4vw, 76px); align-items: start; }
-.lab .lab-split .band__head { margin-bottom: 0; }
-.lab .lab-split .rail-facts { margin-top: 0; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-
-/* ---- 02: the detector, wider than a column ----------------- */
+/* ---- 01: the detector, wider than a column ----------------- */
 .lab .lab-fp .tool { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(22px, 3.4vw, 58px); }
 .lab .fp-cell canvas { max-width: 430px; }
 .lab .fp-cell canvas.pix { max-width: 168px; }
@@ -314,7 +124,7 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
 
 .lab .stage__bar { padding-top: 14px; }
 
-/* ---- 05: the two plates join the night ---------------------
+/* ---- 04: the two plates join the night ---------------------
    The treatment is ink.css §16 (.plate.plate--duo, the same rule
    atlas and portal use); this page supplies the two filter defs the
    primitive asks for and the composition — a pair at the end of the
@@ -365,23 +175,8 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
 .lab .lab-plate figcaption { margin-top: 14px; }
 .lab .lab-plate--l figcaption { padding-right: var(--s-5); }
 
-/* ---- phone: the title, then the card, then what it measured ---- */
+/* ---- phone: the title across the column, then the exhibits ---- */
 @media (max-width: 900px) {
-  /* the card is under the type at this width, so the sentence says so */
-  .lab .lede .at-wide { display: none; }
-  .lab .lede .at-narrow { display: inline; }
-  .lab .sheet-stage { position: relative; top: auto; right: auto; width: min(340px, 74vw); margin: var(--s-6) auto 0; }
-  /* Here the card is carried down the page past the whole world, so it
-     cannot be cut from one place in it. Its stock is the page's own
-     ground, lifted toward the dawn it passes through — one set of stops
-     for both themes, because --rule falls the other way on paper. */
-  :root .lab.ink-ground {
-    --stock: linear-gradient(to bottom,
-      color-mix(in srgb, var(--rule) 14%, var(--ground)) 0%,
-      color-mix(in srgb, var(--rule) 34%, var(--ground)) 45%,
-      color-mix(in srgb, var(--rule) 46%, var(--ground)) 72%,
-      color-mix(in srgb, var(--rule) 22%, var(--ground)) 100%);
-  }
   /* the stacked hero gives the title the whole column, so the two
      words run across it instead of standing in two lines */
   .lab .lab-hero .band-hero__text h1 {
@@ -389,20 +184,19 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
   }
   .lab .lab-hero .band-hero__text h1 span { display: inline; }
   .lab .lab-hero .band-hero__text, .lab .lab-hero .scene-note { max-width: none; }
+  /* the column is in the flow here, so the desktop's lift would only slide
+     it down over the status line under it */
+  .lab .lab-hero .band-hero__text { top: auto; }
   .lab .lab-hero .lede { max-width: var(--measure); }
   .lab .lab-hero { padding-bottom: var(--s-6); }
-  .lab .lab-split { grid-template-columns: minmax(0, 1fr); }
   .lab .stage { aspect-ratio: 16 / 10; }
   .lab .poster-letter { bottom: -14%; font-size: clamp(180px, 52vw, 340px); }
 }
 @media (max-width: 480px) {
-  /* the card is a facsimile, so its type scales with it: at 84vw the smallest
-     line on it rendered at 9.96px on a 320px screen. 88vw carries it to 10.4. */
-  .lab .sheet-stage { width: min(320px, 88vw); }
   .lab .lab-fp .tool { gap: var(--s-6); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .lab .sheet-dl, .lab .stage__idle .btn, .lab .fp-run, .lab .study-tabs button { transition: none; }
+  .lab .stage__idle .btn, .lab .fp-run, .lab .study-tabs button { transition: none; }
 }
 </style>
 <script defer src="js/site.js"></script>
@@ -438,53 +232,17 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
     <div class="band-hero__text">
       <p class="eyebrow">Exhibits &middot; where the work runs</p>
       <h1 id="h-title"><span>The </span><span>lab</span></h1>
-      <p class="lede">Nothing here is a video or a mock-up. Type a name and the card <span class="at-wide">beside</span><span class="at-narrow">below</span> this is laid
-        out and written as a real PDF, in the page, by the same method the original uses.</p>
-    </div>
-
-    <div class="sheet-stage" data-enter="bleed" data-delay="260">
-      <h2 class="vh" id="exhibit-cards-h">The gear-card generator</h2>
-      <div class="sheet" id="card-sheet">
-        <div class="sheet__svg" id="card-preview"></div>
-        <input type="text" id="card-name" class="sheet__name" value="Sample Skater" maxlength="28"
-               placeholder="Sample Skater" autocomplete="off" spellcheck="false" aria-describedby="card-out">
-        <input type="text" id="card-num" class="sheet__num" value="17" maxlength="3"
-               placeholder="00" autocomplete="off" aria-label="Jersey number">
-      </div>
-      <p class="sheet-hint">Both lit fields are typed on the card itself</p>
-      <p class="sheet-do">
-        <label class="sheet-cap" for="card-name">A name, and a number</label>
-        <a class="sheet-dl" id="card-dl" href="#" download>Download the PDF <span aria-hidden="true">&#8595;</span></a>
-      </p>
-      <p class="tool__out sheet-read" id="card-out"></p>
+      <p class="lede">Nothing here is a video or a mock-up. The slide detector runs live in the
+        page, and the game and the seven Atlas design studies load when you ask for them.</p>
     </div>
 
     <p class="scene-note" id="lab-state" role="status"></p>
   </section>
 
-  <section class="band band--flush exhibit" id="exhibit-cards" aria-labelledby="h-cards">
-    <div class="wrap lab-split">
-      <div class="band__head" data-enter="rise">
-        <p class="eyebrow">01 — Running here</p>
-        <h2 class="ink-in" id="h-cards">A 3 × 5 card, written without a PDF library</h2>
-        <p>The original turns a team&rsquo;s gear spreadsheet into a printable deck &mdash; 235 cards across
-           four decks so far &mdash; and writes the PDF by hand, embedding the font&rsquo;s own advance widths
-           so a name of any length centres on the card. The generator at the top of this page is that
-           method, running on one name instead of a spreadsheet.</p>
-      </div>
-      <div class="rail-facts" data-enter="rise" data-delay="120" data-stagger="70">
-        <div data-enter="fade"><h3>What it measures</h3><p>Each character&rsquo;s advance width in Helvetica, in thousandths of an em, summed and scaled to the point size.</p></div>
-        <div data-enter="fade"><h3>What it writes</h3><p>Six PDF objects: catalogue, page tree, page, content stream and two font dictionaries — then the cross-reference table and trailer.</p></div>
-        <div data-enter="fade"><h3>What it never uses</h3><p>A PDF library. The bytes above are assembled as a string and handed to you as a Blob.</p></div>
-        <div data-enter="fade"><h3>The placeholder</h3><p>Every value on the card is a placeholder. No real team, roster or order ever appears on this site.</p></div>
-      </div>
-    </div>
-  </section>
-
   <section class="band exhibit lab-fp" id="exhibit-slides" aria-labelledby="h-fp">
     <div class="wrap">
       <div class="band__head" data-enter="rise">
-        <p class="eyebrow">02 — Also running here</p>
+        <p class="eyebrow">01 — Running here</p>
         <h2 class="ink-in" id="h-fp">Keeping only the frames where the slide changed</h2>
         <p>The lesson recorder keeps a frame only when the slide really changed, by reducing every frame
            to a 24 × 24 grayscale fingerprint and comparing it with the last frame it kept. The sequence
@@ -519,7 +277,7 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
   <section class="band band--flush exhibit" id="exhibit-game" aria-labelledby="h-game">
     <div class="wrap">
       <div class="band__head" data-enter="rise">
-        <p class="eyebrow">03 — Playable</p>
+        <p class="eyebrow">02 — Playable</p>
         <h2 class="ink-in" id="h-game">Star Wars: Strategic Battle</h2>
         <p>A browser strategy game where you deploy Rebel or Imperial ships against an AI opponent.
            X-wings, B-wings, TIE fighters and Star Destroyers, with an upgrade system and a canvas
@@ -576,7 +334,7 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
   <section class="band exhibit" id="exhibit-studies" aria-labelledby="h-studies">
     <div class="wrap">
       <div class="band__head" data-enter="rise">
-        <p class="eyebrow">04 — Seven directions, one product</p>
+        <p class="eyebrow">03 — Seven directions, one product</p>
         <h2 class="ink-in" id="h-studies">The Atlas design studies</h2>
         <p>Seven competing visual directions for Atlas, each built as a standalone page and judged by
            measuring scripts rather than by eye. 63 dependency-free scripts checked contrast,
@@ -608,7 +366,7 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
   <section class="band exhibit" aria-labelledby="h-plates">
     <div class="wrap">
       <div class="band__head" data-enter="rise">
-        <p class="eyebrow">05 — Plates</p>
+        <p class="eyebrow">04 — Plates</p>
         <h2 class="ink-in" id="h-plates">Two things Atlas sends</h2>
         <p>The card the product shows when someone shares it, and one of the emails it writes about
            its own work.</p>
@@ -662,7 +420,7 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
       </div>
       <div>
         <h2>Next</h2>
-        <p><a href="projects.html">All thirty-one other projects</a> &middot;
+        <p><a href="projects.html">All thirty other projects</a> &middot;
            <a href="about.html">How I work</a></p>
       </div>
     </footer>

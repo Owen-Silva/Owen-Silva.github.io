@@ -1,17 +1,8 @@
 /* ============================================================
-   tools.js — two of Owen's algorithms, re-implemented here so
-   they actually run in the page.
+   tools.js — one of Owen's algorithms, re-implemented here so
+   it actually runs in the page.
 
-   1. The gear-card generator. The original turns a team's gear
-      spreadsheet into a printable deck of 3×5 cards and writes
-      the PDF by hand, with no PDF library, embedding font
-      widths so that names centre correctly. This does the same
-      thing for one name you type: it measures the string
-      against Helvetica's own advance widths, lays the card out
-      at 216 × 360 points, and assembles the PDF bytes —
-      header, objects, cross-reference table, trailer.
-
-   2. The lesson-slide recorder's change detector. The original
+   The lesson-slide recorder's change detector. The original
       keeps only the frames where a lesson video's slide really
       changed, using tiny 24×24 grayscale fingerprints so that
       transitions, animated backgrounds and ticking timers do
@@ -23,196 +14,14 @@
 (function () {
   'use strict';
   var I = window.Ink;
-  /* one reading of the motion preference for both instruments. Ink's own
+  /* one reading of the motion preference for the instrument. Ink's own
      flag when site.js is there, the media query itself when it is not —
      the old test read window.Scene, which this site has never defined,
      so the detector used to start itself under reduced motion. */
   var REDUCED = (I && typeof I.REDUCED === 'boolean') ? I.REDUCED
     : !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  /* ============ 1. the gear card ============ */
-
-  /* Helvetica advance widths, in 1/1000 em, for the printable
-     ASCII range — the same table the original embeds. */
-  var HELV = [
-    278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,
-    556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,
-    1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,
-    667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,
-    333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,
-    556,556,333,500,278,556,500,722,500,500,500,334,260,334,584
-  ];
-  var HELV_B = [
-    278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,
-    556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,
-    975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,
-    667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,
-    333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,
-    611,611,389,556,333,611,556,778,556,556,500,389,280,389,584
-  ];
-  function widthOf(s, size, bold) {
-    var tab = bold ? HELV_B : HELV, w = 0;
-    for (var i = 0; i < s.length; i++) {
-      var c = s.charCodeAt(i);
-      w += (c >= 32 && c <= 126) ? tab[c - 32] : 556;
-    }
-    return w * size / 1000;
-  }
-  function pdfEscape(s) { return s.replace(/([\\()])/g, '\\$1'); }
-
-  /* one 3 × 5 inch card, 216 × 360 points, written as PDF bytes */
-  function buildCard(fields) {
-    var W = 216, H = 360;
-    var lines = [], y = H - 42;
-    function centred(txt, size, bold) {
-      var w = widthOf(txt, size, bold);
-      lines.push('BT /' + (bold ? 'F2' : 'F1') + ' ' + size + ' Tf ' +
-                 ((W - w) / 2).toFixed(2) + ' ' + y.toFixed(2) + ' Td (' + pdfEscape(txt) + ') Tj ET');
-      return w;
-    }
-    var content = [];
-    content.push('0.6 w 12 12 ' + (W - 24) + ' ' + (H - 24) + ' re S');
-    var nameW = widthOf(fields.name, 19, true);
-    var size = nameW > W - 44 ? Math.max(11, 19 * (W - 44) / nameW) : 19;
-    lines = [];
-    centred(fields.name, size, true);
-    y -= 26; centred(fields.team, 10, false);
-    y -= 40;
-    ['Jersey   ' + fields.number, 'Size   ' + fields.size, 'Item   ' + fields.item].forEach(function (row) {
-      lines.push('BT /F1 11 Tf 30 ' + y.toFixed(2) + ' Td (' + pdfEscape(row) + ') Tj ET');
-      y -= 22;
-    });
-    y -= 10;
-    lines.push('0.4 w 30 ' + y.toFixed(2) + ' m ' + (W - 30) + ' ' + y.toFixed(2) + ' l S');
-    y -= 20;
-    lines.push('BT /F1 8 Tf 30 ' + y.toFixed(2) + ' Td (3 x 5 in card - written without a PDF library) Tj ET');
-    var stream = content.concat(lines).join('\n');
-
-    var objs = [
-      '<< /Type /Catalog /Pages 2 0 R >>',
-      '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] ' +
-        '/Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>',
-      '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream',
-      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
-      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>'
-    ];
-    var out = '%PDF-1.4\n', offsets = [];
-    objs.forEach(function (o, i) {
-      offsets.push(out.length);
-      out += (i + 1) + ' 0 obj\n' + o + '\nendobj\n';
-    });
-    var xref = out.length;
-    out += 'xref\n0 ' + (objs.length + 1) + '\n0000000000 65535 f \n';
-    offsets.forEach(function (off) { out += ('0000000000' + off).slice(-10) + ' 00000 n \n'; });
-    out += 'trailer\n<< /Size ' + (objs.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF';
-    return { bytes: out, W: W, H: H, size: size, nameW: widthOf(fields.name, size, true), objects: objs.length };
-  }
-
-  function gearCards() {
-    var host = document.getElementById('card-preview');
-    if (!host) return;
-    var name = document.getElementById('card-name');
-    var num = document.getElementById('card-num');
-    var out = document.getElementById('card-out');
-    var dl = document.getElementById('card-dl');
-    var sheet = (host.closest && host.closest('.sheet')) || host;
-    var url = null, last = null, first = true;
-
-    function draw() {
-      var f = {
-        name: (name.value || 'Sample Skater').slice(0, 28),
-        team: 'SAMPLE TEAM, SAMPLE ORDER',
-        number: (num.value || '00').slice(0, 3),
-        size: 'Youth L',
-        item: 'Practice jersey'
-      };
-      var card = buildCard(f);
-      last = card;
-
-      /* The same layout, drawn as SVG at the same 216 × 360 points.
-         The two fields the deck varies — the name and the jersey
-         number — are not drawn here: they are live inputs sitting on
-         the sheet at exactly these coordinates, so the card is typed
-         in place. The page is told where to put them in card units. */
-      var c = card, W = c.W, H = c.H;
-      var numX = 30 + widthOf('Jersey   ', 11, false);
-      /* Every run is placed AND sized by the same advance widths the PDF
-         writer uses: textLength holds the browser to the measurement, so
-         no line on the facsimile can run past the rule the printer cuts
-         to — what you read here is what the bytes say, to the point. */
-      function run(txt, x, y, size, fill) {
-        var w = widthOf(txt, size, false);
-        return '<text x="' + x.toFixed(2) + '" y="' + y + '" textLength="' + w.toFixed(2) + '" lengthAdjust="spacingAndGlyphs"' +
-               ' font-family="Helvetica, Arial, sans-serif" font-size="' + size + '" fill="' + fill + '">' + esc(txt) + '</text>';
-      }
-      /* The stock is not drawn here — the page paints it, at the value
-         the night has where the sheet stands. What is drawn is the
-         printing, and the printing says where the card is: four crop
-         marks on the trim, the way the deck comes off a printer, in
-         place of the ruled box that used to cut a rectangle out of the
-         world. Each arm is 10 pt on a 216 x 360 pt card. */
-      function crop(x, y, dx, dy) {
-        return '<path d="M' + (x + dx * 10) + ' ' + y + ' H' + x + ' V' + (y + dy * 10) + '"' +
-               ' fill="none" stroke="var(--paper-rule)" stroke-width="0.7"/>';
-      }
-      var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="A 3 by 5 inch card for ' + f.name + ', jersey ' + f.number + '.">' +
-        crop(12, 12, 1, 1) + crop(W - 12, 12, -1, 1) +
-        crop(12, H - 12, 1, -1) + crop(W - 12, H - 12, -1, -1) +
-        run(f.team, (W - widthOf(f.team, 10, false)) / 2, 68, 10, 'var(--paper-faint)');
-      var yy = 108;
-      ['Jersey', 'Size   ' + f.size, 'Item   ' + f.item].forEach(function (row) {
-        svg += run(row, 30, yy, 11, 'var(--paper-mid)');
-        yy += 22;
-      });
-      yy += 10;
-      svg += '<line x1="30" y1="' + yy + '" x2="' + (W - 30) + '" y2="' + yy + '" stroke="var(--paper-hair)" stroke-width="0.4"/>';
-      svg += run('3 × 5 in card — written without a PDF library', 30, yy + 20, 8, 'var(--paper-faint)');
-      /* the two ruled fields: the line each one is typed on, drawn at the
-         width the card gives it, so both places you can type are visible
-         before you touch either of them */
-      svg += '<line x1="' + (W * 0.08).toFixed(2) + '" y1="48" x2="' + (W * 0.92).toFixed(2) + '" y2="48" stroke="var(--paper-hair)" stroke-width="0.8"/>';
-      svg += '<line x1="' + (numX - 1).toFixed(2) + '" y1="112" x2="' + (numX + 38).toFixed(2) + '" y2="112" stroke="var(--paper-hair)" stroke-width="0.8"/>';
-      /* the measured width, ruled under the name. On the first pass the
-         page draws it left to right — the measurement being taken, once;
-         after that it simply tracks what you type. */
-      svg += '<line' + (first ? ' class="nm-rule"' : '') + ' x1="' + ((W - c.nameW) / 2).toFixed(1) + '" y1="48" x2="' + ((W + c.nameW) / 2).toFixed(1) + '" y2="48" stroke="var(--accent)" stroke-width="0.8"/>';
-      svg += '</svg>';
-      host.innerHTML = svg;
-      first = false;
-      if (sheet && sheet.style) {
-        sheet.style.setProperty('--nm-size', c.size.toFixed(2));
-        sheet.style.setProperty('--num-x', numX.toFixed(2));
-      }
-
-      /* the numbers are a caption under the sheet, not a panel */
-      if (out) {
-        out.textContent = '';
-        add(out, 'The name measured at ' + c.size.toFixed(1) + ' pt: ', c.nameW.toFixed(2) + ' pt');
-        add(out, ' wide, centred with a ', ((W - c.nameW) / 2).toFixed(2) + ' pt');
-        add(out, ' left margin on a 216 pt card. PDF written: ', c.objects + ' objects, ' + c.bytes.length.toLocaleString('en-GB') + ' bytes');
-        if (REDUCED) out.appendChild(document.createTextNode('. The sheet is a still frame (reduced motion): the measuring rule is drawn, not animated'));
-      }
-      if (dl) {
-        if (url) URL.revokeObjectURL(url);
-        url = URL.createObjectURL(new Blob([c.bytes], { type: 'application/pdf' }));
-        dl.href = url;
-        dl.download = f.name.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase() + '-card.pdf';
-      }
-    }
-    function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]; }); }
-    function add(node, k, v) {
-      node.appendChild(document.createTextNode(k));
-      var b = document.createElement('b'); b.textContent = v;
-      node.appendChild(b);
-    }
-
-    name.addEventListener('input', draw);
-    if (num) num.addEventListener('input', draw);
-    draw();
-  }
-
-  /* ============ 2. the slide fingerprint ============ */
+  /* ============ the slide fingerprint ============ */
   function slideFinger() {
     var stage = document.getElementById('fp-frame');
     if (!stage) return;
@@ -379,7 +188,7 @@
     }
   }
 
-  function boot() { gearCards(); slideFinger(); }
+  function boot() { slideFinger(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 })();

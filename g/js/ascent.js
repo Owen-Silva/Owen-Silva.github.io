@@ -133,6 +133,9 @@
   function build(host, opts) {
     opts = opts || {};
     var say = opts.onState || function () {};
+    /* where the painted horizon is on screen, every frame it is painted
+       (index.js fades the count's rule out of the sky with it) */
+    var onHz = typeof opts.onHorizon === 'function' ? opts.onHorizon : null;
     var reduced = opts.reduced != null ? opts.reduced : REDUCED;
 
     var cvs = document.createElement('canvas');
@@ -540,23 +543,72 @@
         var R = bay.ranges[k], n = R.x.length, D = HL_D[Math.min(k, HL_D.length - 1)];
         var pc = D[1] / R_EARTH, cot = 1 / Math.tan(pc), sinc = Math.sin(pc);
         var sa = new Float64Array(n), ca = new Float64Array(n), ht = new Float64Array(n), az = new Float64Array(n);
-        var runs = [], st = -1, i;
+        var runs = [], st = -1, last = -1, i, G = Math.max(3, Math.round(n * 0.06));
         for (i = 0; i < n; i++) {
+          var r = ray(R.x[i], Math.min(R.y[i], bay.hz));
+          /* where that ray stands over the radial at the crest's
+             distance: t along the ray, then the height above the sphere */
+          var t = (R_EARTH + k0) / (r[1] * cot - r[2]);
+          ht[i] = Math.max(0, t * r[1] / sinc - R_EARTH);
+          az[i] = r[0]; sa[i] = Math.sin(r[0]); ca[i] = Math.cos(r[0]);
           if (bay.hz - R.y[i] > 0.02) {
-            var r = ray(R.x[i], R.y[i]);
-            /* where that ray stands over the radial at the crest's
-               distance: t along the ray, then the height above the sphere */
-            var t = (R_EARTH + k0) / (r[1] * cot - r[2]);
-            ht[i] = t * r[1] / sinc - R_EARTH;
-            az[i] = r[0]; sa[i] = Math.sin(r[0]); ca[i] = Math.cos(r[0]);
+            /* an outline that touches the waterline between two crags is
+               a valley, not the end of the land: a gap that short is
+               bridged (its crest is the ground, behind the bulge from the
+               water, so the hero's picture is unchanged), or every valley
+               cut the range off in a sheer wall once the climb began */
+            if (st >= 0 && i - last > G) { if (last - st > 1) runs.push([st, last]); st = -1; }
             if (st < 0) st = i;
-          } else if (st >= 0) { if (i - st > 1) runs.push([st, i - 1]); st = -1; }
+            last = i;
+          }
         }
-        if (st >= 0 && n - st > 1) runs.push([st, n - 1]);
+        if (st >= 0 && last - st > 1) runs.push([st, last]);
+        /* THE LAND IS AS DEEP AS THE MOUNTAINS ARE TALL. With one shore
+           distance and one back distance for a whole range, the climb
+           opened every range out into a flat black slab: a ruled bottom
+           edge at a fixed depth and a straight vertical cut where the
+           range came down to the water, three of them stepped down each
+           side of the bay. A range's foothills reach out as far as its
+           peaks are high, so the depth of land in front of the crest (and
+           behind it) follows the crest's own height, smoothed along the
+           range: the coast comes in where the ridge drops, and where the
+           range comes down to the water it closes in a spit. */
+        var ap = new Float64Array(n), tmp = new Float64Array(n), hmax = 0, j2, ru2;
+        for (ru2 = 0; ru2 < runs.length; ru2++) {
+          var ra = runs[ru2][0], rb = runs[ru2][1], M = Math.max(2, Math.round((rb - ra + 1) / 22));
+          for (i = ra; i <= rb; i++) ap[i] = ht[i];
+          for (var pass = 0; pass < 2; pass++) {
+            /* a running box, so the cost is per vertex whatever M is */
+            var acc = 0, lo = ra, hi = ra - 1;
+            for (i = ra; i <= rb; i++) {
+              while (hi < Math.min(rb, i + M)) { hi++; acc += ap[hi]; }
+              while (lo < Math.max(ra, i - M)) { acc -= ap[lo]; lo++; }
+              tmp[i] = acc / (hi - lo + 1);
+            }
+            for (i = ra; i <= rb; i++) ap[i] = tmp[i];
+          }
+          for (i = ra; i <= rb; i++) if (ap[i] > hmax) hmax = ap[i];
+          /* and at the very end of the land it comes in to nothing, so the
+             range closes in a spit and never in a cut */
+          var T = M * 3;
+          for (i = ra; i <= rb; i++) ap[i] *= sstep(0, T, i - ra) * sstep(0, T, rb - i);
+        }
+        /* as angles round the planet from the point under the camera (a
+           ground point is in sight while that angle is under the dip),
+           with their sines and cosines, so a frame does no trig for them */
+        var pS = new Float64Array(n), pF = new Float64Array(n), pSmin = D[1] / R_EARTH;
+        var sS = new Float64Array(n), cS = new Float64Array(n), sF = new Float64Array(n), cF = new Float64Array(n);
+        for (i = 0; i < n; i++) {
+          var e2 = hmax > 0 ? Math.pow(clamp(ap[i] / hmax, 0, 1), 0.7) : 0;
+          pS[i] = (D[1] - (D[1] - D[0]) * e2) / R_EARTH;
+          pF[i] = (D[1] + (D[2] - D[1]) * e2) / R_EARTH;
+          sS[i] = Math.sin(pS[i]); cS[i] = Math.cos(pS[i]);
+          sF[i] = Math.sin(pF[i]); cF[i] = Math.cos(pF[i]);
+          if (pS[i] < pSmin) pSmin = pS[i];
+        }
         hl.push({ tone: R.tone, amp: R.amp, sa: sa, ca: ca, ht: ht, az: az, runs: runs,
-                  sC: Math.sin(pc), cC: Math.cos(pc),
-                  sS: Math.sin(D[0] / R_EARTH), cS: Math.cos(D[0] / R_EARTH),
-                  sF: Math.sin(D[2] / R_EARTH), cF: Math.cos(D[2] / R_EARTH) });
+                  sC: Math.sin(pc), cC: Math.cos(pc), pS: pS, pF: pF, pSmin: pSmin,
+                  sS: sS, cS: cS, sF: sF, cF: cF });
       }
     }
     /* how much of the hero's own sea and sky is still lying over this
@@ -1019,6 +1071,12 @@
       var sm = spaceAt(km);
       var alive = 1 - sstep(6, 26, km);
       var sr = sunR;
+      /* ON THE WATER THE GLOW IS THE HERO'S STRENGTH. At full strength it
+         was near twice the hero's along the rim and over twice it round the
+         disc, so the dissolve brightened the sun and then let it go; it is
+         half that at sea level and comes up to full by four kilometres,
+         where there is no hero left to match */
+      var gk = 0.5 + 0.5 * sstep(0.15, 4, km);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       var lift = P.dark ? 'lighter' : 'source-over';
 
@@ -1032,8 +1090,8 @@
          at sea level and laid a fluorescent strip across the waterline */
       ctx.scale(W * (0.62 - 0.30 * sm), Math.max(5, Math.min(H * 0.062, arcH * 0.55)));
       var fg = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-      fg.addColorStop(0, rgba(P.flare, 0.46 * P.k));
-      fg.addColorStop(0.36, rgba(P.gold, 0.19 * P.k));
+      fg.addColorStop(0, rgba(P.flare, 0.46 * gk * P.k));
+      fg.addColorStop(0.36, rgba(P.gold, 0.19 * gk * P.k));
       fg.addColorStop(1, rgba(P.orange, 0));
       ctx.fillStyle = fg;
       ctx.beginPath(); ctx.arc(0, 0, 1, 0, TAU); ctx.fill();
@@ -1043,7 +1101,7 @@
         ctx.save();
         ctx.translate(sunScrX, sunScrY);
         var ag = ctx.createRadialGradient(0, 0, sr * 0.5, 0, 0, sr * 4.6);
-        ag.addColorStop(0, rgba(P.flare, 0.42 * alive * P.k));
+        ag.addColorStop(0, rgba(P.flare, 0.42 * alive * gk * P.k));
         ag.addColorStop(1, rgba(P.gold, 0));
         ctx.fillStyle = ag;
         ctx.beginPath(); ctx.arc(0, 0, sr * 4.6, 0, TAU); ctx.fill();
@@ -1223,8 +1281,16 @@
       ctx.fillStyle = g;
       /* IT IS LIGHT ON THE WATER, so it starts at the waterline and goes
          down from there. Centred on the rim it put a 116 px dome of gold
-         up into the sky above the horizon, which read as a hill. */
-      ctx.beginPath(); ctx.arc(0, 0.985, 1, 0, TAU); ctx.fill();
+         up into the sky above the horizon, which read as a hill. And not
+         cut by a circle either: a disc hung under the waterline sliced
+         the glow along its own edge, and from a few kilometres up that
+         edge was a pale dome drawn on the sea. It is the lower half of
+         the glow, under the rim's own curve, fading out on its own. */
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      hzClip();
+      ctx.translate(sunScrX, hy);
+      ctx.scale(wide, tall);
+      ctx.fillRect(-1, 0, 2, 1);
       ctx.restore();
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
@@ -1243,6 +1309,13 @@
         /* with the hero's bay adopted its ranges are the headlands
            (paintBayLands); only the far shore is drawn from here */
         if (hl.length && !la.far) continue;
+        /* THE FAR SHORE IS A HUNDRED AND THIRTY KILOMETRES OF AIR AWAY.
+           Drawn at full strength it came up from the first kilometre as a
+           black rule along the waterline, straight through the sun; air
+           that deep is the colour of the horizon, so it is let in by the
+           altitude, and is all there only from where you look down on it */
+        var laA = la.far ? sstep(1.5, 28, km) : 1;
+        if (laA < 0.01) continue;
         n = la.n;
         if (!_tx || _tx.length < n) {
           _tx = new Float32Array(n); _ty = new Float32Array(n);
@@ -1286,7 +1359,9 @@
         for (i = 1; i < cnt; i++) ctx.lineTo(_tx[i], _ty[i]);
         for (i = cnt - 1; i >= 0; i--) ctx.lineTo(_bx[i], _by[i]);
         ctx.closePath();
+        ctx.globalAlpha = laA;
         ctx.fill();
+        ctx.globalAlpha = 1;
       }
     }
 
@@ -1295,6 +1370,20 @@
        colour is the hero's (a crest a breath warmer than the foot) and
        goes over to this world's land colour as the light leaves it. */
     var _hx = null, _hy = null, _gx = null, _gy = null;
+    /* along the rim from x = xa to x = xb: the curve's knots between, then xb */
+    function rimTo(xa, xb) {
+      var k, ka, kb;
+      if (xb < xa) {
+        ka = Math.min(NS, Math.ceil((xa - hzX0) / hzStep) - 1);
+        kb = Math.max(0, Math.floor((xb - hzX0) / hzStep) + 1);
+        for (k = ka; k >= kb; k--) ctx.lineTo(hzX0 + hzStep * k, hzArr[k]);
+      } else {
+        ka = Math.max(0, Math.floor((xa - hzX0) / hzStep) + 1);
+        kb = Math.min(NS, Math.ceil((xb - hzX0) / hzStep) - 1);
+        for (k = ka; k <= kb; k++) ctx.lineTo(hzX0 + hzStep * k, hzArr[k]);
+      }
+      ctx.lineTo(xb, hzAt(xb));
+    }
     function paintBayLands() {
       if (!hl.length) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1316,6 +1405,12 @@
           _hx = new Float32Array(n); _hy = new Float32Array(n);
           _gx = new Float32Array(n); _gy = new Float32Array(n);
         }
+        /* a point on the ground is in sight while it is nearer the point
+           under the camera than the rim is: the bulge is the same every
+           way round, so that is one angle (the dip) per frame, and when
+           even the nearest of a range's shore is past it the whole of it
+           is, and the foot of the range is the rim */
+        var shoreSeen = L.pSmin < dip;
         var crest = mix(P.land, mix(P.coral, P.magenta, 0.5), L.tone * 0.30);
         var foot = mix(P.land, P.flare, L.tone * 0.16);
         if (!P.dark) { crest = mix(crest, P.flare, 0.42); foot = mix(foot, P.flare, 0.50); }
@@ -1339,15 +1434,18 @@
             var tX = p1[0], tY = p1[1], vis1 = seen(x1, y1, z1);
             /* the back of the range, flat: from height it is what draws
                the land's top edge, from the water it is behind the bulge */
-            var x3 = R_EARTH * L.sF * sa, y3 = R_EARTH * L.cF - Rk, z3 = R_EARTH * L.sF * ca;
-            var s3 = seen(x3, y3, z3);
-            if (s3) { var p3 = proj(x3, y3, z3); if (p3 && p3[1] < tY) { tX = p3[0]; tY = p3[1]; } }
-            if (!vis1 && !s3) tY = hzAt(tX);
+            var backSeen = L.pF[i] < dip;
+            if (backSeen) {
+              var p3 = proj(R_EARTH * L.sF[i] * sa, R_EARTH * L.cF[i] - Rk, R_EARTH * L.sF[i] * ca);
+              if (p3 && p3[1] < tY) { tX = p3[0]; tY = p3[1]; }
+            }
+            if (!vis1 && !backSeen) tY = hzAt(tX);
             /* the shoreline, or the rim where the bulge hides it */
-            var x2 = R_EARTH * L.sS * sa, y2 = R_EARTH * L.cS - Rk, z2 = R_EARTH * L.sS * ca;
-            var bX = tX, bY = hzAt(tX);
-            if (seen(x2, y2, z2)) { var p2 = proj(x2, y2, z2); if (p2) { bX = p2[0]; bY = p2[1]; } }
-            var hb = hzAt(bX);
+            var bX = tX, bY = hzAt(tX), hb = bY;
+            if (shoreSeen && L.pS[i] < dip) {
+              var p2 = proj(R_EARTH * L.sS[i] * sa, R_EARTH * L.cS[i] - Rk, R_EARTH * L.sS[i] * ca);
+              if (p2) { bX = p2[0]; bY = p2[1]; hb = hzAt(bX); }
+            }
             if (bY < hb) bY = hb;
             if (tY > bY) tY = bY;
             _hx[cnt] = tX; _hy[cnt] = tY; _gx[cnt] = bX; _gy[cnt] = bY; cnt++;
@@ -1355,7 +1453,15 @@
           if (cnt < 2) continue;
           ctx.moveTo(_hx[0], _hy[0]);
           for (j = 1; j < cnt; j++) ctx.lineTo(_hx[j], _hy[j]);
-          for (j = cnt - 1; j >= 0; j--) ctx.lineTo(_gx[j], _gy[j]);
+          if (!shoreSeen) {
+            /* the whole shore is behind the bulge, so the foot of the
+               range IS the rim: the curve's own few knots back to the
+               start, not a vertex per crest laid along it */
+            ctx.lineTo(_gx[cnt - 1], _gy[cnt - 1]);
+            rimTo(_gx[cnt - 1], _gx[0]);
+          } else {
+            for (j = cnt - 1; j >= 0; j--) ctx.lineTo(_gx[j], _gy[j]);
+          }
           ctx.closePath();
           any = true;
         }
@@ -1397,6 +1503,11 @@
       ctx.closePath();
       ctx.clip();
     }
+    function baySeaCovers() {
+      if (!bay || !bay.sea || bayAt(0.12, 2.6) < 1) return false;
+      var pad = bay.seaPad || 0, sc = seaSpan() / Math.max(1, (1 - HZ0) * H);
+      return hzY - pad * sc + (bay.H - bay.hz + pad * 2) * sc >= H + 1;
+    }
     function paintBaySea() {
       var a = bayAt(0.12, 2.6);
       if (!bay || !bay.sea || a <= 0.004) return 0;
@@ -1418,11 +1529,16 @@
       var a = bayAt(0.4, 5.0);
       if (!bay || !bay.clouds || a <= 0.004) return;
       var cs = compressAt(km) / compressAt(kmAt(0));
-      var srcH = Math.round(bay.hz * (bay.clouds.height / bay.H));
+      var sk = bay.clouds.height / bay.H, srcH = Math.round(bay.hz * sk);
       if (srcH < 2) return;
+      /* only the rows the bands are in: above the highest one the plate
+         is clear, and blitting clear sky is most of the blit */
+      var r0 = Math.min(srcH - 2, Math.max(0, Math.floor((bay.cloudTop || 0) * sk)));
+      var k = (bay.hz * cs) / srcH;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.globalAlpha = a;
-      ctx.drawImage(bay.clouds, 0, 0, bay.clouds.width, srcH, 0, hzY - bay.hz * cs, W, bay.hz * cs);
+      ctx.drawImage(bay.clouds, 0, r0, bay.clouds.width, srcH - r0,
+                    0, hzY - bay.hz * cs + r0 * k, W, (srcH - r0) * k);
       ctx.globalAlpha = 1;
     }
 
@@ -1493,14 +1609,28 @@
         if (isBelow !== below) continue;
         var d = Math.sqrt(s[0] * s[0] + s[1] * s[1] + s[2] * s[2]);
         var wpx = f * (c.len * 0.5 / Math.max(0.4, d));
-        var hpx;
+        var hpx, se = 0;
         if (isBelow) {
           /* looked DOWN on, a cloud is as wide as it is long and the
              picture squashes it: flat to the rim, round underfoot */
           var vis2 = Math.max(24, H - hy);
           hpx = wpx * clamp((py - hy) / (0.62 * vis2), 0.045, 0.9);
-        } else {
+        } else if (c.deck) {
           hpx = f * (c.thick * 0.5 / Math.max(0.4, d));
+        } else {
+          /* A BAND HAS A BREADTH AS WELL AS A DEPTH. Drawn as its depth
+             alone it is a few hundred metres on edge however steeply you
+             look at it, and from two or three kilometres up the sky was
+             ruled with them: a dozen pink hairlines a whole screen long.
+             Looked at from under it (or over it) a band shows its breadth,
+             as much of it as the angle between the sight line and its own
+             level gives; edge on, at the rim, it is still the thin line it
+             always was. The breadth is a fixed share of its length, from
+             its phase, so nothing about the sky's random draw moves. */
+          var ux = s[0], uy = s[1] + R_EARTH + km, uz = s[2];
+          se = Math.abs(s[0] * ux + s[1] * uy + s[2] * uz) / Math.max(1e-6, d * Math.sqrt(ux * ux + uy * uy + uz * uz));
+          var wide = c.len * (0.07 + 0.11 * ((c.ph * 7.31) % 1));
+          hpx = f * ((c.thick * Math.sqrt(Math.max(0, 1 - se * se)) + wide * se) * 0.5 / Math.max(0.4, d));
         }
         hpx = Math.max(0.8, hpx);
         if (wpx < 2.0) continue;
@@ -1545,9 +1675,14 @@
            is also what the air between actually does to them. Fading them
            linearly from two pixels was not enough — at 1.3 km the upper sky
            still had a dozen faint scratches on it — so the fade runs on the
-           SQUARE and starts at four. A cloud with real height on screen is
-           untouched by this; only the ones already too thin to read go. */
-        if (hpx < 4) { var hf = clamp(hpx / 4, 0, 1); a *= hf * hf; }
+           SQUARE. It started at four, and from three kilometres up the sky
+           was still ruled with three- and four-pixel scratches a whole
+           screen long, so it starts at six. A cloud with real height on
+           screen is untouched by this; only the ones too thin to read go. */
+        if (hpx < 6) { var hf = clamp(hpx / 6, 0, 1); a *= hf * hf; }
+        /* looked through across its breadth a band is thinner than one
+           looked along, so the broad ones are the faint ones */
+        if (se > 0) a *= 1 - 0.45 * sstep(0.03, 0.40, se);
         if (a < 0.02) continue;
         var base = SPR[c.spr * 2], top = SPR[c.spr * 2 + 1];
         ctx.globalAlpha = a;
@@ -1570,7 +1705,7 @@
        It never asks for a frame of its own past its own second and a
        half (step() runs at 24 ms only while one is alive). */
     var MET = null, metNext = 6;
-    function metGap() { return 7 + Math.random() * 11; }
+    function metGap() { return 12 + Math.random() * 16; }   // rare, as the hero's are
     function spawnMeteor(force) {
       var below = km > 105;
       var x0, y0, ang, len, travel, dir = Math.random() < 0.5 ? -1 : 1;
@@ -1739,7 +1874,9 @@
       paintClouds(clock, false);
       paintBayClouds();
       paintMeteor(false);                 // in the sky: behind the land and the type
-      paintGround(gGnd);
+      /* this world's water is not drawn where the hero's opaque sea plate
+         is about to cover every pixel of it */
+      if (!baySeaCovers()) paintGround(gGnd);
       var seaA = paintBaySea();
       paintTerminator();
       paintGlint(seaA);
@@ -1765,7 +1902,7 @@
        and it never starts at all under reduced motion. */
     var raf = 0, tmr = 0, running = false, t0 = 0, tPrev = 0, clock = 0;
     var sPos = 0, sTarget = 0, frames = 0, cost = 0, worst = 0, rafs = 0;
-    var covered = false, frozen = false, lastPaintY = -1e9, movingNow = false;
+    var covered = false, frozen = false, lastPaintY = -1e9, movingNow = false, lastTarget = 0;
     var REST_MS = 52;                      // the living frame: 19 a second
 
     function target() { return window.scrollY || window.pageYOffset || 0; }
@@ -1780,6 +1917,11 @@
       if (!frozen) clock += dt;
       sTarget = target();
       var d = sTarget - sPos;
+      /* did the page move since the last frame? Inside the lock the camera
+         IS the scroll, so it is never "catching up" and the ease alone
+         would put every scroll frame back on the slow clock below */
+      var scrolled = Math.abs(sTarget - lastTarget) >= 0.4;
+      lastTarget = sTarget;
       /* the ease: fast scrolls arrive smoothly, slow ones feel welded —
          EXCEPT across the lock, where the hero is scrolling 1:1 with the
          page over this picture: an eased camera there trails the hero by
@@ -1805,7 +1947,9 @@
 
       if (reduced) { running = false; return; }
       if (document.hidden || covered) { running = false; return; }
-      if (moving) { rafs++; raf = requestAnimationFrame(step); return; }
+      /* while the page is moving, every frame (one more after the last
+         scroll, to see that it has stopped) */
+      if (moving || scrolled) { rafs++; raf = requestAnimationFrame(step); return; }
       /* at rest the world is still alive, but on its own slow clock: the
          cloud drift, the turning sky and the trembling lights do not need
          sixty frames a second, and a meteor — which does — is over in a
@@ -1815,7 +1959,12 @@
 
     function wake() {
       if (killed || paused || reduced || lostCv) return;
-      if (running) return;
+      if (running) {
+        /* resting on the slow clock when the page starts to move: the next
+           frame is this frame, not the end of the rest */
+        if (tmr && !raf) { clearTimeout(tmr); tmr = 0; rafs++; raf = requestAnimationFrame(step); }
+        return;
+      }
       running = true;
       if (tmr) { clearTimeout(tmr); tmr = 0; }
       rafs++;
@@ -1872,6 +2021,7 @@
     window.__scroll = KNOBS;
     function publish(ms) {
       KNOBS.km = +km.toFixed(2); KNOBS.hzY = Math.round(hzY);
+      if (onHz && !covered) { try { onHz(hzY); } catch (e) {} }
       KNOBS.y = Math.round(sPos); KNOBS.target = Math.round(sTarget);
       KNOBS.ms = frames ? +(cost / frames).toFixed(2) : 0;
       KNOBS.lastMs = +(+ms || 0).toFixed(3); KNOBS.maxMs = +worst.toFixed(2);
