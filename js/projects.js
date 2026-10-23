@@ -599,6 +599,7 @@
       });
       body.appendChild(ln);
     }
+    if (p.repo) body.appendChild(getRow(p));
     if (p.id === 'starwars' || p.id === 'design') {
       var lab = document.createElement('a');
       lab.className = 'more';
@@ -615,6 +616,25 @@
 
     a.appendChild(id); a.appendChild(body); a.appendChild(stack);
     return a;
+  }
+
+  /* the download row of a project whose repo is public (data: p.repo). The
+     button goes to the README's Download/Install section, not to a zip: every
+     one of them runs from a git clone, and the meta line says so. Same markup
+     as browser.html and the front page; the look is .get in css/ink.css. */
+  function getRow(p) {
+    var r = p.repo;
+    var g = document.createElement('div'); g.className = 'get';
+    var btn = document.createElement('a'); btn.className = 'get__btn';
+    btn.href = r.download; btn.rel = 'noopener'; btn.textContent = 'Download';
+    btn.setAttribute('aria-label', 'Download ' + p.name + ' (its install steps on GitHub)');
+    var src = document.createElement('a'); src.className = 'get__src';
+    src.href = r.url; src.rel = 'noopener'; src.textContent = 'Source on GitHub';
+    src.setAttribute('aria-label', p.name + ' source on GitHub');
+    var meta = document.createElement('span'); meta.className = 'get__meta';
+    meta.textContent = [r.platform, r.runs, r.licence].concat(r.release ? [r.release] : []).join(' · ');
+    g.appendChild(btn); g.appendChild(src); g.appendChild(meta);
+    return g;
   }
 
   function buildRegister(data, host, state) {

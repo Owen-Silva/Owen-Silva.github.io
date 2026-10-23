@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Owen Silva</title>
-<meta name="description" content="Everything Owen Silva has built since March 2026 — 33 projects, 3,176 real commits, drawn as a bay at sunset and a river.">
+<meta name="description" content="Everything Owen Silva has built since March 2026 — 34 projects, 3,176 real commits, drawn as a bay at sunset and a river.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='k' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%230A1124'/><stop offset='.46' stop-color='%235A2652'/><stop offset='.8' stop-color='%23DE6A33'/><stop offset='1' stop-color='%23F9B95E'/></linearGradient></defs><rect width='32' height='32' fill='%230B0A12'/><rect width='32' height='20' fill='url(%23k)'/><circle cx='17' cy='20' r='4.2' fill='%23FFF3D8'/><rect y='20' width='32' height='12' fill='%23120F1A'/><path d='M0 20 L5 13.4 L9 17 L12.5 20 Z' fill='%23090B12'/><path d='M32 20 L26 12.4 L22 16.6 L19.8 20 Z' fill='%23090B12'/><rect x='15.5' y='20.6' width='3' height='8.4' fill='%23F9B95E' opacity='.72'/></svg>">
 <script>
   (function () {
@@ -253,7 +253,7 @@
   /* ---- the river: one picture, full bleed ----
      It used to carry three systems in one rectangle — the commit field,
      a 23-row gantt of project names with dotted leaders, and a set of
-     state squares. The field alone is the picture now; the 33 projects,
+     state squares. The field alone is the picture now; the 34 projects,
      their spans and their states are the register further down, which is
      where a reader can actually use them. What is left in the band is
      the water, the calendar it runs along, and the readout. */
@@ -521,7 +521,7 @@
   <!-- ============ and now the data ============ -->
   <section class="mark" aria-label="Since March 2026, counted">
     <dl class="tally" id="hero-tally">
-      <div><dt>Projects</dt><dd data-num="projects">33</dd></div>
+      <div><dt>Projects</dt><dd data-num="projects">34</dd></div>
       <div><dt>Live on the web</dt><dd data-num="live">3</dd></div>
       <div><dt>Used weekly</dt><dd data-num="tools">9</dd></div>
       <div><dt>Commits</dt><dd data-num="commits">3,176</dd></div>
@@ -551,7 +551,7 @@
         history of Atlas, the academy portal and Quartz, my browser. The dots flow into a timeline running
         from 1 March to 12 October 2026, so a mark sits on the day its commit landed and a tall plume
         is a day with a lot of them. The three currents are the three repositories: Atlas, the portal, then Quartz.
-        The 33 projects, their dates and their states are written out as a table under
+        The 34 projects, their dates and their states are written out as a table under
         &ldquo;The register&rdquo;, below.
       </p>
 
@@ -586,7 +586,7 @@
             <li>Left to right is the calendar: 1 March to 12 October 2026.</li>
             <li>Three currents, one per repository. A dot is one commit; a tall plume is a day with a lot of them &mdash; the deepest is 5 September, 208 commits to Atlas.</li>
             <li>The width of a current is that repository&rsquo;s share of the work: Atlas 2,720 commits, the portal 210, Quartz 246.</li>
-            <li>Point at the water for the day under the pointer and its count, and run the pointer through it to move it. The 33 projects are listed with their dates and states in the register below.</li>
+            <li>Point at the water for the day under the pointer and its count, and run the pointer through it to move it. The 34 projects are listed with their dates and states in the register below.</li>
           </ul>
         </div>
       </div>
@@ -603,7 +603,7 @@
       </div>
       <div class="pane pane--tally" id="count-pane">
         <canvas class="pane__cv" id="count-cv" aria-hidden="true"></canvas>
-        <svg class="pane__svg ink-svg" id="count-svg" role="group" aria-label="The four tally figures drawn as individual marks: 3,176 commits, 33 projects, 9 tools used weekly and 3 live on the public web."></svg>
+        <svg class="pane__svg ink-svg" id="count-svg" role="group" aria-label="The four tally figures drawn as individual marks: 3,176 commits, 34 projects, 9 tools used weekly and 3 live on the public web."></svg>
       </div>
       <p class="scene-note" id="count-state" role="status"></p>
     </div>
@@ -624,18 +624,18 @@
     <div class="wrap">
       <div class="band__head">
         <p class="eyebrow">04 — The register</p>
-        <h2 class="ink-in" id="h-reg">Thirty-three projects</h2>
+        <h2 class="ink-in" id="h-reg">Thirty-four projects</h2>
         <p>Everything since March 2026, grouped the way I think about it. Some are still running, some
            shipped and stopped, and some were experiments I learned from and then shelved. Three have pages of
-           their own; the other thirty are written up on <a href="projects.html">the projects page</a>.</p>
+           their own; the other thirty-one are written up on <a href="projects.html">the projects page</a>.</p>
       </div>
 
       <div class="reg-tools" id="reg-tools">
-        <button class="chip" type="button" data-filter="all" aria-pressed="true">All 33</button>
+        <button class="chip" type="button" data-filter="all" aria-pressed="true">All 34</button>
         <button class="chip" type="button" data-filter="run" aria-pressed="false">Running now</button>
         <button class="chip" type="button" data-filter="done" aria-pressed="false">Finished</button>
         <button class="chip" type="button" data-filter="off" aria-pressed="false">Paused or shelved</button>
-        <span class="mono" id="reg-count" role="status" style="color:var(--ink-faint);letter-spacing:.05em;text-transform:none">33 of 33 projects shown</span>
+        <span class="mono" id="reg-count" role="status" style="color:var(--ink-faint);letter-spacing:.05em;text-transform:none">34 of 34 projects shown</span>
       </div>
 
       <p class="reg-down" id="reg-down" role="status" hidden></p>
@@ -716,9 +716,14 @@
               <div><dt>Commits</dt><dd>246</dd></div>
               <div><dt>Code</dt><dd>~75k lines of JavaScript, ~12k lines of CSS</dd></div>
               <div><dt>Features</dt><dd>67, documented in a 1,467-line README</dd></div>
-              <div><dt>Distribution</dt><dd>A Windows installer and a portable build (0.1.0, built 14 Sep under the old name, not code-signed)</dd></div>
+              <div><dt>Distribution</dt><dd>Open source on GitHub. No installer: you clone it, and it updates itself from its GitHub releases</dd></div>
               <div><dt>Built with</dt><dd>Electron, node-pty and xterm.js, koffi for Win32 calls, WebCodecs, scrcpy and adb, Ghostery ad blocker, Mozilla Readability</dd></div>
             </dl>
+            <div class="get">
+              <a class="get__btn" href="https://github.com/Owen-Silva/quartz#download" rel="noopener" aria-label="Download Quartz from GitHub">Download</a>
+              <a class="get__src" href="https://github.com/Owen-Silva/quartz" rel="noopener" aria-label="Quartz source on GitHub">Source on GitHub</a>
+              <span class="get__meta">Windows 11 · runs from a git clone · GPL-3.0 · v0.1.0</span>
+            </div>
             <a class="more" href="browser.html">The phone pipeline and all 67 features</a>
           </div>
           <figure class="plate plate--duo">
@@ -745,6 +750,11 @@
               <div><dt>Inside</dt><dd>Its own file manager, Alt+Tab switcher, task view, snap layouts, clipboard history and a Settings app</dd></div>
               <div><dt>Built with</dt><dd>Electron, koffi, and one C# helper process that makes every Windows call</dd></div>
             </dl>
+            <div class="get">
+              <a class="get__btn" href="https://github.com/Owen-Silva/mantle#download" rel="noopener" aria-label="Download Mantle from GitHub">Download</a>
+              <a class="get__src" href="https://github.com/Owen-Silva/mantle" rel="noopener" aria-label="Mantle source on GitHub">Source on GitHub</a>
+              <span class="get__meta">Windows 11 · runs from a git clone · GPL-3.0 · v0.1.0</span>
+            </div>
             <a class="more" href="projects.html#p-mantle">Mantle on the projects page</a>
           </div>
           <div>
@@ -756,6 +766,11 @@
               <div><dt>Commits</dt><dd>53</dd></div>
               <div><dt>Built with</dt><dd>Electron, the Claude Agent SDK, Preact, WebSockets</dd></div>
             </dl>
+            <div class="get">
+              <a class="get__btn" href="https://github.com/Owen-Silva/helm#install" rel="noopener" aria-label="Download Helm from GitHub">Download</a>
+              <a class="get__src" href="https://github.com/Owen-Silva/helm" rel="noopener" aria-label="Helm source on GitHub">Source on GitHub</a>
+              <span class="get__meta">Windows 10 or 11, with your own Claude Code · runs from a git clone · GPL-3.0</span>
+            </div>
             <a class="more" href="projects.html#p-helm">Helm on the projects page</a>
           </div>
         </div>
@@ -821,8 +836,12 @@
       </div>
       <div>
         <h2>How I work</h2>
-        <p>I build with Claude Code as a pair programmer. A few of the projects here, like Helm,
-           my Claude Code mods, Mission Control and VOLT, are tools I made for working that way.</p>
+        <p>I build with Claude Code as a pair programmer. A few of the projects here, like
+           <a href="https://github.com/Owen-Silva/helm" rel="noopener">Helm</a>,
+           <a href="https://github.com/Owen-Silva/mods" rel="noopener">my Claude Code mods</a>,
+           <a href="https://github.com/Owen-Silva/mission-control" rel="noopener">Mission Control</a> and
+           <a href="https://github.com/Owen-Silva/volt" rel="noopener">VOLT</a>, are tools I made for working that
+           way, and all four are open source on GitHub.</p>
       </div>
       <div>
         <h2>How this site is made</h2>

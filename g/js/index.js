@@ -1,6 +1,6 @@
 /* ============================================================
    index.js — front page: open the sunset world, mount the commit
-   river below it, build the register of 33 projects, draw the
+   river below it, build the register of 34 projects, draw the
    census, and check every printed number against the JSON it
    came from.
    ============================================================ */
@@ -307,7 +307,7 @@
     if (problems.length) state('number check: ' + problems.join('; '), true);
   }
 
-  /* ---- the register: all 33, grouped, with a real timeline ---
+  /* ---- the register: all 34, grouped, with a real timeline ---
      Two systems carry it, not four (QA-4 D13). Every project is ONE LINE
      OF TYPE — the name, with its state and its dates riding the same line
      — over ONE RULE, the hairline that already parted the rows, inked
@@ -415,7 +415,24 @@
     go.textContent = PAGE[p.id] ? 'Its page' : 'The write-up';
     go.setAttribute('aria-label', (PAGE[p.id] ? 'The page for ' : 'The write-up for ') + p.name);
 
-    a.appendChild(id); a.appendChild(body); a.appendChild(go); a.appendChild(rule);
+    /* a public repository gets a second word under the first: where to
+       download it, the README's own Download or Install section on GitHub
+       (projects.json carries it as repo.download; only public repos have
+       a repo object, so nothing private can get a link here). */
+    var last = go;
+    if (p.repo && p.repo.download) {
+      last = document.createElement('div');
+      last.className = 'entry__gos';
+      var dl = document.createElement('a');
+      dl.className = 'entry__go entry__dl';
+      dl.href = p.repo.download;
+      dl.rel = 'noopener';
+      dl.textContent = 'Download';
+      dl.setAttribute('aria-label', 'Download ' + p.name + ' from GitHub');
+      last.appendChild(go); last.appendChild(dl);
+    }
+
+    a.appendChild(id); a.appendChild(body); a.appendChild(last); a.appendChild(rule);
     return a;
   }
 

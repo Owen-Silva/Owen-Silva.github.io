@@ -8,17 +8,18 @@
     "correction_count": 14,
     "refreshed": "2026-10-12",
     "refresh_note": "Refreshed 12 Oct 2026 (lane projects): 11 new entries from their repos (git log/README, read-only, cutoff 2026-10-12T00:00-07:00, --all), Owen's memory notes, file dates for mesh-test and scratch-games (no git); spans/when updated for atlas (branch next: main has no commits after 9 Sep), browser (renamed Quartz), tvha, notebooks (lesson count from the class files: <article class=\"lesson\"> and <section> tags), slides. commits_* tally keys untouched (numbers lane).",
-    "refresh_note_front": "Refreshed 12 Oct 2026 (lane front): tally.commits_across_atlas_portal_browser set from commits.json (3,176; the 16 Sep 2,986 kept as commits_across_atlas_portal_browser_16_sep), commits_all_repos added from commits.json all_repos; the facts blocks of atlas, browser and tvha copied from the refreshed atlas.html, browser.html and portal.html (Built, Commits, Releases, Code, Features, Shape). No other entry carries a commit figure."
+    "refresh_note_front": "Refreshed 12 Oct 2026 (lane front): tally.commits_across_atlas_portal_browser set from commits.json (3,176; the 16 Sep 2,986 kept as commits_across_atlas_portal_browser_16_sep), commits_all_repos added from commits.json all_repos; the facts blocks of atlas, browser and tvha copied from the refreshed atlas.html, browser.html and portal.html (Built, Commits, Releases, Code, Features, Shape). No other entry carries a commit figure.",
+    "refresh_note_1023": "Refreshed 23 Oct 2026 (lane pf-data): nine projects are public on GitHub (github.com/Owen-Silva, checked with gh). Each public entry carries a repo object (name, url, download = the README Download/Install anchor, licence, release or null, platform from the README Requirements, runs). No installer exists for any of them. New entry cloudtest (built 14 Oct per Owen; its public repo history starts 19-20 Oct). project_count, tally.projects_since_march_2026 and the Tools I use group count follow; tally.timeline_today moved to 10-23, the day of this update. Commit and line counts untouched."
   },
   "tally": {
-    "projects_since_march_2026": 33,
+    "projects_since_march_2026": 34,
     "live_on_the_public_web": 3,
     "tools_used_every_week": 9,
     "commits_across_atlas_portal_browser": 3176,
     "commits_as_written_in_source": 2978,
     "commits_correction_note": "12 Oct 2026, from _data/commits.json: Atlas 2,720 (measured on origin/master, the production branch; local main has not moved since 9 Sep) + portal 210 + Quartz 246 = 3,176, authored through 11 Oct local. History: on 16 Sep it was 2,636 + 188 + 162 = 2,986 (CONTENT-UPDATE §6, Atlas then on local main, which mirrored production); the 13 Sep source file said 2,978.",
     "measured_on": "12 October 2026",
-    "timeline_today": "10-12",
+    "timeline_today": "10-23",
     "timeline_today_in_source": "09-13",
     "live_on_the_public_web_basis": "atlas (try-atlas.app), tvha (the portal, portal.tvhockeyacademy.com), portfolio (owen-silva.github.io). Arkhe is link-only and unverified, so it is not counted. The academy’s public landing page (tvhockeyacademy.com) is not Owen’s work and was removed on 14 Oct 2026.",
     "tools_used_every_week_basis": "stockcoach (weekly scan report 10 Oct), volt (session import files written 12 Oct), spotify (bridge listening 12 Oct), browser/Quartz (Quartz.exe running 12 Oct), slides (lesson captures dated 10-12 Oct), notebooks (class files edited 11 Oct), mantle (sidecar running 12 Oct), helm (Helm.exe running 12 Oct), mods (load in every Claude Code session via settings). News Shadow runs daily but is a paper test, not a tool, so it is not counted.",
@@ -42,7 +43,7 @@
     },
     {
       "name": "Tools I use",
-      "count": 9
+      "count": 10
     },
     {
       "name": "Hockey",
@@ -53,7 +54,7 @@
       "count": 2
     }
   ],
-  "project_count": 33,
+  "project_count": 34,
   "corrections_applied": [
     {
       "id": "browser",
@@ -352,7 +353,16 @@
         "numpy",
         "SVG"
       ],
-      "links": []
+      "links": [],
+      "repo": {
+        "name": "stock-cone",
+        "url": "https://github.com/Owen-Silva/stock-cone",
+        "download": "https://github.com/Owen-Silva/stock-cone#install",
+        "licence": "MIT",
+        "release": null,
+        "platform": "Python 3.11+ on Windows, macOS or Linux",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "newsshadow",
@@ -747,7 +757,16 @@
         "pandas",
         "FastAPI"
       ],
-      "links": []
+      "links": [],
+      "repo": {
+        "name": "fly-brain",
+        "url": "https://github.com/Owen-Silva/fly-brain",
+        "download": "https://github.com/Owen-Silva/fly-brain#install",
+        "licence": "MIT",
+        "release": null,
+        "platform": "Python 3.13",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "breakaway",
@@ -903,7 +922,16 @@
         "Node",
         "no dependencies"
       ],
-      "links": []
+      "links": [],
+      "repo": {
+        "name": "volt",
+        "url": "https://github.com/Owen-Silva/volt",
+        "download": "https://github.com/Owen-Silva/volt#install",
+        "licence": "MIT",
+        "release": null,
+        "platform": "Windows, macOS or Linux, Node 18+",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "mission",
@@ -933,7 +961,16 @@
         "server-sent events",
         "vanilla JS"
       ],
-      "links": []
+      "links": [],
+      "repo": {
+        "name": "mission-control",
+        "url": "https://github.com/Owen-Silva/mission-control",
+        "download": "https://github.com/Owen-Silva/mission-control#install",
+        "licence": "MIT",
+        "release": null,
+        "platform": "Windows 10 or 11, Node 20+",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "spotify",
@@ -1009,7 +1046,7 @@
         "Code": "~75k lines of JavaScript, ~12k lines of CSS",
         "Features": "67, documented in a 1,467-line README",
         "Built with": "Electron, node-pty and xterm.js, koffi for Win32 calls, WebCodecs, scrcpy and adb, Ghostery ad blocker, Mozilla Readability",
-        "Distribution": "A Windows installer and a portable build (0.1.0, built 14 Sep under the old name, not code-signed)"
+        "Distribution": "Public on GitHub under GPL-3.0, release v0.1.0. It runs from a git clone on Windows 11 and has no installer."
       },
       "what_it_does": [
         "Claude tabs: a real Claude Code session in each tab, with its own folder, resume, and a pulse when it needs me.",
@@ -1028,7 +1065,16 @@
         "About 550 ms cold start. Hidden workspaces go to sleep, which fixed a 1.9 GB GPU process.",
         "No silent failures. Every state shows its reason and what to do next."
       ],
-      "features_note": "The \"67 features\" figure is what the 1,400-line README documents. Four more user-facing features landed 14–15 Sep and are not in it."
+      "features_note": "The \"67 features\" figure is what the 1,400-line README documents. Four more user-facing features landed 14–15 Sep and are not in it.",
+      "repo": {
+        "name": "quartz",
+        "url": "https://github.com/Owen-Silva/quartz",
+        "download": "https://github.com/Owen-Silva/quartz#download",
+        "licence": "GPL-3.0",
+        "release": "v0.1.0",
+        "platform": "Windows 11",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "mantle",
@@ -1063,7 +1109,16 @@
         "C#",
         "koffi"
       ],
-      "links": []
+      "links": [],
+      "repo": {
+        "name": "mantle",
+        "url": "https://github.com/Owen-Silva/mantle",
+        "download": "https://github.com/Owen-Silva/mantle#download",
+        "licence": "GPL-3.0",
+        "release": "v0.1.0",
+        "platform": "Windows 11",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "helm",
@@ -1095,7 +1150,16 @@
         "Preact",
         "WebSockets"
       ],
-      "links": []
+      "links": [],
+      "repo": {
+        "name": "helm",
+        "url": "https://github.com/Owen-Silva/helm",
+        "download": "https://github.com/Owen-Silva/helm#install",
+        "licence": "GPL-3.0",
+        "release": null,
+        "platform": "Windows 10 or 11, with your own Claude Code",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "mods",
@@ -1129,7 +1193,16 @@
         "TypeScript",
         "Claude Code hooks"
       ],
-      "links": []
+      "links": [],
+      "repo": {
+        "name": "mods",
+        "url": "https://github.com/Owen-Silva/mods",
+        "download": "https://github.com/Owen-Silva/mods#install",
+        "licence": "MIT",
+        "release": null,
+        "platform": "An add-on for Claude Code",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "meshtest",
@@ -1157,6 +1230,50 @@
         "Node"
       ],
       "links": []
+    },
+    {
+      "id": "cloudtest",
+      "name": "cloudtest",
+      "group": "Tools I use",
+      "state": "run",
+      "state_meaning": "running now",
+      "label": "In use",
+      "spans": [
+        [
+          "10-14",
+          "10-14"
+        ],
+        [
+          "10-19",
+          "10-20"
+        ]
+      ],
+      "ongoing": true,
+      "featured": false,
+      "note": "Runs a heavy test suite on a GitHub runner instead of my laptop",
+      "when": "Built 14 Oct 2026, in use since",
+      "what": "Run a CPU-heavy test command on a GitHub Actions runner against an exact snapshot of the working tree, and get the log and artifacts back.",
+      "detail": [
+        "It snapshots the tree, uncommitted and untracked files included, through a private git index, so the real index, HEAD, branches and stash are never written.",
+        "Each run pushes one throwaway cloudtest/* branch with its own injected workflow, then deletes the branch when the run ends, and tries to on errors and Ctrl-C too.",
+        "It refuses deny-listed repos and snapshots that hold secret-looking files, and never force-pushes or pushes tags.",
+        "Zero npm dependencies. A finished run ends in one summary line: pass or fail, exit code, times and the run link."
+      ],
+      "stack": [
+        "Node",
+        "GitHub Actions",
+        "GitHub CLI"
+      ],
+      "links": [],
+      "repo": {
+        "name": "cloudtest",
+        "url": "https://github.com/Owen-Silva/cloudtest",
+        "download": "https://github.com/Owen-Silva/cloudtest#install",
+        "licence": "MIT",
+        "release": null,
+        "platform": "Node 18+, git and the GitHub CLI",
+        "runs": "runs from a git clone"
+      }
     },
     {
       "id": "tvha",
