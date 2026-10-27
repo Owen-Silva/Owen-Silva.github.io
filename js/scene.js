@@ -56,6 +56,9 @@
          opts.reach cap on how much a long page multiplies the travel
                     (default 1: no scaling, exactly as before).
          opts.lean  fraction of vh the layer leans toward the pointer.
+         opts.leanX the sideways share of that lean (default: lean). A
+                    full-bleed layer that leans sideways has to be painted
+                    wider than the window, or its edge shows.
          returns { release(), amp(px) } — amp() pins the amplitude to the
                  one the caller sized its canvas for.
 
@@ -409,7 +412,7 @@
       var L = layers[i], t = 0, x = 0;
       if (L.mode === 'page') {
         t = ampOf(L) * L.shape.at(cam.progress);
-        if (L.lean) { t += L.lean * look.y * cam.vh; x = L.lean * 1.6 * look.x * cam.vh; }
+        if (L.lean) { t += L.lean * look.y * cam.vh; x = L.leanX * 1.6 * look.x * cam.vh; }
       } else {
         var r = L.el.getBoundingClientRect();
         if (r.bottom < -240 || r.top > cam.vh + 240) continue;   // off camera: leave it
@@ -474,7 +477,8 @@
       mode: opts.mode || 'viewport', axis: opts.axis || 'y',
       max: opts.max || 0, last: null, lastX: null,
       shape: opts.shape || LINEAR, reach: opts.reach || 1,
-      lean: opts.lean || 0, amp: null
+      lean: opts.lean || 0, amp: null,
+      leanX: opts.leanX != null ? opts.leanX : (opts.lean || 0)
     };
     function pose() {
       /* one still pose, then never again */
@@ -577,14 +581,22 @@
        crest = mix(NEAR, FAR, 0.06 + 0.72 * d^0.9)
        foot  = mix(NEAR, FAR, 0.02 + 0.34 * d)
 
-     Change it HERE AND IN world.js, or the site stops being one night. */
+     Change it HERE AND IN world.js, or the site stops being one night.
+
+     PAPER has two numbers of its own, --land-near and --land-far in
+     ink.css (world.js never mirrored the paper ramp). They used to be
+     mixed out of the text inks, which made the near plane a grey type
+     could not be read on: 2.0-2.5:1 for the meta lines (QA 10-26). The
+     paper ramp is a pale rock grey now, its darkest crest held where a
+     meta line still reads at 4.5:1, and the ranges are told apart by
+     their crests against the mist the range behind runs out into. */
   function nightNear() {
     return isDark() ? mix(hex('--ground-deep'), '#000000', 0.55)
-                    : mix(hex('--rule-strong'), hex('--ink-low'), 0.54);
+                    : hex('--land-near', '#CCC9C0');
   }
   function nightFar() {
     return isDark() ? hex('--wash-c')
-                    : mix(hex('--rule-strong'), hex('--ink-low'), 0.10);
+                    : hex('--land-far', '#D9D4C8');
   }
   function crestTone(d) { return mix(nightNear(), nightFar(), 0.06 + 0.72 * Math.pow(d, 0.9)); }
   function footTone(d) { return mix(nightNear(), nightFar(), 0.02 + 0.34 * d); }
@@ -639,16 +651,26 @@
     var ctx;
     try { ctx = cv.getContext('2d'); } catch (e) { ctx = null; }
     if (!ctx) return false;
-    var W = cv.clientWidth || cv.offsetWidth, H = cv.clientHeight || cv.offsetHeight;
+    /* `padX`: the canvas hangs that far past BOTH side edges, so the
+       pointer lean can slide it sideways without baring an edge (QA 10-26:
+       a 12 px strip of bare paper at the right). Everything is drawn in
+       window coordinates — W is the window's width, x = 0 its left edge —
+       so the resting picture is the same pixels it was before the
+       overhang, and the overhang is the same crest carried on. */
+    var P = Math.max(0, Math.round(o.padX || 0));
+    var W = (cv.clientWidth || cv.offsetWidth) - 2 * P, H = cv.clientHeight || cv.offsetHeight;
     if (W < 2 || H < 2) return false;
     var dpr = Math.min(PHONE ? 1.75 : 2, window.devicePixelRatio || 1);
-    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, W, H);
+    cv.width = Math.round((W + 2 * P) * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, P * dpr, 0);
+    ctx.clearRect(-P, 0, W + 2 * P, H);
 
     var f = crest(o.seed, o.terms);
     var base = o.base, amp = o.amp;
     var step = Math.max(3, Math.round(W / 320));
+    /* the crest's sample grid, run out into the overhang on the same
+       spacing, so every sample inside the window stays where it was */
+    var x0 = -2 - step * Math.ceil(P / step), x1 = W + 2 + P + (P ? step : 0);
     var x, yv;
 
     /* The crest, written once. EVERY pass below is cut against it, so the
@@ -659,9 +681,9 @@
        own — the ridge is the edge. */
     function cut(land) {
       ctx.beginPath();
-      ctx.moveTo(-2, land ? H + 2 : -H - 2);
-      for (x = -2; x <= W + 2; x += step) ctx.lineTo(x, base + f(x / W) * amp);
-      ctx.lineTo(W + 2, land ? H + 2 : -H - 2);
+      ctx.moveTo(x0, land ? H + 2 : -H - 2);
+      for (x = x0; x <= x1; x += step) ctx.lineTo(x, base + f(x / W) * amp);
+      ctx.lineTo(x1, land ? H + 2 : -H - 2);
       ctx.closePath();
     }
 
@@ -675,7 +697,7 @@
     hz.addColorStop(0, rgba(o.hazeColor, 0));
     hz.addColorStop(1, rgba(o.hazeColor, o.hazeAlpha));
     ctx.fillStyle = hz;
-    ctx.fillRect(0, base - amp - o.haze, W, H - (base - amp - o.haze) + 4);
+    ctx.fillRect(-P, base - amp - o.haze, W + 2 * P, H - (base - amp - o.haze) + 4);
     ctx.restore();
 
     /* the land itself */
@@ -698,7 +720,7 @@
       gl.addColorStop(0, rgba(o.rim, o.rimGlow));
       gl.addColorStop(1, rgba(o.rim, 0));
       ctx.fillStyle = gl;
-      ctx.fillRect(0, base - amp - 2, W, amp * 2 + (o.rimFall || 0) + 4);
+      ctx.fillRect(-P, base - amp - 2, W + 2 * P, amp * 2 + (o.rimFall || 0) + 4);
       ctx.restore();
     }
 
@@ -706,9 +728,9 @@
        land. The light falls off at both edges, so it reads as light on a
        ridge rather than a rule across the page. */
     ctx.beginPath();
-    for (x = -2; x <= W + 2; x += step) {
+    for (x = x0; x <= x1; x += step) {
       yv = base + f(x / W) * amp;
-      if (x < 0) ctx.moveTo(x, yv); else ctx.lineTo(x, yv);
+      if (x === x0) ctx.moveTo(x, yv); else ctx.lineTo(x, yv);
     }
     var rg = ctx.createLinearGradient(0, 0, W, 0);
     if (o.rimLight) {
@@ -739,13 +761,24 @@
 
     /* On paper the land has to dissolve back into the sheet below its crest,
        the way a wash runs out of pigment — otherwise dark type ends up sitting
-       on a grey hill. On ink there is nothing to dissolve into. */
+       on a grey hill. On ink there is nothing to dissolve into.
+       QA 10-26: the run-out used to span the whole canvas, which hangs a
+       full camera travel below the window, so inside the window the wash
+       had barely started to thin and meta lines sat on grey at 2.5:1. It
+       runs out over `fadeSpan` now, measured from the crest's top in window
+       pixels, and holds. It is cut to the land, so the air above a crest
+       keeps its own tone and the silhouette keeps its edge. */
     if (o.fadeColor && o.fadeAlpha > 0) {
-      var fd = ctx.createLinearGradient(0, base - amp, 0, H);
-      fd.addColorStop(0, rgba(o.fadeColor, 0));
+      var fy = base - amp;
+      var fd = ctx.createLinearGradient(0, fy, 0, fy + (o.fadeSpan || (H - fy)));
+      fd.addColorStop(0, rgba(o.fadeColor, o.fadeFrom || 0));
       fd.addColorStop(1, rgba(o.fadeColor, o.fadeAlpha));
+      ctx.save();
+      cut(true);
+      ctx.clip();
       ctx.fillStyle = fd;
-      ctx.fillRect(0, base - amp, W, H - (base - amp));
+      ctx.fillRect(-P, fy, W + 2 * P, H - fy);
+      ctx.restore();
     }
     return true;
   }
@@ -861,6 +894,20 @@
        travels on; place() sizes each canvas for exactly that travel */
     var LEAN = { sky: 0.006, deep: 0.008, far: 0.012, near: 0.018 };
 
+    /* PAPER's land, one place. `fade` is how much of the sheet a range has
+       run out into by `span` (a share of the window's height) below the top
+       of its crest, and it holds from there down; `haze` is the mist above
+       the crest. Ink reads none of this. Every number was measured against
+       the faintest meta line on all six pages at 1280 and 393 (QA 10-26). */
+    var PAPER = {
+      deep: { fade: 0.80, span: 0.11, haze: 0.30 },
+      far:  { fade: 0.85, span: 0.15, haze: 0.36, rim: 0.30, glow: 0.05 },
+      near: { fade: 0.90, span: 0.22, haze: 0.40, rim: 0.08 },
+      /* the horizon: the sheet laid back over the sky's warm band (four
+         stops down to the line and just past it), and the lit edge's glow */
+      gather: [0.06, 0.22, 0.50, 0.30], glow: 0.30
+    };
+
     /* the two standard ranges. `r` is half the plane's whole travel, so
        `2*r` cancels the canvas's own overhang and the crest lands on the
        horizon minus its own drop on the first screen, at any page length. */
@@ -872,17 +919,20 @@
         base: HOR * H + 2 * r - (PHONE ? 0.012 : 0.018) * H,
         amp: (PHONE ? 0.050 : 0.042) * H,
         haze: 0.14 * H,
-        hazeColor: hex('--wash-c'), hazeAlpha: dark ? 0.34 : 0.22,
+        /* on paper the air above a crest is mist, lighter than the land:
+           it is what keeps a pale crest an edge */
+        hazeColor: dark ? hex('--wash-c') : hex('--wash-a'), hazeAlpha: dark ? 0.34 : PAPER.far.haze,
         fillTop: crestTone(0.52), fillBottom: footTone(0.52),
-        fadeColor: dark ? null : hex('--ground'), fadeAlpha: dark ? 0 : 0.78,
+        fadeColor: dark ? null : hex('--ground'), fadeAlpha: dark ? 0 : PAPER.far.fade,
+        fadeSpan: PAPER.far.span * H,
         /* QA-4 D15: one horizon, one way of drawing it. This range takes the
            dawn's light exactly as the dawn's own crest does. */
-        rim: hex('--accent'), rimAlpha: dark ? 0.74 : 0.34,
+        rim: hex('--accent'), rimAlpha: dark ? 0.74 : PAPER.far.rim,
         rimLight: true,
         rimWidth: dark ? 1.5 : 1,
         /* the wash under the crest stays under the warm threshold on its own:
            it is the colour the light leaves on the land, not a second edge */
-        rimGlow: dark ? 0.26 : 0.14, rimFall: 0.020 * H
+        rimGlow: dark ? 0.26 : PAPER.far.glow, rimFall: 0.020 * H
       };
     }
     /* the near plane, d = 0: the darkest thing on the page, and what a
@@ -893,23 +943,30 @@
         base: HOR * H + 2 * r + (PHONE ? 0.090 : 0.075) * H,
         amp: (PHONE ? 0.062 : 0.055) * H,
         haze: 0.10 * H,
-        hazeColor: hex('--wash-b'), hazeAlpha: dark ? 0.26 : 0.16,
+        hazeColor: dark ? hex('--wash-b') : hex('--wash-a'), hazeAlpha: dark ? 0.26 : PAPER.near.haze,
         fillTop: crestTone(0), fillBottom: footTone(0),
-        fadeColor: dark ? null : hex('--ground'), fadeAlpha: dark ? 0 : 0.90,
-        rim: dark ? hex('--wash-c') : hex('--ink-low'), rimAlpha: dark ? 0.16 : 0.12
+        fadeColor: dark ? null : hex('--ground'), fadeAlpha: dark ? 0 : PAPER.near.fade,
+        fadeSpan: PAPER.near.span * H,
+        rim: dark ? hex('--wash-c') : hex('--ink-low'), rimAlpha: dark ? 0.16 : PAPER.near.rim
       };
     }
 
     var geomDh = 0;
+    /* The sky leans up and down with the rest, never sideways: wash.js
+       paints it at the window's own width (its light and grain sit at fixed
+       places in that canvas), so it cannot be hung past the side edges
+       without repainting it, and sliding it bared a strip of paper at the
+       edge (QA 10-26). It is the furthest thing there is; the sideways
+       parallax is the three ranges', which hang past both edges. */
     var moved = [
-      { el: sky,  depth: R_SKY,  shape: SKY,    reach: REACH.sky,    lean: LEAN.sky },
+      { el: sky,  depth: R_SKY,  shape: SKY,    reach: REACH.sky,    lean: LEAN.sky, leanX: 0 },
       /* the horizon rides with the sky, so the hairline and the painted
          band it belongs to are never two different horizons; it is a
          0-height rule, so it is moved but never re-sized */
-      { el: line, depth: R_SKY,  shape: SKY,    reach: REACH.sky,    lean: LEAN.sky, box: false },
+      { el: line, depth: R_SKY,  shape: SKY,    reach: REACH.sky,    lean: LEAN.sky, leanX: 0, box: false },
       /* the lit edge rides the same layer as the hairline and the sky's
          own band: three drawings of one horizon, never two horizons */
-      { el: dawn, depth: R_SKY,  shape: SKY,    reach: REACH.sky,    lean: LEAN.sky, box: false },
+      { el: dawn, depth: R_SKY,  shape: SKY,    reach: REACH.sky,    lean: LEAN.sky, leanX: 0, box: false },
       { el: far,  depth: R_FAR,  shape: GROUND, reach: REACH.ground, lean: LEAN.far,  optsFn: farOpts },
       { el: near, depth: R_NEAR, shape: GROUND, reach: REACH.near,   lean: LEAN.near, optsFn: nearOpts }
     ];
@@ -971,8 +1028,23 @@
         rec.el.style.bottom = 'auto';
         rec.el.style.height = 'calc(100% + ' + rec.h + 'px)';
       }
+      /* a painted range also hangs past both side edges by its sideways
+         lean (the most the pointer can slide it), and is painted in window
+         coordinates across that overhang */
+      var lx = rec.leanX != null ? rec.leanX : (rec.lean || 0);
+      /* whole multiples of 8 px, so the window's own pixels sit on the same
+         places of the canvas's gradient dither as they did with no overhang */
+      rec.padX = rec.optsFn && lx ? Math.ceil((lx * 1.6 * H + 2) / 8) * 8 : 0;
+      if (rec.optsFn) {
+        rec.el.style.left = (-rec.padX) + 'px';
+        rec.el.style.width = 'calc(100% + ' + (2 * rec.padX) + 'px)';
+      }
       if (rec.handle) rec.handle.amp(A);
-      if (paint && rec.optsFn) return paintRidge(rec.el, rec.optsFn(H, (span + pad) / 2, isDark()));
+      if (paint && rec.optsFn) {
+        var o = rec.optsFn(H, (span + pad) / 2, isDark());
+        o.padX = rec.padX;
+        return paintRidge(rec.el, o);
+      }
       return true;
     }
 
@@ -1026,23 +1098,33 @@
       var S = Math.round((PHONE ? 0.09 : 0.10) * H);     // how far the light spills
       var D = Math.round((PHONE ? 0.22 : 0.26) * H);     // how far the land falls away
       var A = Math.round((PHONE ? 0.085 : 0.075) * H);   // how far the crest rides
-      var a = hex('--accent'), k = dark ? 1 : 0.55;
+      /* k: the lit edge itself; ks: the edge's glow, which on paper is a
+         tint laid under whole lines of type */
+      var a = hex('--accent'), k = dark ? 1 : 0.55, ks = dark ? 1 : PAPER.glow;
       var n = (window.innerWidth || 1280) < 520 ? 60 : 120;
       var ys = crestPts(n, G, A);
       dawn.style.top = (Math.round(HOR * H) - G) + 'px';
       dawn.style.height = (G + D) + 'px';
 
+      /* On ink the gather is vermilion light. On paper light is the sheet
+         showing through: the sky's own horizon (wash.js) lays a warm, darker
+         band along the line, and a vermilion gather on top of it took body
+         copy to 4.1:1 wherever a paragraph crossed the horizon (QA 10-26).
+         So on paper the gather is the paper's palest tone, laid over that
+         band along the whole line; the vermilion stays in the lit edge. */
+      var gc = dark ? a : hex('--wash-a'), gs = dark ? [0.030, 0.085, 0.190, 0.060] : PAPER.gather;
       gather.style.backgroundImage =
-        'linear-gradient(to bottom,' + rgba(a, 0) + ' 0,' +
-          rgba(a, 0.030 * k) + ' ' + Math.round(G * 0.42) + 'px,' +
-          rgba(a, 0.085 * k) + ' ' + Math.round(G * 0.80) + 'px,' +
-          rgba(a, 0.190 * k) + ' ' + G + 'px,' +
-          rgba(a, 0.060 * k) + ' ' + (G + Math.round(S * 0.38)) + 'px,' +
-          rgba(a, 0) + ' ' + (G + S) + 'px,' + rgba(a, 0) + ' 100%)';
+        'linear-gradient(to bottom,' + rgba(gc, 0) + ' 0,' +
+          rgba(gc, gs[0]) + ' ' + Math.round(G * 0.42) + 'px,' +
+          rgba(gc, gs[1]) + ' ' + Math.round(G * 0.80) + 'px,' +
+          rgba(gc, gs[2]) + ' ' + G + 'px,' +
+          rgba(gc, gs[3]) + ' ' + (G + Math.round(S * 0.38)) + 'px,' +
+          rgba(gc, 0) + ' ' + (G + S) + 'px,' + rgba(gc, 0) + ' 100%)';
       /* the gather and the edge under one light: the same distribution
          masks both, so they can only ever be the same dawn. The land is
-         not masked — light is uneven, a mountain is not. */
-      setMask(gather, lightMask(16, lightAt));
+         not masked — light is uneven, a mountain is not. (Paper's gather
+         is not light falling, it is the sheet: it runs the whole line.) */
+      setMask(gather, dark ? lightMask(16, lightAt) : 'none');
       setMask(edge, edgeMask(n, ys));
 
       var deep = dark ? hex('--wash-a') : hex('--ground');
@@ -1054,8 +1136,8 @@
 
       var glow = (PHONE ? 4 : 5), wide = (PHONE ? 11 : 15);
       edge.style.filter =
-        'drop-shadow(0 0 ' + glow + 'px ' + rgba(a, 0.42 * k) + ') ' +
-        'drop-shadow(0 1px ' + wide + 'px ' + rgba(a, 0.26 * k) + ')';
+        'drop-shadow(0 0 ' + glow + 'px ' + rgba(a, 0.42 * ks) + ') ' +
+        'drop-shadow(0 1px ' + wide + 'px ' + rgba(a, 0.26 * ks) + ')';
       edgeCut.style.background = rgba(a, 0.88 * k);
       setClip(edgeCut, cutAt(n, ys, PHONE ? 2.2 : 2.6));
     }
@@ -1131,7 +1213,7 @@
        Painted once; moved with transforms. */
     moved.forEach(function (rec) {
       rec.handle = layer(rec.el, rec.depth, {
-        mode: 'page', shape: rec.shape, reach: rec.reach, lean: rec.lean
+        mode: 'page', shape: rec.shape, reach: rec.reach, lean: rec.lean, leanX: rec.leanX
       });
     });
 
@@ -1144,10 +1226,11 @@
         base: HOR * H + 2 * r - 0.055 * H,
         amp: 0.028 * H,
         haze: 0.16 * H,
-        hazeColor: hex('--wash-c'), hazeAlpha: dark ? 0.42 : 0.26,
+        hazeColor: dark ? hex('--wash-c') : hex('--wash-a'), hazeAlpha: dark ? 0.42 : PAPER.deep.haze,
         /* the furthest plane, d = 1 on the ONE NIGHT ramp */
         fillTop: crestTone(1), fillBottom: footTone(1),
-        fadeColor: dark ? null : hex('--ground'), fadeAlpha: dark ? 0 : 0.62,
+        fadeColor: dark ? null : hex('--ground'), fadeAlpha: dark ? 0 : PAPER.deep.fade,
+        fadeSpan: PAPER.deep.span * H,
         /* the range standing nearest the horizon takes the dawn too, on its
            own peaks: three planes, one light, no second line */
         rim: dark ? hex('--accent') : hex('--ink-low'),

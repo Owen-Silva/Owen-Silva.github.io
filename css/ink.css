@@ -15,14 +15,19 @@
 
   --ink-hi:  #14191D;
   --ink-mid: #414A50;
-  --ink-low: #535C61;
-  --ink-faint: #545B57;
+  /* low and faint sit a step darker than they did (#535C61 / #545B57), so a
+     meta line still reads at 4.5:1 on the palest stone of the land behind it
+     and the land can keep enough tone to be seen (QA 10-26) */
+  --ink-low: #4A5257;
+  --ink-faint: #4B524E;
   --scene-ink: #3E464C;
 
   --rule:        #D8CFBE;
   --rule-strong: #BDB29C;
 
-  --accent:      #AE2F14;
+  /* a shade deeper than #AE2F14: the small vermilion status words ("In use",
+     "Live") sat at 2.5-4:1 over the land and the horizon (QA 10-26) */
+  --accent:      #9C2A11;
   --accent-soft: #F0D8CF;
   --accent-edge: #D6805F;
 
@@ -34,6 +39,11 @@
   --wash-a: #F2ECE0; /* ink-wash shader: low  */
   --wash-b: #E4DCCA; /* ink-wash shader: mid  */
   --wash-c: #D5CCB6; /* ink-wash shader: high */
+
+  /* the land on paper (js/scene.js ONE NIGHT ramp): a pale rock grey, the
+     near plane darkest; ink defines neither and never reads them */
+  --land-near: #CCC9C0;
+  --land-far:  #D9D4C9;
 
   --shadow: 0 1px 0 rgb(20 25 29 / .06), 0 14px 34px -22px rgb(20 25 29 / .5);
 
