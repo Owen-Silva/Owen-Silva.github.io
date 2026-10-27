@@ -108,6 +108,30 @@
       color-mix(in srgb, var(--ground) 74%, transparent), transparent 72%),
     linear-gradient(to top,
       color-mix(in srgb, var(--ground) 84%, transparent) 0%, transparent 27%);
+  /* where the PAPER mist below sits (only paper draws it) */
+  --veil-foot: 80% 46% at 14% 100%;
+}
+/* PAPER only (QA 10-27): in daylight the near ranges are the darkest thing
+   on the page, and the readout stood on them in dark type: 1.5-4.2:1. A
+   mist settles in the valley under the readout, so the words stand on
+   paper and the range still rises clear of it to the right and above. On
+   a phone the readout runs the full width, so the mist does too. It thins
+   out over the last 12% so the hero still meets the page below without a
+   seam. Only paper gives the ::after a content; ink draws none. */
+.p-about .ab-hero__veil::after {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(var(--veil-foot),
+    color-mix(in srgb, var(--ground) 94%, transparent) 0%,
+    color-mix(in srgb, var(--ground) 88%, transparent) 50%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, rgb(0 0 0 / 0) 0, #000 12%);
+  mask-image: linear-gradient(to top, rgb(0 0 0 / 0) 0, #000 12%);
+}
+:root[data-theme="light"] .p-about .ab-hero__veil::after { content: ""; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .p-about .ab-hero__veil::after { content: ""; }
+}
+@media (max-width: 720px) {
+  .p-about .ab-hero__veil { --veil-foot: 140% 46% at 36% 100%; }
 }
 
 .p-about .ab-hero__front {

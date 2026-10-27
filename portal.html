@@ -204,6 +204,16 @@
   width: 6px; height: 1px; background: var(--ink-faint);
 }
 .p-portal .pt-band--near .pt-band__list { color: var(--ink-mid); }
+/* PAPER only (QA 10-27): distance fades a band by opacity, and on the pale
+   haze the far bands are painted with, the small type of the three far rows
+   fell to 3.5-4.4:1 (dark ink at 72-92% over near-white is grey). On paper
+   a band keeps most of its ink: --o .72 / .82 / .92 / 1 becomes .89 / .93 /
+   .97 / 1, so the order still recedes and the size step (--k) still carries
+   the distance. Ink keeps the full fade. */
+:root[data-theme="light"] .p-portal .pt-band > * { opacity: calc(.6 + .4 * var(--o)); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .p-portal .pt-band > * { opacity: calc(.6 + .4 * var(--o)); }
+}
 
 .p-portal .pt-hz__close { margin-top: var(--s-7); }
 .p-portal .pt-hz__close .note { margin-top: 0; }

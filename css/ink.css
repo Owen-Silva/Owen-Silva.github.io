@@ -1425,6 +1425,28 @@ html.has-ink-world .band-hero { background-color: transparent; background-image:
     paint-order: stroke fill; stroke: var(--ground); stroke-width: 3px; stroke-linejoin: round;
   }
 }
+/* PAPER only (QA 10-27). On a phone the rail's names sit among the graph's
+   own ticks and arcs; at --scene-ink the box around a name measured 4.3-4.5:1
+   over that grey (the rim clears each glyph, not the box). The palette's
+   darkest ink holds 4.5 over all of it; pointer and focus keep the vermilion. */
+@media (max-width: 720px) {
+  :root[data-theme="light"] #graph-svg .gt:not(:hover):not(:focus-visible) text,
+  :root[data-theme="light"] #graph-svg .gp:not(:hover):not(:focus-visible) text { fill: var(--ink-hi); }
+}
+@media (max-width: 720px) and (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) #graph-svg .gt:not(:hover):not(:focus-visible) text,
+  :root:not([data-theme="dark"]) #graph-svg .gp:not(:hover):not(:focus-visible) text { fill: var(--ink-hi); }
+}
+/* PAPER only (QA 10-27): the keyboard ring on the graph's ticks met their
+   dark tick marks at 2.2-3:1 in --accent. On paper the ring is the same
+   vermilion taken 40% toward the ink: one hue, and 3:1 against the marks
+   as well as the paper. */
+:root[data-theme="light"] .gt:focus-visible rect:first-of-type,
+:root[data-theme="light"] .gp:focus-visible rect:first-of-type { outline-color: color-mix(in srgb, var(--accent) 60%, var(--ink-hi)); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .gt:focus-visible rect:first-of-type,
+  :root:not([data-theme="dark"]) .gp:focus-visible rect:first-of-type { outline-color: color-mix(in srgb, var(--accent) 60%, var(--ink-hi)); }
+}
 
 /* ---- the life-of-a-task strip ----------------------------- */
 .lf text { transition: fill var(--dur-half) var(--ease); }
