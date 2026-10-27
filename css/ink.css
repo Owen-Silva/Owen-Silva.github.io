@@ -1404,6 +1404,17 @@ html.has-ink-world .band-hero { background-color: transparent; background-image:
 .gp:hover text, .gp:focus-visible text { fill: var(--accent); }
 .rd:hover text, .rd:focus-visible text { fill: var(--accent); }
 .mt:hover text, .mt:focus-visible text { fill: var(--ink-hi); }
+/* projects.html on a phone: the rail's flat names sit right on the arcs'
+   canvas, and at 320 the upright project names stand 9.7px apart in a 10px
+   face, so ascenders met descenders and arcs ran through every word. A
+   ground-coloured rim under each glyph (paint-order puts it beneath the fill)
+   keeps each name its own stroke. The desktop field is laid out with room to
+   spare and keeps its bare type. */
+@media (max-width: 720px) {
+  #graph-svg .gt text, #graph-svg .gp text {
+    paint-order: stroke fill; stroke: var(--ground); stroke-width: 3px; stroke-linejoin: round;
+  }
+}
 
 /* ---- the life-of-a-task strip ----------------------------- */
 .lf text { transition: fill var(--dur-half) var(--ease); }
@@ -1640,7 +1651,7 @@ html { scrollbar-color: var(--rule-strong) transparent; scrollbar-width: thin; }
   .pal__list li i { font-size: .7rem; }   /* .pal__hint / .pal__key: palette.js builds neither */
   /* nothing may reach past the edge on a phone */
   .bleed { padding-inline: var(--gutter); }
-  .fp-log li { grid-template-columns: 54px 66px minmax(0, 1fr); gap: 7px; }
+  .fp-log li { grid-template-columns: 62px 48px minmax(0, 1fr); gap: 7px; }   /* "frame 41" on one line; a score is four characters */
   /* the system map on a phone: nothing under 10px. The map's own viewBox is the
      real pixel width (js/atlas.js), so these are the sizes that actually render.
      Byte-identical to atlas.html's page-scoped pair, atlas being the only page
@@ -1678,4 +1689,10 @@ html { scrollbar-color: var(--rule-strong) transparent; scrollbar-width: thin; }
   .rel-row summary, .pal__list li { min-height: 44px; align-content: center; }
   .mini > a { padding-bottom: 6px; }
   .scrub input[type="range"] { height: 44px; }
+  /* two links that are a whole line of their own, not words in a sentence:
+     a register entry's address (15px tall) and atlas.html's way back (18px).
+     The address reaches 44px without moving its line (padding taken back by
+     the margin); the way back is the colophon's last word and may grow. */
+  .entry__when a { display: inline-block; padding-block: 14px; margin-block: -14px; }
+  .colophon p > a:only-child { display: inline-flex; align-items: center; min-height: 44px; }
 }

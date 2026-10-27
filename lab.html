@@ -192,6 +192,13 @@ html:has(> body.lab) { scroll-padding-top: calc(var(--nav-h, 56px) + 22px); }
   .lab .stage { aspect-ratio: 16 / 10; }
   .lab .poster-letter { bottom: -14%; font-size: clamp(180px, 52vw, 340px); }
 }
+/* the page's own two-column detector (above) outranked the sheet's one-column
+   .tool under 860px, so on a phone the frame log was squeezed into half of a
+   320 screen with its third column cut off at the edge. Stack it here, at the
+   sheet's own breakpoint. */
+@media (max-width: 860px) {
+  .lab .lab-fp .tool { grid-template-columns: minmax(0, 1fr); }
+}
 @media (max-width: 480px) {
   .lab .lab-fp .tool { gap: var(--s-6); }
 }
