@@ -28,7 +28,7 @@
   function di(s) { var p = s.split('-').map(Number); return (Date.UTC(2026, p[0] - 1, p[1]) - Date.UTC(2026, 2, 1)) / 864e5; }
   /* the timeline runs 1 March to 31 October 2026; today comes from the data */
   var TOTALD = (Date.UTC(2026, 10, 1) - Date.UTC(2026, 2, 1)) / 864e5;
-  var TODAY = '10-12';
+  var TODAY = '10-26';
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function todayLabel(md) { var p = md.split('-').map(Number); return 'Today, ' + p[1] + ' ' + MON[p[0] - 1]; }
 

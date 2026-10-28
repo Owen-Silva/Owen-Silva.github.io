@@ -371,24 +371,25 @@
       <h2 id="h-num">How everything here was counted</h2>
       <div class="ab-cols">
         <div class="prose">
-          <p>Measured on <strong>12 October 2026</strong> from git history, file counts and the live
-             sites, counting commits through 11 October. Where a project has no git history, its dates
+          <p>Measured on <strong>26 October 2026</strong> from git history, file counts and the live
+             sites, counting commits through 25 October. Where a project has no git history, its dates
              come from its files.</p>
           <p>The commit river on the front page is built from the per-day commit counts of three
              repositories &mdash; Atlas, the academy portal and Quartz, my browser &mdash; bucketed by UTC
-             author date. Every dot in it is one commit; there are 3,176 of them, and nothing is
-             sampled or rounded to make the picture work. Across all 31 of my repositories, counted
-             the same way, there are 3,750.</p>
+             author date. Every dot in it is one commit; there are 3,612 of them, and nothing is
+             sampled or rounded to make the picture work. Across all 35 of my repositories, counted
+             the same way, there are 4,735.</p>
           <p>Two different line-counting rules appear across the site and they do not reconcile, so they
-             are never shown side by side. The 875,541-line census counts <em>code lines</em>. The
+             are never shown side by side. The 1,075,938-line census counts <em>code lines</em>. The
              per-project figures in the write-ups come from <code>git ls-files | wc -l</code>, which
              counts every line in a different file set. Both are stated with the rule that produced them.</p>
         </div>
         <div class="ab-facing" data-enter="fade">
           <div>
             <h3>Commits</h3>
-            <p><code>git rev-list --count</code> on each repository&rsquo;s production branch: 2,720 for
-               Atlas, 210 for the portal, 246 for Quartz.</p>
+            <p><code>git rev-list --count</code> on each repository&rsquo;s production branch: 2,738 for
+               Atlas, 210 for the portal, 664 for Quartz. Quartz, Mantle and Helm went public on 22 October
+               with fresh histories, so theirs count the old history and the new, each commit once.</p>
           </div>
           <div>
             <h3>Dates</h3>
@@ -403,8 +404,8 @@
           <div>
             <h3>Not remeasured</h3>
             <p>A few of Atlas&rsquo;s derived figures &mdash; test-file counts, eval runs, its app and
-               test line counts &mdash; were not recounted on 16 September or 12 October. Atlas has shipped
-               since, up to v1.3.1.1 on 4 October, so read them as approximate.</p>
+               test line counts &mdash; were not recounted on 16 September, 12 October or 26 October. Atlas has shipped
+               since, up to v1.3.1.2 on 14 October, so read them as approximate.</p>
           </div>
         </div>
       </div>
@@ -526,12 +527,12 @@
         <h2>The work</h2>
         <p><a href="index.html">The index</a> &middot; <a href="atlas.html">Atlas</a> &middot;
            <a href="browser.html">Quartz</a> &middot; <a href="portal.html">The portal</a> &middot;
-           <a href="projects.html">The other thirty-one</a> &middot; <a href="lab.html">The lab</a></p>
+           <a href="projects.html">The other twenty-nine</a> &middot; <a href="lab.html">The lab</a></p>
       </div>
       <div>
         <h2>Measured</h2>
-        <p>12 October 2026, and cloudtest added on 23 October. 34 projects, 3 live on the public web, 9 tools used every week,
-           3,176 commits.</p>
+        <p>26 October 2026. 32 projects, 3 live on the public web, 9 tools used every week,
+           3,612 commits.</p>
       </div>
     </footer>
 

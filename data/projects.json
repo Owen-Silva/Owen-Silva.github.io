@@ -9,24 +9,26 @@
     "refreshed": "2026-10-12",
     "refresh_note": "Refreshed 12 Oct 2026 (lane projects): 11 new entries from their repos (git log/README, read-only, cutoff 2026-10-12T00:00-07:00, --all), Owen's memory notes, file dates for mesh-test and scratch-games (no git); spans/when updated for atlas (branch next: main has no commits after 9 Sep), browser (renamed Quartz), tvha, notebooks (lesson count from the class files: <article class=\"lesson\"> and <section> tags), slides. commits_* tally keys untouched (numbers lane).",
     "refresh_note_front": "Refreshed 12 Oct 2026 (lane front): tally.commits_across_atlas_portal_browser set from commits.json (3,176; the 16 Sep 2,986 kept as commits_across_atlas_portal_browser_16_sep), commits_all_repos added from commits.json all_repos; the facts blocks of atlas, browser and tvha copied from the refreshed atlas.html, browser.html and portal.html (Built, Commits, Releases, Code, Features, Shape). No other entry carries a commit figure.",
-    "refresh_note_1023": "Refreshed 23 Oct 2026 (lane pf-data): nine projects are public on GitHub (github.com/Owen-Silva, checked with gh). Each public entry carries a repo object (name, url, download = the README Download/Install anchor, licence, release or null, platform from the README Requirements, runs). No installer exists for any of them. New entry cloudtest (built 14 Oct per Owen; its public repo history starts 19-20 Oct). project_count, tally.projects_since_march_2026 and the Tools I use group count follow; tally.timeline_today moved to 10-23, the day of this update. Commit and line counts untouched."
+    "refresh_note_1023": "Refreshed 23 Oct 2026 (lane pf-data): nine projects are public on GitHub (github.com/Owen-Silva, checked with gh). Each public entry carries a repo object (name, url, download = the README Download/Install anchor, licence, release or null, platform from the README Requirements, runs). No installer exists for any of them. New entry cloudtest (built 14 Oct per Owen; its public repo history starts 19-20 Oct). project_count, tally.projects_since_march_2026 and the Tools I use group count follow; tally.timeline_today moved to 10-23, the day of this update. Commit and line counts untouched.",
+    "refresh_note_1026": "Refreshed 26 Oct 2026 (lane pf-refresh): tally commit figures from the recounted commits.json (cutoff 2026-10-26T00:00-07:00), measured_on 26 October 2026, timeline_today 10-26. Atlas (production through 14 Oct, v1.3.1.2, 14 public releases), Quartz, Mantle and Helm: when, spans and facts follow their commit days through 25 Oct (Atlas spans from branch next, as on 12 Oct); Quartz Code recounted with the 12 Oct wc rule (workspace/1026/quartz-wc.js) and its Features figure dated to the 12 Oct README. Other entries’ spans and when lines were not revisited; the 567 Mantle and 145 Helm commits are in commits.json all_repos, not here.",
+    "refresh_note_1027": "Updated 27 Oct 2026 (lane pf-remove-ra): two Side projects entries removed at Owen’s request (a collaborator’s repositories; see corrections_applied). project_count and tally.projects_since_march_2026 34 to 32, the Side projects group 8 to 6. No other entry changed; the timeline axis is unchanged (both started 29 Apr, inside the Atlas span)."
   },
   "tally": {
-    "projects_since_march_2026": 34,
+    "projects_since_march_2026": 32,
     "live_on_the_public_web": 3,
     "tools_used_every_week": 9,
-    "commits_across_atlas_portal_browser": 3176,
+    "commits_across_atlas_portal_browser": 3612,
     "commits_as_written_in_source": 2978,
-    "commits_correction_note": "12 Oct 2026, from _data/commits.json: Atlas 2,720 (measured on origin/master, the production branch; local main has not moved since 9 Sep) + portal 210 + Quartz 246 = 3,176, authored through 11 Oct local. History: on 16 Sep it was 2,636 + 188 + 162 = 2,986 (CONTENT-UPDATE §6, Atlas then on local main, which mirrored production); the 13 Sep source file said 2,978.",
-    "measured_on": "12 October 2026",
-    "timeline_today": "10-23",
+    "commits_correction_note": "26 Oct 2026, from _data/commits.json: Atlas 2,738 (origin/master, the production branch, as it stands locally) + portal 210 + Quartz 664 = 3,612, authored through 25 Oct local. Quartz counts its pre-publication history plus its public commits since 22 Oct (commits.json _source.notes). History: 12 Oct, 2,720 + 210 + 246 = 3,176; 16 Sep, 2,636 + 188 + 162 = 2,986 (CONTENT-UPDATE §6); the 13 Sep source file said 2,978.",
+    "measured_on": "26 October 2026",
+    "timeline_today": "10-26",
     "timeline_today_in_source": "09-13",
     "live_on_the_public_web_basis": "atlas (try-atlas.app), tvha (the portal, portal.tvhockeyacademy.com), portfolio (owen-silva.github.io). Arkhe is link-only and unverified, so it is not counted. The academy’s public landing page (tvhockeyacademy.com) is not Owen’s work and was removed on 14 Oct 2026.",
     "tools_used_every_week_basis": "stockcoach (weekly scan report 10 Oct), volt (session import files written 12 Oct), spotify (bridge listening 12 Oct), browser/Quartz (Quartz.exe running 12 Oct), slides (lesson captures dated 10-12 Oct), notebooks (class files edited 11 Oct), mantle (sidecar running 12 Oct), helm (Helm.exe running 12 Oct), mods (load in every Claude Code session via settings). News Shadow runs daily but is a paper test, not a tool, so it is not counted.",
     "commits_across_atlas_portal_browser_16_sep": 2986,
-    "commits_all_repos": 3750,
-    "commits_all_repos_count": 31,
-    "commits_all_repos_note": "commits.json all_repos: every git repo of my own work, default branch (Atlas on origin/master), through 11 Oct local."
+    "commits_all_repos": 4735,
+    "commits_all_repos_count": 35,
+    "commits_all_repos_note": "commits.json all_repos: every git repo of my own work, default branch (Atlas on origin/master; the repos published 20-23 Oct counted across their old and new histories), through 25 Oct local."
   },
   "groups": [
     {
@@ -39,7 +41,7 @@
     },
     {
       "name": "Side projects",
-      "count": 8
+      "count": 6
     },
     {
       "name": "Tools I use",
@@ -54,7 +56,7 @@
       "count": 2
     }
   ],
-  "project_count": 34,
+  "project_count": 32,
   "corrections_applied": [
     {
       "id": "browser",
@@ -167,6 +169,13 @@
       "from": "Academy public site (tvhockeyacademy.com), counted as a project and as live",
       "to": "removed",
       "why": "Owen, 14 Oct 2026: he built the family & staff portal (portal.tvhockeyacademy.com), not the public landing page at tvhockeyacademy.com. Project count 34 to 33, live on the public web 4 to 3, Hockey group 2 to 1."
+    },
+    {
+      "id": "collaborator-repos",
+      "field": "removed",
+      "from": "two Side projects entries, each listed as built with a collaborator",
+      "to": "removed",
+      "why": "Owen, 27 Oct 2026: both repositories belong to a collaborator, so they are no longer shown as his projects or counted as his work. Project count 34 to 32, Side projects 8 to 6. Their commits were never in the commit counts (commits.json all_repos has excluded the two collaborator repos since 12 Oct). The census had counted his git-blame share of both repos plus a folder of brand files for one of them (2,416 code lines, 66 files, 3 of its projects); those come out too: 1,078,354 to 1,075,938 lines, 4,229 to 4,163 files."
     }
   ],
   "projects": [
@@ -410,12 +419,16 @@
         [
           "10-02",
           "10-04"
+        ],
+        [
+          "10-13",
+          "10-15"
         ]
       ],
       "ongoing": true,
       "featured": true,
-      "note": "AI task automation, live at try-atlas.app. Public launch 27 Aug, now at v1.3.1.1.",
-      "when": "1 Apr – 4 Oct 2026, with commits on 112 days",
+      "note": "AI task automation, live at try-atlas.app. Public launch 27 Aug, now at v1.3.1.2.",
+      "when": "1 Apr – 14 Oct 2026, with commits on 114 days",
       "what": "Type “every weekday at 8am, send me the top tech news” and Atlas runs it on that schedule, checks the answer, and sends you the result.",
       "detail": [],
       "stack": [
@@ -435,10 +448,10 @@
       ],
       "mark": "08-27",
       "facts": {
-        "Built": "1 Apr – 4 Oct 2026, with commits on 112 days",
+        "Built": "1 Apr – 14 Oct 2026, with commits on 114 days",
         "Public launch": "27 Aug 2026",
-        "Commits": "2,720 to production",
-        "Releases": "337 internal before 1.0, then 13 public",
+        "Commits": "2,738 to production",
+        "Releases": "337 internal before 1.0, then 14 public",
         "Code": "~140k lines of app code, ~212k lines of tests",
         "Built with": "Node and Express, PostgreSQL, Clerk, Railway, Cloudflare, Brevo, LemonSqueezy. Gemini by default, or your own OpenAI or Anthropic key. Playwright and axe-core."
       },
@@ -637,63 +650,6 @@
         "HTML",
         "Canvas",
         "JS"
-      ],
-      "links": []
-    },
-    {
-      "id": "roamly",
-      "name": "Roamly",
-      "group": "Side projects",
-      "state": "done",
-      "state_meaning": "finished",
-      "label": "Shipped demo",
-      "spans": [
-        [
-          "04-29",
-          "05-04"
-        ]
-      ],
-      "ongoing": false,
-      "featured": false,
-      "note": "AI travel planner, with a collaborator",
-      "when": "29 Apr – 4 May 2026",
-      "what": "An AI travel planner that returns best, cheapest and fastest trip packages with flights, hotel, car and itinerary. Built with a collaborator.",
-      "detail": [
-        "My part, 9 of 22 commits: car rentals, real hotel ratings, date-filled Booking.com and Kayak links, the return flight leg and a landing page redesign."
-      ],
-      "stack": [
-        "Next.js 15",
-        "React 19",
-        "Tailwind",
-        "Vercel AI SDK"
-      ],
-      "links": []
-    },
-    {
-      "id": "aerocore",
-      "name": "Aerocore",
-      "group": "Side projects",
-      "state": "done",
-      "state_meaning": "finished",
-      "label": "Shipped demo",
-      "spans": [
-        [
-          "04-29",
-          "05-05"
-        ]
-      ],
-      "ongoing": false,
-      "featured": false,
-      "note": "3D product showcase, with a collaborator",
-      "when": "29 Apr – 5 May 2026",
-      "what": "A 3D showcase and customizer for airless, 3D-printed sports balls. Built with a collaborator.",
-      "detail": [
-        "My part, 4 of 6 commits: the rebrand, dynamic accent colours, a scroll indicator and the coming-soon page."
-      ],
-      "stack": [
-        "React Three Fiber",
-        "GSAP",
-        "Vite"
       ],
       "links": []
     },
@@ -1021,13 +977,13 @@
         ],
         [
           "10-07",
-          "10-11"
+          "10-23"
         ]
       ],
       "ongoing": true,
       "featured": true,
       "note": "My own everyday browser, now called Quartz. The first version took 6 days.",
-      "when": "10 Sep – 11 Oct 2026, first version in 6 days",
+      "when": "10 Sep – 23 Oct 2026, first version in 6 days",
       "what": "Claude coding sessions, Windows programs like Paint and Discord, and my Android phone all open as tabs beside ordinary web pages, in a browser I wrote.",
       "detail": [],
       "stack": [
@@ -1041,10 +997,10 @@
       ],
       "links": [],
       "facts": {
-        "Built": "10 Sep – 11 Oct 2026, commits on 13 days",
-        "Commits": "246",
-        "Code": "~75k lines of JavaScript, ~12k lines of CSS",
-        "Features": "67, documented in a 1,467-line README",
+        "Built": "10 Sep – 23 Oct 2026, commits on 24 days",
+        "Commits": "664",
+        "Code": "~161k lines of JavaScript, ~17k lines of CSS",
+        "Features": "67, documented in the 1,467-line README of 12 Oct",
         "Built with": "Electron, node-pty and xterm.js, koffi for Win32 calls, WebCodecs, scrcpy and adb, Ghostery ad blocker, Mozilla Readability",
         "Distribution": "Public on GitHub under GPL-3.0, release v0.1.0. It runs from a git clone on Windows 11 and has no installer."
       },
@@ -1090,13 +1046,13 @@
         ],
         [
           "10-08",
-          "10-11"
+          "10-24"
         ]
       ],
       "ongoing": true,
       "featured": false,
       "note": "My own layer over the Windows 11 desktop",
-      "when": "Built 21 Sep – 11 Oct 2026, my desktop every day",
+      "when": "Built 21 Sep – 24 Oct 2026, my desktop every day",
       "what": "A bar, a launcher, a desktop and a set of tools of my own, drawn over Windows 11 while Windows keeps running underneath.",
       "detail": [
         "Its own file manager, Alt+Tab switcher, task view, snap layouts, clipboard history, screenshots, notes, a timer and a Settings app.",
@@ -1130,13 +1086,13 @@
       "spans": [
         [
           "10-07",
-          "10-11"
+          "10-22"
         ]
       ],
       "ongoing": true,
       "featured": false,
       "note": "A desktop and phone app for Claude Code",
-      "when": "Built 7–11 Oct 2026, in use now",
+      "when": "Built 7–22 Oct 2026, in use now",
       "what": "A window for Claude Code instead of a terminal: a sidebar of sessions, a readable conversation, and the same screen on my phone. Every session is the real Claude Code underneath, driven through the Agent SDK.",
       "detail": [
         "An inspector shows each session’s helper agents and how full their context is, the files it changed with diffs and rewind points, and usage against the 5-hour limit.",

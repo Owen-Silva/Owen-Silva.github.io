@@ -1,7 +1,7 @@
 /* ============================================================
    atlas.js — two scenes for the Atlas page.
 
-   1. The release history: the public releases (13 on 12 Oct 2026) as
+   1. The release history: the public releases (14 on 26 Oct 2026) as
       ink marks along a line, over a current made of the Atlas commits.
    2. The 50-node public-safe system map, drawn as an ink diagram
       whose 61 strokes draw in as the page scrolls.
@@ -106,7 +106,7 @@
     }
 
     var W = 0, H = 0, dpr = 1, baseY = 0;
-    var D0 = di('03-28'), D1 = di('10-14');
+    var D0 = di('03-28'), D1 = di('10-28');   // two days past the measurement date, as on 12 Oct
     function X(d) { return 16 + (d - D0) / (D1 - D0) * (W - 32); }
 
     function layout() {
@@ -235,8 +235,8 @@
       svg.appendChild(el('line', { 'class': 'rel-axis', x1: 16, y1: g.H - 26, x2: g.W - 16, y2: g.H - 26, opacity: .5 }));
 
       // ---- the public releases --------------------------------
-      // Nine of the thirteen land in one September week, three more on
-      // 2-4 October, at the right of a six-month axis: their names cannot sit over their own
+      // Nine of the fourteen land in one September week, three more on
+      // 2-4 October and one on 14 October, at the right of a seven-month axis: their names cannot sit over their own
       // marks: stacked there they collided in 9 px mono. The names get
       // a rail of their own across the whole band, and a lens joins
       // that rail to the stretch it magnifies. Date order on the rail is

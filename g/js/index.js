@@ -1,6 +1,6 @@
 /* ============================================================
    index.js — front page: open the sunset world, mount the commit
-   river below it, build the register of 34 projects, draw the
+   river below it, build the register of 32 projects, draw the
    census, and check every printed number against the JSON it
    came from.
    ============================================================ */
@@ -307,7 +307,7 @@
     if (problems.length) state('number check: ' + problems.join('; '), true);
   }
 
-  /* ---- the register: all 34, grouped, with a real timeline ---
+  /* ---- the register: all 32, grouped, with a real timeline ---
      Two systems carry it, not four (QA-4 D13). Every project is ONE LINE
      OF TYPE — the name, with its state and its dates riding the same line
      — over ONE RULE, the hairline that already parted the rows, inked
@@ -473,7 +473,7 @@
     var total = census.totals.code_lines;
     bar.innerHTML = ''; key.innerHTML = '';
     /* One measure, parted by hairlines: each project's share of the same
-       875,541 lines, in one tone stepping down by rank. It was a solid
+       1,075,938 lines, in one tone stepping down by rank. It was a solid
        cream block, a solid vermilion block and seven greys — a stock
        chart, and the loudest use of the accent outside the horizon. No
        number changed; the names ride their own spans where those are wide

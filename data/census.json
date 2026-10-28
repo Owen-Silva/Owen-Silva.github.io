@@ -1,84 +1,99 @@
 {
-  "_source": "measured 2026-10-12 census (code lines: non-blank, non-comment), same method as the 2026-09-14 census, extended to the projects built since",
+  "_source": "measured 2026-10-26 census (code lines: non-blank, non-comment): the 2026-10-12 census carried forward with every change since 12 Oct measured by the same rules",
   "_source_detail": {
-    "measured": "2026-10-12, working trees as they stood that day (Atlas: the main checkout, on branch next, 4 commits ahead of the last production push)",
-    "method": "The 2026-09-14 census script (loc.js) re-run unchanged except one more kept directory (~/.claude/mods). Repo files come from git ls-files -co --exclude-standard, so .gitignore'd output is skipped; non-git folders are walked. Each code file is split into code / comment / blank lines with per-language comment rules; only code lines are counted. Exact copies (sha1) and near-identical copies (line-set Jaccard >= 0.7) are counted once, under the most recently active project; a project that is 80%+ copies of another is not counted. Repos owned by a collaborator count only the lines git blame gives to Owen.",
-    "exclusions": "node_modules, venvs and every package/cache/build-output directory (dist, build, out, release, coverage, .next and the rest); vendored and third-party code (vendor dirs, license-banner files such as bundled marked/purify); minified, bundled, hashed and .d.ts files; generated Prisma migrations; saved web pages; lockfiles, JSON, CSV and other data files (not code extensions); Markdown (counted separately, not included); git worktrees, second clones, deploy copies (mantle-live, news-shadow-deploy, portfolio-site-live, the packaged Quartz build), backups, scratch folders and Claude background-job copies; the frozen _explore/i2 snapshot of this site; skills synced from claude.ai; class notes; and work that is not Owen's (the Tensor extensions, MultiMC, overworld_music_pack, a third-party fly-brain reference model).",
-    "tool": "loc.js (node, no external counter). Raw lines including blanks and comments: 1,194,235; comment lines 227,609; blank lines 91,084.",
-    "previous": "The 2026-09-14 census gave 408,364 code lines in 1,355 files. The growth is mostly new projects (Mantle, Helm, Arkhe, the fly-brain simulation, this site) plus Quartz and the portal growing.",
-    "rounding": "Every figure is a whole-line count; display strings round to one decimal place in thousands."
+    "measured": "2026-10-26, from the git trees as committed through 25 Oct (Atlas: branch next, the main checkout, 16 commits ahead of production), against the trees the same branches had at the 12 Oct cutoff",
+    "method": "The 12 Oct census script (loc.js) is no longer on this machine. workspace/1026/count-lines.js re-implements its recorded rules and was checked against the 12 Oct figures first: it reproduces Fly brain (42,972 lines, 301 files) and Spotify Auto-Pause (8,740, 12 files) exactly and this site within 17 lines (77,184 vs 77,167); on the 12 Oct trees of Mantle, Atlas, Quartz and Helm it lands within 0.1-1.3% (the rest is untracked files and the second sources such as ~/helm-site). So each group is its 12 Oct figure plus the change between its 12 Oct and 25 Oct trees, counted by that script (workspace/1026/census-delta.js). Groups with no new commits and no code file changed since 12 Oct (Arkhe, the portal, the prototypes, Spotify Auto-Pause, the parts in plain folders) keep their 12 Oct figures; the design explorations add the seven files created in their working tree after 12 Oct, less the five that are copies of Atlas files (workspace/1026/census-design.js). Mission Control is recounted whole, and the tools added to ~/.claude/tools after 12 Oct, cloudtest, VOLT and one new private project are counted whole (workspace/1026/census-extra.js). Cross-group copies of files added since 12 Oct were checked with the census rule (line-set Jaccard >= 0.7, workspace/1026/census-neardup.js): four files Quartz shares with Mantle (852 lines) and the change to the shared look-sync.js are counted once, under Mantle.",
+    "exclusions": "node_modules, venvs and every package/cache/build-output directory (dist, build, out, release, coverage, .next and the rest); vendored and third-party code (vendor dirs, license-banner files such as bundled marked/purify); minified, bundled, hashed and .d.ts files; generated Prisma migrations; saved web pages; lockfiles, JSON, CSV and other data files (not code extensions); Markdown (counted separately, not included); git worktrees, second clones, deploy copies (mantle-live, news-shadow-deploy, portfolio-site-live, the packaged Quartz build), backups, scratch folders and Claude background-job copies; the frozen _explore/i2 snapshot of this site; skills synced from claude.ai; class notes; and work that is not Owen's (third-party projects kept on this machine, a third-party fly-brain reference model). Since 12 Oct also: the staging and scratch clones made to publish the public repos, a third-party repository cloned to review it, and two folders of post drafts and test screenshots.",
+    "tool": "count-lines.js (node, no external counter), same rules as loc.js: git ls-tree / ls-files file lists, per-language comment rules (HTML includes its inline CSS comments), exact copies counted once. Raw totals for the whole census are not re-derivable from a carried-forward figure and are not given.",
+    "previous": "The 2026-10-12 census gave 875,541 code lines in 3,364 files (47 projects); the 2026-09-14 census gave 408,364 in 1,355. The growth since 12 Oct is mostly Mantle (+71.5k), Quartz (+75.9k), Helm (+13.2k), the site and two projects new to the census.",
+    "rounding": "Every figure is a whole-line count; display strings round to one decimal place in thousands.",
+    "changes_since_12_oct": [
+      "atlas +3636 lines, +14 files",
+      "mantle +71491 lines, +321 files",
+      "portfolio-site +4609 lines, +15 files",
+      "browser +75893 lines, +260 files",
+      "helm +13246 lines, +73 files",
+      "fly-brain +1 lines, +0 files",
+      "trading +1855 lines, +13 files",
+      "claude-tools +3230 lines, +23 files",
+      "mission-control +151 lines, +1 files",
+      "design+site +526 lines, +3 files",
+      "everything else +28175 lines, +142 files (Atlas marketing research +700, VOLT 6420, a new private project 21055)"
+    ],
+    "removed_27_oct": "Owen, 27 Oct 2026: two Side projects entries were a collaborator’s repositories and came off the site. The 12 Oct census (loc.js) had counted three rows for them, carried unchanged into 26 Oct: the two repositories at Owen’s git-blame share (34% and 17%; 1,196 code lines in 39 files and 495 in 24) and a plain folder of brand files for one of them (725 in 3). All three came out of \"everything else\": 2,416 lines, 66 files, 3 projects; TypeScript -1,056, HTML -1,075, CSS -285 (split re-derived with loc.js’s blame rule; workspace/1026/census-collab.js in the site’s working repo). Totals 1,078,354 lines / 4,229 files / 50 projects became 1,075,938 / 4,163 / 47; every share recomputed."
   },
   "totals": {
-    "code_lines": 875541,
-    "files": 3364,
-    "lines_per_file_mean": 260,
-    "projects_counted": 47
+    "code_lines": 1075938,
+    "files": 4163,
+    "lines_per_file_mean": 258,
+    "projects_counted": 47,
+    "projects_counted_note": "12 Oct: 47. Added on 26 Oct: VOLT, cloudtest and one private project begun on 14 Oct. Removed on 27 Oct: two collaborator repositories behind two removed Side projects entries, and a folder of brand files for one of them (Owen’s request; not his repositories)."
   },
   "by_project": [
     {
+      "id": "mantle",
+      "name": "Mantle",
+      "lines": 243655,
+      "display": "243.7k",
+      "note": "A Windows 11 shell: an Electron bar and panels over a C# sidecar that talks to the system.",
+      "files": 897,
+      "share_pct": 22.6,
+      "sources": [
+        "~/mantle"
+      ]
+    },
+    {
       "id": "atlas",
       "name": "Atlas",
-      "lines": 238064,
-      "display": "238.1k",
+      "lines": 241700,
+      "display": "241.7k",
       "breakdown": {
-        "tests": 143928,
-        "tests_display": "about 144k",
-        "rest": 94136,
-        "rest_display": "about 94k"
+        "tests": 146353,
+        "tests_display": "about 146k",
+        "rest": 95347,
+        "rest_display": "about 95k"
       },
-      "note": "The single biggest body of code, and roughly three fifths of it is tests.",
-      "files": 866,
-      "share_pct": 27.2,
+      "note": "The biggest body of code until Mantle passed it in October, and roughly three fifths of it is tests.",
+      "files": 880,
+      "share_pct": 22.5,
       "sources": [
         "Downloads/Atlas",
         "Downloads/Atlas/HarnessAgents/hive"
       ]
     },
     {
-      "id": "mantle",
-      "name": "Mantle",
-      "lines": 172164,
-      "display": "172.2k",
-      "note": "A Windows 11 shell: an Electron bar and panels over a C# sidecar that talks to the system.",
-      "files": 576,
-      "share_pct": 19.7,
-      "sources": [
-        "~/mantle"
-      ]
-    },
-    {
-      "id": "portfolio-site",
-      "name": "This site",
-      "lines": 77167,
-      "display": "77.2k",
-      "note": "This site and the design directions explored on the way to it.",
-      "files": 140,
-      "share_pct": 8.8,
-      "sources": [
-        "~/portfolio-site"
-      ]
-    },
-    {
       "id": "browser",
       "name": "Quartz",
-      "lines": 60559,
-      "display": "60.6k",
+      "lines": 136452,
+      "display": "136.5k",
       "note": "The Electron browser, now named Quartz.",
-      "files": 107,
-      "share_pct": 6.9,
+      "files": 367,
+      "share_pct": 12.7,
       "sources": [
         "~/browser",
         "~/quartz-logo"
       ]
     },
     {
+      "id": "portfolio-site",
+      "name": "This site",
+      "lines": 81776,
+      "display": "81.8k",
+      "note": "This site and the design directions explored on the way to it.",
+      "files": 155,
+      "share_pct": 7.6,
+      "sources": [
+        "~/portfolio-site"
+      ]
+    },
+    {
       "id": "helm",
       "name": "Helm",
-      "lines": 53424,
-      "display": "53.4k",
+      "lines": 66670,
+      "display": "66.7k",
       "note": "A desktop and phone app for running Claude Code sessions.",
-      "files": 297,
-      "share_pct": 6.1,
+      "files": 370,
+      "share_pct": 6.2,
       "sources": [
         "~/helm",
         "~/helm-site"
@@ -91,7 +106,7 @@
       "display": "46.3k",
       "note": "A beginner-guide site, co-built with a friend.",
       "files": 219,
-      "share_pct": 5.3,
+      "share_pct": 4.3,
       "sources": [
         "~/arkhe"
       ]
@@ -99,35 +114,23 @@
     {
       "id": "fly-brain",
       "name": "Fly brain",
-      "lines": 42972,
+      "lines": 42973,
       "display": "43k",
       "note": "A spiking simulation of the fruit-fly brain wiring map, with the experiments run on it.",
       "files": 301,
-      "share_pct": 4.9,
+      "share_pct": 4,
       "sources": [
         "~/fly-brain"
       ]
     },
     {
-      "id": "portal",
-      "name": "TVHA portal",
-      "lines": 38892,
-      "display": "38.9k",
-      "note": "The youth-hockey family and staff portal.",
-      "files": 154,
-      "share_pct": 4.4,
-      "sources": [
-        "Downloads/Academy Website"
-      ]
-    },
-    {
       "id": "trading",
       "name": "Trading tools",
-      "lines": 38574,
-      "display": "38.6k",
+      "lines": 40429,
+      "display": "40.4k",
       "note": "Stock Coach, the Robinhood bot, the backtesting lab, Lens Trade, the stock cone and the news shadow.",
-      "files": 157,
-      "share_pct": 4.4,
+      "files": 170,
+      "share_pct": 3.8,
       "sources": [
         "~/stock-cone",
         "~/news-shadow",
@@ -138,13 +141,25 @@
       ]
     },
     {
+      "id": "portal",
+      "name": "TVHA portal",
+      "lines": 38892,
+      "display": "38.9k",
+      "note": "The youth-hockey family and staff portal.",
+      "files": 154,
+      "share_pct": 3.6,
+      "sources": [
+        "Downloads/Academy Website"
+      ]
+    },
+    {
       "id": "design+site",
       "name": "Design explorations + site rebuild",
-      "lines": 22556,
-      "display": "22.6k",
+      "lines": 23082,
+      "display": "23.1k",
       "note": "Standalone visual directions for Atlas plus the site rebuild's own harness (the rebuilt pages now ship inside Atlas and are counted there).",
-      "files": 89,
-      "share_pct": 2.6,
+      "files": 92,
+      "share_pct": 2.1,
       "sources": [
         "Downloads/design-test-suite",
         "Downloads/atlas-design",
@@ -158,7 +173,7 @@
       "display": "18.4k",
       "note": "Single-sitting builds: the Star Wars game, the NHL picks bot, MarketLens and the rest.",
       "files": 64,
-      "share_pct": 2.1,
+      "share_pct": 1.7,
       "sources": [
         "Downloads/(loose files)",
         "~/scratch-games",
@@ -168,29 +183,29 @@
       ]
     },
     {
-      "id": "mission-control",
-      "name": "Mission Control",
-      "lines": 12147,
-      "display": "12.1k",
-      "note": "The local live dashboard of agents and infrastructure.",
-      "files": 14,
-      "share_pct": 1.4,
-      "sources": [
-        "~/mission-control"
-      ]
-    },
-    {
       "id": "claude-tools",
       "name": "Claude Code mods + tools",
-      "lines": 9319,
-      "display": "9.3k",
+      "lines": 12549,
+      "display": "12.5k",
       "note": "Mods, hooks and helper tools for Claude Code itself.",
-      "files": 36,
-      "share_pct": 1.1,
+      "files": 59,
+      "share_pct": 1.2,
       "sources": [
         "~/.claude/mods",
         "~/.claude/tools",
         "~/.claude/autoloop"
+      ]
+    },
+    {
+      "id": "mission-control",
+      "name": "Mission Control",
+      "lines": 12298,
+      "display": "12.3k",
+      "note": "The local live dashboard of agents and infrastructure.",
+      "files": 15,
+      "share_pct": 1.1,
+      "sources": [
+        "~/mission-control"
       ]
     },
     {
@@ -200,7 +215,7 @@
       "display": "8.7k",
       "note": "Pauses music when a video starts talking.",
       "files": 12,
-      "share_pct": 1,
+      "share_pct": 0.8,
       "sources": [
         "~/spotify-autopause"
       ]
@@ -209,71 +224,71 @@
   "by_language": [
     {
       "language": "JavaScript",
-      "lines": 542603,
-      "display": "542.6k",
-      "share_pct": 62
+      "lines": 704084,
+      "display": "704.1k",
+      "share_pct": 65.4
     },
     {
       "language": "HTML",
-      "lines": 111763,
-      "display": "111.8k",
-      "share_pct": 12.8
+      "lines": 113680,
+      "display": "113.7k",
+      "share_pct": 10.6
     },
     {
       "language": "Python",
-      "lines": 74487,
-      "display": "74.5k",
+      "lines": 91884,
+      "display": "91.9k",
       "share_pct": 8.5
     },
     {
-      "language": "CSS",
-      "lines": 46716,
-      "display": "46.7k",
-      "share_pct": 5.3
+      "language": "C#",
+      "lines": 55181,
+      "display": "55.2k",
+      "share_pct": 5.1
     },
     {
-      "language": "C#",
-      "lines": 45363,
-      "display": "45.4k",
-      "share_pct": 5.2
+      "language": "CSS",
+      "lines": 53552,
+      "display": "53.6k",
+      "share_pct": 5
     },
     {
       "language": "TypeScript",
-      "lines": 42516,
-      "display": "42.5k",
-      "share_pct": 4.9
+      "lines": 43029,
+      "display": "43k",
+      "share_pct": 4
     },
     {
       "language": "PowerShell",
-      "lines": 10285,
-      "display": "10.3k",
-      "share_pct": 1.2
+      "lines": 12365,
+      "display": "12.4k",
+      "share_pct": 1.1
     }
   ],
   "residuals": {
-    "by_project_sum": 839291,
-    "by_project_unattributed": 36250,
-    "by_project_unattributed_note": "The 14 named groups account for 839,291 of 875,541 lines. The remaining 36,250 sit in 17 smaller projects and tools not broken out individually. Label any leftover slice \"everything else\", never zero it.",
-    "by_language_sum": 873733,
-    "by_language_unattributed": 1808,
-    "by_language_unattributed_note": "The 7 named languages account for 873,733 lines; the remaining 1,808 are other languages (SQL, Prisma, shell, batch and others). JSX is folded into JavaScript and TSX into TypeScript."
+    "by_project_sum": 1013929,
+    "by_project_unattributed": 62009,
+    "by_project_unattributed_note": "The 14 named groups account for 1,013,929 of 1,075,938 lines. The remaining 62,009 sit in 16 smaller projects and tools not broken out individually (the 17 of 12 Oct, VOLT and one private project begun on 14 Oct, less the three collaborator-project rows removed on 27 Oct). Label any leftover slice \"everything else\", never zero it.",
+    "by_language_sum": 1073775,
+    "by_language_unattributed": 2163,
+    "by_language_unattributed_note": "The 7 named languages account for 1,073,775 lines; the remaining 2,163 are other languages (SQL, Prisma, shell, batch and others). JSX is folded into JavaScript and TSX into TypeScript."
   },
   "conflicts_with_other_measurements": [
     {
       "subject": "Browser",
-      "census_says": "60.6k lines (12 Oct census; 51.3k on 14 Sep)",
+      "census_says": "136.5k lines (26 Oct census; 60.6k on 12 Oct, 51.3k on 14 Sep)",
       "other_measurement_says": "63,029 JavaScript lines + 13,218 CSS lines = 76,247 (CONTENT-UPDATE.md §1, `git ls-files | xargs wc -l`) [measured 16 Sep, not re-run]",
       "why": "Different rules. The census counts CODE lines; `wc -l` counts every line including blanks and comments, and `git ls-files` sweeps a different file set. Neither figure is wrong; they are not interchangeable. Do not add them together or present them side by side without saying which rule each used."
     },
     {
       "subject": "TVHA portal",
-      "census_says": "38.9k lines (12 Oct census; 26k on 14 Sep)",
+      "census_says": "38.9k lines (26 Oct census, unchanged since 12 Oct; 26k on 14 Sep)",
       "other_measurement_says": "35,088 TypeScript lines (CONTENT-UPDATE.md §3, `git ls-files '*.ts' '*.tsx' | xargs wc -l`) [measured 16 Sep, not re-run]",
       "why": "Same reason as above: code lines vs. raw line count over a different file set."
     },
     {
       "subject": "Atlas",
-      "census_says": "238.1k lines, about 144k of it tests (12 Oct census; 228.5k / about 136k on 14 Sep)",
+      "census_says": "241.7k lines, about 146k of it tests (26 Oct census; 238.1k / about 144k on 12 Oct; 228.5k / about 136k on 14 Sep)",
       "other_measurement_says": "~140k app lines and ~212k test lines (the figures on the baseline write-up, listed there as NOT remeasured)",
       "why": "The two were measured with different rules and do not reconcile: 140k + 212k = 352k against the census’s figure. The census is the measurement to publish. The ~140k/~212k pair is explicitly flagged unverified in CONTENT-UPDATE.md and should not be shown beside the census figure."
     }

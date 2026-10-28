@@ -1,50 +1,51 @@
 {
   "_source": {
-    "generated": "2026-10-12",
-    "cutoff": "author date before 2026-10-12T00:00:00-07:00 (through 11 October 2026, Owen's local time)",
+    "generated": "2026-10-26",
+    "cutoff": "author date before 2026-10-26T00:00:00-07:00 (through 25 October 2026, Owen's local time)",
     "timezone": "UTC (author date)",
     "commands": [
-      "git -C <repo> rev-list --count --before=2026-10-12T00:00:00-07:00 <branch>",
-      "TZ=UTC git -C <repo> log <branch> --before=2026-10-12T00:00:00-07:00 --format='%ad' --date=format-local:'%Y-%m-%d|%G-W%V|%Y-%m-%dT%H:%M:%SZ'",
-      "git -C <repo> log <branch> --before=2026-10-12T00:00:00-07:00 --format='%ad' --date=short | sort -u | wc -l   (local-time day count, for cross-reference)"
+      "git -C <repo> rev-list --count --before=2026-10-26T00:00:00-07:00 <branch>",
+      "TZ=UTC git -C <repo> log <branch> --before=2026-10-26T00:00:00-07:00 --format='%ad' --date=format-local:'%Y-%m-%d|%G-W%V|%Y-%m-%dT%H:%M:%SZ'",
+      "git -C <repo> log <branch> --before=2026-10-26T00:00:00-07:00 --format='%ad' --date=short | sort -u | wc -l   (local-time day count, for cross-reference)",
+      "workspace/1026/count-commits.js in the working repo does all of the above in one pass (read-only git, no fetch, no checkout); run with the 12 Oct cutoff it reproduces the 12 Oct atlas, portal and Quartz blocks field for field (workspace/1026/project-block.js check)."
     ],
     "notes": [
-      "All buckets use the AUTHOR date converted to UTC. Owen commits from UTC-07:00, so a late-evening local commit lands on the next UTC day (the last Quartz commit, 22:41 on 11 Oct local, is bucketed on 2026-10-12 UTC). The local-time span and day count are carried alongside in each project's \"local_time\" block because the site copy quotes local dates.",
-      "Atlas is measured on `origin/master`, the production branch. The 16 Sep run used local `main`, which then mirrored origin/master; local `main` has not moved since 9 Sep (2,636 commits) and is an ancestor of origin/master, so origin/master (2,720) is the same line carried to the last production push (4 Oct). Re-running the 16 Sep method on `main` reproduces the old atlas block byte for byte. Local `master` (2,002, 21 Aug) is stale and was NOT used. The 4 commits on the unpushed `next` branch are not counted.",
-      "The browser is now named Quartz; its id stays `browser`.",
+      "All buckets use the AUTHOR date converted to UTC. Owen commits from UTC-07:00, so a late-evening local commit lands on the next UTC day (a commit at 22:41 local is bucketed on the next UTC day). The local-time span and day count are carried alongside in each project's \"local_time\" block because the site copy quotes local dates.",
+      "Atlas is measured on `origin/master`, the production branch, as it stands in the local clone without a fetch: a94f97f4, last commit 14 Oct 2026, 2,738 commits. On 12 Oct origin/master was c0515922 (2,720). Run today with the 12 Oct cutoff, origin/master gives 2,724, because 4 commits from the `next` branch, committed before 12 Oct, reached production afterwards; the series moves to the current ref. The 16 commits on `next` that are not on origin/master are not counted. Local `main` (9 Sep) and local `master` (21 Aug) are stale and were NOT used.",
+      "Quartz, Mantle, Helm and six smaller repos went public between 20 and 23 Oct. Each public history is a re-rooted copy (a filtered rewrite with new hashes and the same author times, or a single squashed commit), and each local branch was reset to it, so a plain rev-list of local master no longer measures the work: Quartz's local master gives 244 for the 12 Oct cutoff where the real history had 246. For these repos the count is the pre-switch line on the private-archive remote (read-only; per the reflog it contains the commit local master pointed at just before its reset) plus every commit on the public branch that is not a copy of one on that line. A public commit is a copy when its author time matches a commit on the private line, one for one (the rewrite kept author times but changed some subjects), or when its tree equals a private commit's tree (a squash). With the 12 Oct cutoff this reproduces 246 for Quartz, 202 for Mantle and 53 for Helm. Helm's private line is private-archive/wk/opensource-prep, which holds its pre-switch master (0f53c26, 16 Oct) and the 22 open-source prep commits that the public squash 2e0668a copies.",
+      "The browser is named Quartz; its id stays `browser`.",
       "ISO week keys are %G-W%V (ISO-8601 week-numbering year and week), cross-checked against an independent ISO-week computation for every commit.",
       "all_repos is an extra block (added 2026-10-12) that the site's existing code ignores: commit totals for every repo of Owen's own work on this machine, same cutoff."
-    ]
+    ],
+    "previous": "Measured 12 Oct 2026 through 11 Oct: Atlas 2,720 + portal 210 + Quartz 246 = 3,176; all repos 3,750 across 31."
   },
   "totals": {
-    "total_commits": 3176,
+    "total_commits": 3612,
     "projects": 3,
-    "distinct_commit_days_utc_sum": 161,
-    "distinct_commit_days_local_sum": 162,
+    "distinct_commit_days_utc_sum": 174,
+    "distinct_commit_days_local_sum": 175,
     "earliest_commit_utc": "2026-04-01T23:22:36Z",
-    "latest_commit_utc": "2026-10-12T05:41:13Z"
+    "latest_commit_utc": "2026-10-24T02:42:40Z"
   },
   "projects": {
     "atlas": {
       "name": "Atlas",
       "repo_path": "~/Downloads/Atlas",
       "branch": "origin/master",
-      "total_commits": 2720,
+      "total_commits": 2738,
       "first_commit_utc": "2026-04-01T23:22:36Z",
-      "last_commit_utc": "2026-10-04T22:43:12Z",
+      "last_commit_utc": "2026-10-14T19:10:15Z",
       "first_commit_day_utc": "2026-04-01",
-      "last_commit_day_utc": "2026-10-04",
-      "calendar_span_days_utc": 187,
-      "distinct_commit_days_utc": 112,
-      "distinct_commit_weeks_utc": 23,
+      "last_commit_day_utc": "2026-10-14",
+      "calendar_span_days_utc": 197,
+      "distinct_commit_days_utc": 114,
+      "distinct_commit_weeks_utc": 25,
       "busiest_day_utc": "2026-09-05",
       "busiest_day_commits": 208,
       "median_commits_per_active_day": 11,
       "local_time": {
         "note": "Same commits bucketed in Owen's local zone (UTC-07:00) — these are the dates the site copy quotes.",
-        "distinct_commit_days": 112,
-        "first_commit_local": "2026-04-01 16:22:36 -0700",
-        "last_commit_local": "2026-10-04 15:43:12 -0700"
+        "distinct_commit_days": 114
       },
       "commits_per_week": {
         "2026-W14": 2,
@@ -69,7 +70,9 @@
         "2026-W35": 88,
         "2026-W36": 483,
         "2026-W37": 63,
-        "2026-W40": 81
+        "2026-W40": 82,
+        "2026-W41": 3,
+        "2026-W42": 14
       },
       "commits_per_day": {
         "2026-04-01": 1,
@@ -183,7 +186,9 @@
         "2026-09-10": 6,
         "2026-10-02": 45,
         "2026-10-03": 8,
-        "2026-10-04": 28
+        "2026-10-04": 29,
+        "2026-10-05": 3,
+        "2026-10-14": 14
       }
     },
     "portal": {
@@ -203,9 +208,7 @@
       "median_commits_per_active_day": 3,
       "local_time": {
         "note": "Same commits bucketed in Owen's local zone (UTC-07:00) — these are the dates the site copy quotes.",
-        "distinct_commit_days": 37,
-        "first_commit_local": "2026-07-16 23:27:02 -0700",
-        "last_commit_local": "2026-10-08 21:24:40 -0700"
+        "distinct_commit_days": 37
       },
       "commits_per_week": {
         "2026-W29": 51,
@@ -264,29 +267,28 @@
       "name": "Quartz",
       "repo_path": "~/browser",
       "branch": "master",
-      "total_commits": 246,
+      "total_commits": 664,
       "first_commit_utc": "2026-09-11T04:26:21Z",
-      "last_commit_utc": "2026-10-12T05:41:13Z",
+      "last_commit_utc": "2026-10-24T02:42:40Z",
       "first_commit_day_utc": "2026-09-11",
-      "last_commit_day_utc": "2026-10-12",
-      "calendar_span_days_utc": 32,
-      "distinct_commit_days_utc": 13,
-      "distinct_commit_weeks_utc": 5,
-      "busiest_day_utc": "2026-09-12",
-      "busiest_day_commits": 75,
-      "median_commits_per_active_day": 8,
+      "last_commit_day_utc": "2026-10-24",
+      "calendar_span_days_utc": 44,
+      "distinct_commit_days_utc": 24,
+      "distinct_commit_weeks_utc": 6,
+      "busiest_day_utc": "2026-10-18",
+      "busiest_day_commits": 142,
+      "median_commits_per_active_day": 11.5,
       "local_time": {
         "note": "Same commits bucketed in Owen's local zone (UTC-07:00) — these are the dates the site copy quotes.",
-        "distinct_commit_days": 13,
-        "first_commit_local": "2026-09-10 21:26:21 -0700",
-        "last_commit_local": "2026-10-11 22:41:13 -0700"
+        "distinct_commit_days": 24
       },
       "commits_per_week": {
         "2026-W37": 145,
         "2026-W38": 18,
         "2026-W39": 8,
         "2026-W41": 74,
-        "2026-W42": 1
+        "2026-W42": 261,
+        "2026-W43": 158
       },
       "commits_per_day": {
         "2026-09-11": 53,
@@ -301,26 +303,38 @@
         "2026-10-09": 63,
         "2026-10-10": 8,
         "2026-10-11": 2,
-        "2026-10-12": 1
-      }
+        "2026-10-12": 1,
+        "2026-10-13": 1,
+        "2026-10-14": 7,
+        "2026-10-15": 38,
+        "2026-10-16": 10,
+        "2026-10-17": 62,
+        "2026-10-18": 142,
+        "2026-10-19": 49,
+        "2026-10-21": 15,
+        "2026-10-22": 57,
+        "2026-10-23": 34,
+        "2026-10-24": 3
+      },
+      "count_method": "published 22 Oct: 614 commits on the pre-switch line (private-archive/master) + 50 made on the public master since; its 611 copies of older commits are not counted twice"
     }
   },
   "all_repos": {
-    "note": "Every git repo of Owen's own work on his machine, counted the same way (author date before 2026-10-12T00:00:00-07:00, i.e. through 11 October local). Site code that reads totals/projects ignores this block. A repo with a single commit dated 2026-09-20 is a backup snapshot: that project was built before it had git history and was pushed once as a private backup, so its count of 1 says nothing about its size.",
-    "command": "git -C <repo> rev-list --count --before=2026-10-12T00:00:00-07:00 <branch>; first/last = git log <branch> --before=... --date=short",
-    "branch_rule": "Atlas on origin/master (production); every other repo on its checked-out default branch.",
-    "grand_total_commits": 3750,
-    "repos_counted": 31,
+    "note": "Every git repo of Owen's own work on his machine, counted the same way (author date before 2026-10-26T00:00:00-07:00, i.e. through 25 October local). Site code that reads totals/projects ignores this block. A repo with a single commit dated 2026-09-20 (or 14 Oct) is a backup snapshot: that project was built before it had git history and was pushed once as a private backup, so its count of 1 says nothing about its size.",
+    "command": "git -C <repo> rev-list --count --before=2026-10-26T00:00:00-07:00 <branch>; first/last = git log <branch> --before=... --date=short. Repos published 20-23 Oct: the pre-switch private-archive line plus the new public commits (see _source.notes).",
+    "branch_rule": "Atlas on origin/master (production); every other repo on its checked-out default branch (for the published repos, that branch's pre-switch line on private-archive plus its new public commits).",
+    "grand_total_commits": 4735,
+    "repos_counted": 35,
     "repos": [
       {
         "id": "atlas",
         "name": "Atlas",
         "path": "~/Downloads/Atlas",
         "branch": "origin/master",
-        "commits": 2720,
+        "commits": 2738,
         "first_commit_local": "2026-04-01",
-        "last_commit_local": "2026-10-04",
-        "distinct_commit_days_local": 112,
+        "last_commit_local": "2026-10-14",
+        "distinct_commit_days_local": 114,
         "note": "production branch (origin/master); same ref as projects.atlas"
       },
       {
@@ -328,10 +342,22 @@
         "name": "Quartz",
         "path": "~/browser",
         "branch": "master",
-        "commits": 246,
+        "commits": 664,
         "first_commit_local": "2026-09-10",
-        "last_commit_local": "2026-10-11",
-        "distinct_commit_days_local": 13
+        "last_commit_local": "2026-10-23",
+        "distinct_commit_days_local": 24,
+        "note": "published 22 Oct: 614 commits on the pre-switch line (private-archive/master) + 50 made on the public master since; its 611 copies of older commits are not counted twice"
+      },
+      {
+        "id": "mantle",
+        "name": "Mantle",
+        "path": "~/mantle",
+        "branch": "master",
+        "commits": 567,
+        "first_commit_local": "2026-09-21",
+        "last_commit_local": "2026-10-24",
+        "distinct_commit_days_local": 28,
+        "note": "published 22 Oct: 513 commits on the pre-switch line (private-archive/master) + 54 made on the public master since; its 512 copies of older commits are not counted twice"
       },
       {
         "id": "portal",
@@ -344,24 +370,25 @@
         "distinct_commit_days_local": 37
       },
       {
-        "id": "mantle",
-        "name": "Mantle",
-        "path": "~/mantle",
+        "id": "helm",
+        "name": "Helm",
+        "path": "~/helm",
         "branch": "master",
-        "commits": 202,
-        "first_commit_local": "2026-09-21",
-        "last_commit_local": "2026-10-11",
-        "distinct_commit_days_local": 16
+        "commits": 145,
+        "first_commit_local": "2026-10-07",
+        "last_commit_local": "2026-10-22",
+        "distinct_commit_days_local": 14,
+        "note": "published 22 Oct: 144 commits on the pre-switch line (private-archive/wk/opensource-prep) + 1 made on the public master since; its 1 copies of older commits are not counted twice"
       },
       {
         "id": "portfolio-site",
         "name": "This site",
         "path": "~/portfolio-site",
         "branch": "main",
-        "commits": 115,
+        "commits": 137,
         "first_commit_local": "2026-09-16",
-        "last_commit_local": "2026-09-21",
-        "distinct_commit_days_local": 4
+        "last_commit_local": "2026-10-23",
+        "distinct_commit_days_local": 8
       },
       {
         "id": "arkhe",
@@ -375,54 +402,101 @@
         "note": "co-built with a friend; 2 of the commits are a collaborator's"
       },
       {
-        "id": "helm",
-        "name": "Helm",
-        "path": "~/helm",
-        "branch": "master",
-        "commits": 53,
-        "first_commit_local": "2026-10-07",
-        "last_commit_local": "2026-10-11",
-        "distinct_commit_days_local": 5
-      },
-      {
         "id": "fly-brain",
         "name": "Fly brain",
         "path": "~/fly-brain",
         "branch": "master",
-        "commits": 49,
+        "commits": 54,
         "first_commit_local": "2026-09-22",
-        "last_commit_local": "2026-09-24",
-        "distinct_commit_days_local": 3
+        "last_commit_local": "2026-10-21",
+        "distinct_commit_days_local": 6,
+        "note": "published 20 Oct: 53 commits on the pre-switch line (private-archive/master) + 1 made on the public master since; its 52 copies of older commits are not counted twice"
       },
       {
         "id": "stock-cone",
         "name": "Stock cone",
         "path": "~/stock-cone",
         "branch": "master",
-        "commits": 24,
+        "commits": 29,
         "first_commit_local": "2026-10-03",
-        "last_commit_local": "2026-10-04",
-        "distinct_commit_days_local": 2
+        "last_commit_local": "2026-10-21",
+        "distinct_commit_days_local": 5,
+        "note": "published 20 Oct: 28 commits on the pre-switch line (private-archive/master) + 1 made on the public master since; its 27 copies of older commits are not counted twice"
       },
       {
-        "id": "news-shadow",
-        "name": "News shadow",
-        "path": "~/news-shadow",
-        "branch": "master",
-        "commits": 15,
-        "first_commit_local": "2026-10-10",
-        "last_commit_local": "2026-10-11",
-        "distinct_commit_days_local": 2
+        "id": "claude-mods",
+        "name": "Claude Code mods",
+        "path": "~/.claude/mods",
+        "branch": "main",
+        "commits": 18,
+        "first_commit_local": "2026-10-02",
+        "last_commit_local": "2026-10-22",
+        "distinct_commit_days_local": 7,
+        "note": "published 20 Oct: 16 commits on the pre-switch line (private-archive/main) + 2 made on the public main since; its 1 copies of older commits are not counted twice"
       },
       {
         "id": "atlas-marketing-research",
         "name": "Atlas marketing research",
         "path": "~/atlas-marketing-research",
         "branch": "main",
-        "commits": 14,
+        "commits": 17,
         "first_commit_local": "2026-10-02",
-        "last_commit_local": "2026-10-04",
-        "distinct_commit_days_local": 2
+        "last_commit_local": "2026-10-14",
+        "distinct_commit_days_local": 3
+      },
+      {
+        "id": "news-shadow",
+        "name": "News shadow",
+        "path": "~/news-shadow",
+        "branch": "master",
+        "commits": 16,
+        "first_commit_local": "2026-10-10",
+        "last_commit_local": "2026-10-14",
+        "distinct_commit_days_local": 3
+      },
+      {
+        "id": "unlisted",
+        "name": "Unlisted project",
+        "path": "(one private project not shown on the site)",
+        "branch": "master",
+        "commits": 16,
+        "first_commit_local": "2026-10-14",
+        "last_commit_local": "2026-10-16",
+        "distinct_commit_days_local": 3,
+        "repos": 1,
+        "note": "new since 12 Oct"
+      },
+      {
+        "id": "mission-control",
+        "name": "Mission control",
+        "path": "~/mission-control",
+        "branch": "main",
+        "commits": 11,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-10-22",
+        "distinct_commit_days_local": 5,
+        "note": "published 20 Oct: 9 commits on the pre-switch line (private-archive/main) + 2 made on the public main since; its 1 copies of older commits are not counted twice"
+      },
+      {
+        "id": "look-sync",
+        "name": "Look sync",
+        "path": "~/look-sync",
+        "branch": "main",
+        "commits": 7,
+        "first_commit_local": "2026-10-10",
+        "last_commit_local": "2026-10-14",
+        "distinct_commit_days_local": 4
+      },
+      {
+        "id": "volt",
+        "name": "VOLT",
+        "path": "~/Downloads/project",
+        "branch": "main",
+        "commits": 7,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-10-22",
+        "distinct_commit_days_local": 4,
+        "note": "counted from 26 Oct: on 12 Oct its authorship was unconfirmed and it was left out; it is now published under Owen's own GitHub account. Its first commit is the 20 Sep backup snapshot; published 20 Oct: 6 commits on the pre-switch line (private-archive/main) + 1 made on the public main since; its 1 copies of older commits are not counted twice"
       },
       {
         "id": "atlas-design",
@@ -432,16 +506,6 @@
         "commits": 5,
         "first_commit_local": "2026-09-20",
         "last_commit_local": "2026-10-04",
-        "distinct_commit_days_local": 2
-      },
-      {
-        "id": "look-sync",
-        "name": "Look sync",
-        "path": "~/look-sync",
-        "branch": "main",
-        "commits": 5,
-        "first_commit_local": "2026-10-10",
-        "last_commit_local": "2026-10-11",
         "distinct_commit_days_local": 2
       },
       {
@@ -455,24 +519,46 @@
         "distinct_commit_days_local": 2
       },
       {
-        "id": "claude-mods",
-        "name": "Claude Code mods",
-        "path": "~/.claude/mods",
+        "id": "cloudtest",
+        "name": "cloudtest",
+        "path": "~/.claude/tools/cloudtest",
         "branch": "main",
-        "commits": 4,
-        "first_commit_local": "2026-10-02",
-        "last_commit_local": "2026-10-09",
-        "distinct_commit_days_local": 2
+        "commits": 3,
+        "first_commit_local": "2026-10-19",
+        "last_commit_local": "2026-10-20",
+        "distinct_commit_days_local": 2,
+        "note": "new since 12 Oct (built 14 Oct; git history starts 19 Oct); published 20 Oct: 3 commits on the pre-switch line (private-archive/main) + 0 made on the public main since; its 3 copies of older commits are not counted twice"
       },
       {
         "id": "robinhood-agent",
         "name": "Robinhood agent",
         "path": "~/robinhood-agent",
         "branch": "main",
-        "commits": 2,
+        "commits": 3,
         "first_commit_local": "2026-06-04",
+        "last_commit_local": "2026-10-13",
+        "distinct_commit_days_local": 3
+      },
+      {
+        "id": "stock-agent",
+        "name": "Stock coach",
+        "path": "~/stock-agent",
+        "branch": "main",
+        "commits": 3,
+        "first_commit_local": "2026-09-20",
+        "last_commit_local": "2026-10-14",
+        "distinct_commit_days_local": 3
+      },
+      {
+        "id": "small-tools",
+        "name": "Small tools",
+        "path": "(two small personal tools, not shown on the site)",
+        "repos": 2,
+        "branch": "main",
+        "commits": 2,
+        "first_commit_local": "2026-09-20",
         "last_commit_local": "2026-09-20",
-        "distinct_commit_days_local": 2
+        "distinct_commit_days_local": 1
       },
       {
         "id": "atlas-autopilot",
@@ -555,14 +641,15 @@
         "distinct_commit_days_local": 1
       },
       {
-        "id": "mission-control",
-        "name": "Mission control",
-        "path": "~/mission-control",
+        "id": "mesh-test",
+        "name": "Mesh test",
+        "path": "~/mesh-test",
         "branch": "main",
         "commits": 1,
-        "first_commit_local": "2026-09-20",
-        "last_commit_local": "2026-09-20",
-        "distinct_commit_days_local": 1
+        "first_commit_local": "2026-10-14",
+        "last_commit_local": "2026-10-14",
+        "distinct_commit_days_local": 1,
+        "note": "backup snapshot taken 14 Oct (no git history before it)"
       },
       {
         "id": "nhl-picks-bot",
@@ -570,17 +657,6 @@
         "path": "~/Downloads/nhl-bot",
         "branch": "main",
         "commits": 1,
-        "first_commit_local": "2026-09-20",
-        "last_commit_local": "2026-09-20",
-        "distinct_commit_days_local": 1
-      },
-      {
-        "id": "small-tools",
-        "name": "Small tools",
-        "path": "(two small personal tools, not shown on the site)",
-        "repos": 2,
-        "branch": "main",
-        "commits": 2,
         "first_commit_local": "2026-09-20",
         "last_commit_local": "2026-09-20",
         "distinct_commit_days_local": 1
@@ -604,21 +680,11 @@
         "first_commit_local": "2026-09-20",
         "last_commit_local": "2026-09-20",
         "distinct_commit_days_local": 1
-      },
-      {
-        "id": "stock-agent",
-        "name": "Stock coach",
-        "path": "~/stock-agent",
-        "branch": "main",
-        "commits": 1,
-        "first_commit_local": "2026-09-20",
-        "last_commit_local": "2026-09-20",
-        "distinct_commit_days_local": 1
       }
     ],
     "excluded": [
       {
-        "what": "Atlas worktrees and trial checkouts (atlas-main-wt, atlas-master-wt, atlas-merge-trial, atlas-ux-*)",
+        "what": "Atlas worktrees and trial checkouts (atlas-main-wt, atlas-master-wt, atlas-merge-trial, atlas-ux-*, atlas-wt-*)",
         "why": "same repository as Atlas; would double count"
       },
       {
@@ -634,10 +700,6 @@
         "why": "not his repositories"
       },
       {
-        "what": "a terminal AI CLI (Downloads/project)",
-        "why": "authorship unconfirmed, same call as the census"
-      },
-      {
         "what": "school notes repos (Documents/school, repos/class-notebooks)",
         "why": "notes, not software; same call as the census"
       },
@@ -650,8 +712,24 @@
         "why": "kept off the site under its privacy rules"
       },
       {
-        "what": "tensor extensions, MultiMC, overworld_music_pack",
-        "why": "not Owen's work (none are git repos here anyway)"
+        "what": "git worktrees of Quartz, Mantle, Helm, Look sync and this site (quartz-wt, mantle-wt, helm-wt, look-sync-wt, portfolio-site-wt)",
+        "why": "same repositories; would double count"
+      },
+      {
+        "what": "the staging and scratch clones made to publish the public repos (and a second clone of the Claude Code mods)",
+        "why": "copies of repos counted above; their commits are either on the counted branch already or unmerged"
+      },
+      {
+        "what": "a third-party repository cloned to review it",
+        "why": "not Owen's work"
+      },
+      {
+        "what": "two folders of post drafts and test screenshots that were given git history as backups",
+        "why": "not software"
+      },
+      {
+        "what": "~/helm-site",
+        "why": "a folder with an empty git repo (no commits); its code is in the census under Helm"
       }
     ]
   }

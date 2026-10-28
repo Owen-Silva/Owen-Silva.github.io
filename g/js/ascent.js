@@ -972,11 +972,18 @@
        of a pixel was enough to draw a ladder of faint vertical lines down
        the gold, because every layer with alpha in it was blended twice
        along the join. */
+    /* and a strip's right edge is computed EXACTLY as its neighbour's
+       left edge is (x0 + step * (k + 1), never x0 + step * k + step): the
+       two differ by a rounding error, and on a join that lands on a half
+       pixel (the middle of an odd-width phone, 196.5 at 393) one rounded
+       down and the other up, leaving a column no strip painted. The last
+       frame showed through it as a dark line from the top of the sky to
+       the bottom of the sea. */
     var stripW = 1;
     function stripT(k) {
       var xu = hzX0 + hzStep * k;
       var xa = Math.round(xu * dpr) / dpr;
-      var xb = Math.round((xu + hzStep) * dpr) / dpr;
+      var xb = Math.round((hzX0 + hzStep * (k + 1)) * dpr) / dpr;
       stripW = xb - xa;
       var y0 = hzArr[k], sl = (hzArr[k + 1] - y0) / hzStep;
       ctx.setTransform(dpr, dpr * sl, 0, dpr, 0, dpr * (y0 - sl * xu));
@@ -1067,6 +1074,29 @@
     /* the sun and the fire it lays along the rim. No rays, no ring: the
        only reason it reads as a sun is that it is small and nothing near
        it is. */
+    /* the hero's two lobes of air round the disc (world.js paintSun), in
+       sun radii: flattened, stepped down fast and then long. The hero
+       paints them once into a still layer; this world paints them every
+       frame, so the wide one is filled only out to 0.72 of its radius:
+       past that it adds under one level of 255 (0.004 and falling), and
+       the fill it skips is half its ellipse, a third of a desktop frame */
+    var SUN_LOBES = [
+      { r: 3.6, sy: 0.82, cut: 1, a: [0.125, 0.082, 0.040, 0.014] },
+      { r: 9.6, sy: 0.60, cut: 0.72, a: [0.052, 0.030, 0.012, 0.004] }
+    ];
+    /* every stop of both disc recipes, so a blend of the two is exact at
+       either end: each recipe is straight between its own stops */
+    var DISC_T = [0, 0.55, 0.72, 0.86, 1];
+    function discAt(S, t) {
+      for (var i = 1; i < S.length; i++) {
+        if (t <= S[i][0]) {
+          var u = (t - S[i - 1][0]) / (S[i][0] - S[i - 1][0]);
+          return [mix(S[i - 1][1], S[i][1], u), S[i - 1][2] + (S[i][2] - S[i - 1][2]) * u];
+        }
+      }
+      var z = S[S.length - 1];
+      return [z[1], z[2]];
+    }
     function paintSun() {
       var sm = spaceAt(km);
       var alive = 1 - sstep(6, 26, km);
@@ -1098,21 +1128,71 @@
       ctx.restore();
 
       if (alive > 0.01) {
+        /* AT SEA LEVEL THE DISC IS THE HERO'S DISC. This one went orange
+           from a third of the way out and ended in a see-through rim, and
+           its glow was one straight falloff, which draws its own outline:
+           through the dissolve the hero's white-hot sun turned into a dull
+           apricot one with a ring round it (measured at 393: the hero's
+           sun 2 px over the water 255,243,219, this one 247,207,163). So
+           up to 4 km it is the hero's recipe, the same stops, the hot
+           spot high in the disc and the two flattened lobes of air, and
+           it hands over to its own on the way up, where nothing is left
+           to match. */
+        var hk = 1 - sstep(0.15, 4, km);
         ctx.save();
         ctx.translate(sunScrX, sunScrY);
-        var ag = ctx.createRadialGradient(0, 0, sr * 0.5, 0, 0, sr * 4.6);
-        ag.addColorStop(0, rgba(P.flare, 0.42 * alive * gk * P.k));
-        ag.addColorStop(1, rgba(P.gold, 0));
-        ctx.fillStyle = ag;
-        ctx.beginPath(); ctx.arc(0, 0, sr * 4.6, 0, TAU); ctx.fill();
+        if (hk < 0.999) {
+          var ag = ctx.createRadialGradient(0, 0, sr * 0.5, 0, 0, sr * 4.6);
+          ag.addColorStop(0, rgba(P.flare, 0.42 * alive * gk * P.k * (1 - hk)));
+          ag.addColorStop(1, rgba(P.gold, 0));
+          ctx.fillStyle = ag;
+          ctx.beginPath(); ctx.arc(0, 0, sr * 4.6, 0, TAU); ctx.fill();
+        }
+        if (hk > 0.001) {
+          var la = alive * P.k * hk;
+          for (var li = 0; li < SUN_LOBES.length; li++) {
+            var L = SUN_LOBES[li], lr = sr * L.r;
+            ctx.save();
+            ctx.scale(1, L.sy);
+            var lg = ctx.createRadialGradient(0, 0, 0, 0, 0, lr);
+            lg.addColorStop(0.00, rgba(li ? P.flare : P.disc, L.a[0] * la));
+            lg.addColorStop(0.20, rgba(P.flare, L.a[1] * la));
+            lg.addColorStop(0.44, rgba(P.flare, L.a[2] * la));
+            lg.addColorStop(0.70, rgba(P.flare, L.a[3] * la));
+            lg.addColorStop(1.00, rgba(P.flare, 0));
+            ctx.fillStyle = lg;
+            ctx.beginPath(); ctx.arc(0, 0, lr * L.cut, 0, TAU); ctx.fill();
+            ctx.restore();
+          }
+        }
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = alive;
-        var dg = ctx.createRadialGradient(0, 0, 0, 0, 0, sr);
-        dg.addColorStop(0, rgb(mix(P.disc, P.flare, 0.10)));
-        dg.addColorStop(0.72, rgb(mix(P.disc, P.gold, 0.42)));
-        dg.addColorStop(1, rgba(mix(P.gold, P.orange, 0.5), 0.42));
+        ctx.scale(1, 1 - 0.08 * hk);
+        var DA = [[0, mix(P.disc, P.flare, 0.10), 1], [0.72, mix(P.disc, P.gold, 0.42), 1],
+                  [1, mix(P.gold, P.orange, 0.5), 0.42]];
+        var DH = [[0, mix(P.disc, [255, 255, 255], 0.5), 1], [0.55, P.disc, 1],
+                  [0.86, mix(P.disc, P.gold, 0.45), 0.99], [1, mix(P.gold, P.orange, 0.35), 0.94]];
+        /* and the hero softens its disc's edge with a blur filter, which is
+           a frame on a software rasteriser: here the softness is the last
+           stops of the gradient instead, the rim ramping out over the same
+           width (1.5 of the blur's radius either side of the edge) */
+        var bw = 1.5 * (sr * 0.035 + 0.4) * hk, R2 = sr + bw, tIn = (sr - bw) / sr;
+        var dg = ctx.createRadialGradient(0, -sr * 0.2 * hk, 0, 0, 0, R2);
+        for (var si = 0; si < DISC_T.length; si++) {
+          var tt = DISC_T[si];
+          if (bw >= 0.05 && tt >= tIn) break;
+          var ta = discAt(DA, tt), th = discAt(DH, tt);
+          dg.addColorStop(tt * sr / R2, rgba(mix(ta[0], th[0], hk), (ta[1] + (th[1] - ta[1]) * hk).toFixed(3)));
+        }
+        if (bw >= 0.05) {
+          var ea = discAt(DA, tIn), eh = discAt(DH, tIn), ec = mix(ea[0], eh[0], hk), eA = ea[1] + (eh[1] - ea[1]) * hk;
+          var ra = discAt(DA, 1), rh = discAt(DH, 1), rc = mix(ra[0], rh[0], hk), rA = ra[1] + (rh[1] - ra[1]) * hk;
+          dg.addColorStop(tIn * sr / R2, rgba(ec, eA.toFixed(3)));
+          dg.addColorStop(sr / R2, rgba(rc, (rA * 0.5).toFixed(3)));
+          dg.addColorStop(1, rgba(rc, 0));
+        }
         ctx.fillStyle = dg;
-        ctx.beginPath(); ctx.arc(0, 0, sr, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, 0, R2, 0, TAU); ctx.fill();
         ctx.globalAlpha = 1;
         ctx.restore();
       }
@@ -1902,7 +1982,7 @@
        and it never starts at all under reduced motion. */
     var raf = 0, tmr = 0, running = false, t0 = 0, tPrev = 0, clock = 0;
     var sPos = 0, sTarget = 0, frames = 0, cost = 0, worst = 0, rafs = 0;
-    var covered = false, frozen = false, lastPaintY = -1e9, movingNow = false, lastTarget = 0;
+    var covered = false, frozen = false, lastPaintY = -1e9, movingNow = false, lastTarget = 0, handT = -1e9;
     var REST_MS = 52;                      // the living frame: 19 a second
 
     function target() { return window.scrollY || window.pageYOffset || 0; }
@@ -1936,7 +2016,12 @@
       movingNow = moving;
 
       var c = 0;
-      if (!covered) {
+      /* the curtain opening (setCovered) paints at once, in the scroll
+         event, and this frame then landed on the same picture a few ms
+         later: the first frame out from under the hero, the coldest and
+         dearest one, was painted twice. Once is enough. */
+      var dup = sPos === lastPaintY && f0 - handT < 12;
+      if (!covered && !dup) {
         paint(sPos, clock);
         lastPaintY = sPos;
         c = performance.now() - f0;
@@ -2053,7 +2138,8 @@
       movingNow = false;                 // a frame asked for by hand is a still one
       var f0 = performance.now();
       paint(sPos, clock);
-      var c = performance.now() - f0;
+      lastPaintY = sPos; handT = performance.now();
+      var c = handT - f0;
       frames++; cost += c; if (c > worst) worst = c;
       publish(c);
     }
@@ -2117,8 +2203,12 @@
            kilometres, and the next hand-over played that fall on screen.
            There is nothing to see under the hero, so there is nothing to
            ease: it snaps, and it is always right when the curtain opens. */
+        /* and when it opens, the picture is painted where the page IS:
+           the camera was parked where the curtain closed, so the first
+           frame out was painted at the old scroll (y 0 with the page at
+           100 on a wheel notch, measured) and thrown away a moment later */
         if (covered) { sPos = sTarget = target(); stop(); }
-        else { repaintOnce(); wake(); }
+        else { sPos = sTarget = lastTarget = target(); repaintOnce(); wake(); }
       },
       relayout: function () { refreshMax(); makeQuiet(); repaintOnce(); },
       /* the hero's bay: a function returning its layout, ranges and sea

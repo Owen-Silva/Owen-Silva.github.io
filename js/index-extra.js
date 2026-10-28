@@ -3,7 +3,7 @@
 
    1. The tally, counted out. Each figure is drawn as that many
       individual marks, read from the same JSON the river reads,
-      so 3,176 is three thousand one hundred and seventy-six marks
+      so 3,612 is three thousand six hundred and twelve marks
       and not a number in a box.
    2. Three live miniatures — the opening scene of each of the
       three project pages, drawn small, as the link to it.
@@ -118,7 +118,7 @@
            one accent the night reserves for its horizon, the loudest thing
            on the page after the census bar. The marks are the ink the rest
            of the site is written in; the commit field keeps its weight from
-           being 3,176 of them, not from being orange. */
+           being 3,612 of them, not from being orange. */
         ctx.fillStyle = css('--lane-atlas');
         ctx.globalAlpha = grp.hot ? 0.68 : 0.6;
         for (var k = 0; k < shown; k++) {
